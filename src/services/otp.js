@@ -1,7 +1,7 @@
-const { OTP_LENGTH, OTP_DIGITS } = require('../config/otpOptions');
+const { OTP_LENGTH, OTP_DIGITS } = require("../config/otpOptions");
 
 function generateOTP() {
-    let otp = '';
+    let otp = "";
 
     for(let i = 1; i <= OTP_LENGTH; i++) {
         let index = Math.floor(Math.random()*(OTP_DIGITS.length));
@@ -12,7 +12,7 @@ function generateOTP() {
 }
 
 function AddMinutesToDate(date, minutes) {
-    return new Date(date.getTime() + minutes*60000);
+    return new Date(date.getTime() + minutes * 60000);
 }
 
 module.exports = {generateOTP, AddMinutesToDate};

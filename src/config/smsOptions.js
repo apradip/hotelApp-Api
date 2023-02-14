@@ -1,9 +1,14 @@
 const SMS_SETTINGS = {
-    host: 'bulksms.smslive.in', 
-    port: 80, 
-    path: '/api/v5/otp',
-    apiKey: '16431AiIEowT50NS54e72032',
-    templateId: '604f029baa4d32317179150d'
+    host: process.env.SMS_HOST,
+    port: process.env.SMS_PORT,
+    path: process.env.SMS_PATH,
+    method: process.env.SMS_METHOD,
+    module: process.env.SMS_MODULE,
+    templateId: process.env.SMS_TEMPLATEID,
+    apiKey: process.env.SMS_APIKEY,
+    headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+    },
 }
 
 module.exports = {SMS_SETTINGS}

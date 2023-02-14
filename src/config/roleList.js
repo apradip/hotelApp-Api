@@ -11,8 +11,7 @@ const ROLE_LIST = {
     "RESTAURANT_MANAGER": "63c775d8becbeb16e2d1b34e",
     "CHEF": "63cad4c6ae2b5da042a01488",
     "JOUNIER_CHEF": "63cada4e9c22c16ca46ef2f0",
-    "TECHNION": "63d4be756db7869905faf6f1",
-    
+    "TECHNION": "63d4be756db7869905faf6f1"
 }
 
 module.exports = ROLE_LIST

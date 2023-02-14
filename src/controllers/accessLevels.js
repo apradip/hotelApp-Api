@@ -1,4 +1,4 @@
-const AccessLevel = require('../models/accessLevels');
+const AccessLevel = require("../models/accessLevels");
 
 
 //handel search access level
@@ -7,14 +7,14 @@ const handelSearch = async (req, res) => {
     try {
         const search = req.query.search;
         const data = await AccessLevel.find({ isEnable: true })
-                                        .sort('name')                                
-                                        .select('_id name description').exec();
+                                        .sort("name")                                
+                                        .select("_id name description").exec();
         if (!data) return res.status(404).send();
 
         if (search) {
-            const filterData = await AccessLevel.find({ isEnable: true, name: { $regex: '.*' + search.trim().toUpperCase() + '.*' }})
-                                                .sort('name')                                
-                                                .select('_id name description').exec();
+            const filterData = await AccessLevel.find({ isEnable: true, name: { $regex: ".*" + search.trim().toUpperCase() + ".*" }})
+                                                .sort("name")                                
+                                                .select("_id name description").exec();
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        

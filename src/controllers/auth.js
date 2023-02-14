@@ -1,6 +1,6 @@
-const Employee = require('../models/employees');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const Employee = require("../models/employees");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 
 //handel login with password
@@ -11,7 +11,7 @@ const handleLogin = async (req, res) => {
     const { userName, password } = req.body;
     let foundEmployee;
 
-    if (!userName || !password) return res.status(400).json({'message': 'Mobile no. and password are required.'});
+    if (!userName || !password) return res.status(400).json({"message": "Mobile no. and password are required."});
 
     if (parseInt(userName)) {
         foundEmployee = await Employee.findOne({hotelId, isEnable: true, mobile: parseInt(userName.trim())}).exec();
@@ -35,18 +35,18 @@ const handleLogin = async (req, res) => {
             // create JWTs
             const accessToken = jwt.sign(
                 {
-                    'UserInfo': {
-                        'userid': foundEmployee._id,
-                        'username': foundEmployee.name,
-                        'roles': employeeRoles
+                    "UserInfo": {
+                        "userid": foundEmployee._id,
+                        "username": foundEmployee.name,
+                        "roles": employeeRoles
                     }
                 },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: '1h' }
+                { expiresIn: "1h" }
             );
 
             const refreshToken = jwt.sign(
-                { 'username': foundEmployee.name },
+                { "username": foundEmployee.name },
                 process.env.REFRESH_TOKEN_SECRET,
                 { expiresIn: '1d' }
             );
@@ -72,8 +72,8 @@ const handelOtpLogin = async (req, res) => {
         const {userName, otp} = req.body;
         let foundEmployee;
 
-        if (!userName) return res.status(400).json({ 'message': 'Mobile no. or email is required.' });
-        if (!otp) return res.status(400).json({ 'message': 'OTP is required.' });
+        if (!userName) return res.status(400).json({ "message": "Mobile no. or email is required." });
+        if (!otp) return res.status(400).json({ "message": "OTP is required." });
 
         if (parseInt(userName)) {
             foundEmployee = await Employee.findOne({hotelId, isEnable: true, mobile: parseInt(userName.trim())}).exec();
@@ -91,7 +91,7 @@ const handelOtpLogin = async (req, res) => {
             const exporyDateTime = new Date(foundEmployee.expiration_time);
 
             if (currentDateTime.getTime() > exporyDateTime.getTime()) {
-                return res.sendStatus(401).send('OTP expire.'); //Unauthorized 
+                return res.sendStatus(401).send("OTP expire."); //Unauthorized 
             }
 
             let employeeRoles = [];
@@ -104,20 +104,20 @@ const handelOtpLogin = async (req, res) => {
                 // create JWTs
                 const accessToken = jwt.sign(
                     {
-                        'UserInfo': {
-                            'userid': foundEmployee._id,
-                            'username': foundEmployee.name,
-                            'roles': employeeRoles
+                        "UserInfo": {
+                            "userid": foundEmployee._id,
+                            "username": foundEmployee.name,
+                            "roles": employeeRoles
                         }
                     },
                     process.env.ACCESS_TOKEN_SECRET,
-                    { expiresIn: '1h' }
+                    { expiresIn: "1h" }
                 );
 
                 const refreshToken = jwt.sign(
-                    { 'username': foundEmployee.name },
+                    { "username": foundEmployee.name },
                     process.env.REFRESH_TOKEN_SECRET,
-                    { expiresIn: '1d' }
+                    { expiresIn: "1d" }
                 );
 
                 // Saving refreshToken with current user
