@@ -30,7 +30,7 @@ const bookingAgentSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const BookingAgent = new mongoose.model('BookingAgent', bookingAgentSchema);
 

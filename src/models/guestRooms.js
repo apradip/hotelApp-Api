@@ -14,10 +14,9 @@ const guestRoomSchema = new mongoose.Schema({
         type: String, 
         required: [true, 'Invalid room!']
     },
-    isAC: {
-        type: Boolean, 
-        debugger: true,
-        required: [true, 'Invalid ac!']
+    roomNo: {
+        type: String, 
+        required: [true, 'Invalid room!']
     },
     tariff: {
         type: Number,
@@ -55,25 +54,15 @@ const guestRoomSchema = new mongoose.Schema({
         default: 0,
         min: [0, 'Invalid max. discount!']
     },
-    cGstPercentage: {
+    gstPercentage: {
         type: Number,
         default: 0,
-        min: [0, 'Invalid cgst percentage!']
+        min: [0, 'Invalid gst percentage!']
     },
-    cGstAmount: {
+    gstAmount: {
         type: Number,
         default: 0,
-        min: [0, 'Invalid cgst!']
-    },
-    sGstPercentage: {
-        type: Number,
-        default: 0,
-        min: [0, 'Invalid sgst percentage!']
-    },
-    sGstAmount: {
-        type: Number,
-        default: 0,
-        min: [0, 'Invalid sgst!']
+        min: [0, 'Invalid gst!']
     },
     price: {
         type: Number,
@@ -93,7 +82,7 @@ const guestRoomSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const GuestRoom = new mongoose.model('GuestRoom', guestRoomSchema);
 

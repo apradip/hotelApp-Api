@@ -10,13 +10,13 @@ const handelSearch = async (req, res) => {
         
         const data = await Room.find({hotelId, isEnable: true})
                                         .sort('no')                                
-                                        .select('hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff').exec();
+                                        .select('hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied').exec();
         if (!data) return res.status(404).send();
 
         if (search) {
             const filterData = await Room.find({hotelId, isEnable: true, no: {$regex: '.*' + search.trim().toUpperCase() + '.*'}})
                                                 .sort('no')                                
-                                                .select('hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff').exec();
+                                                .select('hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied').exec();
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -59,7 +59,8 @@ const handelCreate = async (req, res) => {
             tariff: tariff,
             maxDiscount: maxDiscount,
             extraBedTariff: extraBedTariff,
-            extraPersonTariff: extraPersonTariff
+            extraPersonTariff: extraPersonTariff,
+            isOccupied: false
         });
 
         const duplicate = await Room.find({hotelId, isEnable: true, categoryId, no}).exec();
@@ -81,7 +82,7 @@ const handelCreate = async (req, res) => {
 const handelUpdate = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const {categoryId, no, tariff, maxDiscount, extraBedTariff, extraPersonTariff} =  req.body;
+        const {categoryId, no, tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied} =  req.body;
         const data = await Room.findOne({hotelId, isEnable: true, _id}).exec();
         if (!data) return res.status(404).send();
 
@@ -94,7 +95,7 @@ const handelUpdate = async (req, res) => {
             })
         }
 
-        const resUpdate = await Room.findByIdAndUpdate(_id, {categoryId, no: no.trim().toUpperCase(), tariff, maxDiscount, extraBedTariff, extraPersonTariff}).exec();
+        const resUpdate = await Room.findByIdAndUpdate(_id, {categoryId, no: no.trim().toUpperCase(), tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied}).exec();
         if (!resUpdate) return res.status(400).send(resUpdate);
 
         return res.status(200).send(resUpdate);

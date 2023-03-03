@@ -30,7 +30,7 @@ const idDocumentSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const IDDocument = new mongoose.model('IDDocument', idDocumentSchema);
 

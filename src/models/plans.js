@@ -34,7 +34,7 @@ const planSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const Plan = new mongoose.model('Plan', planSchema);
 

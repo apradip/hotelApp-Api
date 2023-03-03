@@ -39,7 +39,7 @@ const foodSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const Food = new mongoose.model('Food', foodSchema);
 

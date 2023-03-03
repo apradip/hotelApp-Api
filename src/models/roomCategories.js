@@ -64,7 +64,7 @@ const roomCategorySchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const RoomCategory = new mongoose.model('RoomCategory', roomCategorySchema);
 

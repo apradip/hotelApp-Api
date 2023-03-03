@@ -60,6 +60,10 @@ const roomSchema = new mongoose.Schema({
             }
         }
     },
+    isOccupied: {
+        type: Boolean, 
+        debugger: false
+    },
     updatedDate: { 
         type: Date, 
         default: Date.now 
@@ -68,7 +72,7 @@ const roomSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const Room = new mongoose.model('Room', roomSchema);
 

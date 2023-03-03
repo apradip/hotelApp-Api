@@ -30,7 +30,7 @@ const accessLevelSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const AccessLevel = new mongoose.model('AccessLevel', accessLevelSchema);
 

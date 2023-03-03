@@ -87,7 +87,7 @@ const employeeSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     }
-})
+});
 
 const Employee = new mongoose.model('Employee', employeeSchema);
 
