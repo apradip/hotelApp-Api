@@ -9,7 +9,7 @@ const handelSearch = async (req, res) => {
         const search = req.query.search;
         const data = await Guest.find({hotelId, isEnable: true })
                                         .sort("name")                                
-                                        .select("_id idDocumentId idNo name age fatherName address city policeStation state pin phone mobile email guestCount guestMaleCount guestFemaleCount bookingAgentId planId corporateName corporateAddress gstNo roomNos checkInDate checkInTime dayCount checkOutDate checkOutTime isCheckedOut totalExpenseAmount totalPaidAmount").exec();
+                                        .select("_id idDocumentId idNo name age fatherName address city policeStation state pin phone mobile email guestCount guestMaleCount guestFemaleCount bookingAgentId planId corporateName corporateAddress gstNo roomNos checkInDate checkInTime dayCount checkOutDate checkOutTime isCheckedOut").exec();
         if (!data) return res.status(404).send();
 
         if (search) {
@@ -23,7 +23,7 @@ const handelSearch = async (req, res) => {
                                                  {pin: {$regex: ".*" + search.trim() + ".*"}},
                                                  {mobile: {$regex: ".*" + search.trim() + ".*"}}]})
                                                 .sort("name")                                
-                                                .select("_id idDocumentId idNo name age fatherName address city policeStation state pin phone mobile email guestCount guestMaleCount guestFemaleCount bookingAgentId planId corporateName corporateAddress gstNo roomNos checkInDate checkInTime dayCount checkOutDate checkOutTime isCheckedOut totalExpenseAmount totalPaidAmount").exec();
+                                                .select("_id idDocumentId idNo name age fatherName address city policeStation state pin phone mobile email guestCount guestMaleCount guestFemaleCount bookingAgentId planId corporateName corporateAddress gstNo roomNos checkInDate checkInTime dayCount checkOutDate checkOutTime isCheckedOut").exec();
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        

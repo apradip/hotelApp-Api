@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const date = require("date-and-time");
 const validator = require("validator");
 
 const guestRoomSchema = new mongoose.Schema({
@@ -71,7 +72,7 @@ const guestRoomSchema = new mongoose.Schema({
     },
     occupancyDate: {
         type: Date,
-        default: Date.now,
+        default: date.format(new Date(),'YYYY-MM-DD'),
         required: [true, 'Occupancy date require!'],
     },
     updatedDate: { 

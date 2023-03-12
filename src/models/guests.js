@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const date = require("date-and-time");
 const validator = require("validator");
 
 const guestSchema = new mongoose.Schema({
@@ -143,11 +144,12 @@ const guestSchema = new mongoose.Schema({
     },
     checkInDate: {
         type: Date,
-        default: Date.now,
+        default: date.format(new Date(),'YYYY-MM-DD'),
         required: [true, 'Check in date require!'],
     },
     checkInTime: {
         type: String,
+        default: date.format(new Date(),'HH:mm'),
         required: [true, 'Check in time require!'],
     },
     dayCount: {
@@ -196,14 +198,6 @@ const guestSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
         required: [true, 'Check out date require!'],
-    },
-    totalExpenseAmount: { 
-        type: Number, 
-        default: 0
-    },
-    totalPaidAmount: { 
-        type: Number, 
-        default: 0
     },
     isCheckedOut: {
         type: Boolean,
