@@ -4,7 +4,7 @@ const validator = require("validator");
 const roomSchema = new mongoose.Schema({
     hotelId: {
         type: String,
-        required: [true, 'Invalid data!']
+        required: [true, 'Invalid hotel!']
     }, 
     categoryId: {
         type: String,

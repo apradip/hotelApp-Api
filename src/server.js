@@ -87,6 +87,9 @@ app.use("/api/guests", require("./routes/api/guests"));
 //guestRooms CURD api
 app.use("/api/guestRooms", require("./routes/api/guestRooms"));
 
+//guestpayments CURD api
+app.use("/api/guestExpensesPayments", require("./routes/api/guestExpensesPayments"));
+
 
 app.get("/", (req, res) => {
     res.send("HotelApp Restfull API server is running...");

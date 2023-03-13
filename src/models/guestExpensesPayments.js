@@ -5,7 +5,7 @@ const validator = require("validator");
 const guestExpensesPaymentsSchema = new mongoose.Schema({
     hotelId: {
         type: String,
-        required: [true, 'Invalid data!']
+        required: [true, 'Invalid hotel!']
     },
     guestId: {
         type: String, 

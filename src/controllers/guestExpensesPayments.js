@@ -173,18 +173,19 @@ async function totalPayment(hotelId, guestId) {
 
 //handel add payment
 //query string : hotel Id
-//body : {"guestId" : "", "type" : "[expense/payment]", "amount" : 0, "narration" : "", "transactionDate" : new Date()}
+//body : {"guestId": "", "type" : "[expense/payment]", "amount" : 0, "narration" : "", "transactionDate" : new Date()}
 const handelCreate = async (req, res) => {
     try {
         const {hotelId} = req.params;
-        const {guestId, type, amount, narration, transactionDate} = req.body;
+        const {guestId, type, amount, narration, transactionDate, transactionTime} = req.body;
         
         if (type.toUpperCase() === "E") {
             const data = new GuestExpensePayment({hotelId,
                                             guestId,          
                                             expenseAmount: amount,
                                             narration,
-                                            transactionDate});
+                                            transactionDate,
+                                            transactionTime});
 
             const resAdd = await data.save();
             if (!resAdd) return res.status(400).send();
@@ -196,7 +197,8 @@ const handelCreate = async (req, res) => {
                                             guestId,          
                                             paymentAmount: amount,
                                             narration,
-                                            transactionDate});
+                                            transactionDate,
+                                            transactionTime});
 
             const resAdd = await data.save();
             if (!resAdd) return res.status(400).send();
@@ -204,7 +206,7 @@ const handelCreate = async (req, res) => {
             return res.status(200).send(data);
         }
 
-        return res.status(400).send();
+        // return res.status(400).send();
     } catch(e) {
         return res.status(500).send(e);
     }        
