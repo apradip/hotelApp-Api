@@ -81,6 +81,9 @@ app.use("/api/roomCategories", require("./routes/api/roomCategories"));
 //rooms CURD api
 app.use("/api/rooms", require("./routes/api/rooms"));
 
+//tables CURD api
+app.use("/api/tables", require("./routes/api/tables"));
+
 //guests CURD api
 app.use("/api/guests", require("./routes/api/guests"));
 
