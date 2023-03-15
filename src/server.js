@@ -84,6 +84,9 @@ app.use("/api/rooms", require("./routes/api/rooms"));
 //tables CURD api
 app.use("/api/tables", require("./routes/api/tables"));
 
+//foods CURD api
+app.use("/api/foods", require("./routes/api/foods"));
+
 //guests CURD api
 app.use("/api/guests", require("./routes/api/guests"));
 
