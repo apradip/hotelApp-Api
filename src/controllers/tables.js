@@ -56,7 +56,7 @@ const handelCreate = async (req, res) => {
             hotelId,
             no: no.trim().toUpperCase(),
             description: description.trim(), 
-            isOccupied: false
+            // isOccupied: false
         });
 
         const duplicate = await Table.find({hotelId, isEnable: true, no}).exec();

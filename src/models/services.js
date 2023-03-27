@@ -1,29 +1,27 @@
 const mongoose = require("mongoose");
-// const validator = require("validator");
+const validator = require("validator");
 
-const tableSchema = new mongoose.Schema({
+const serviceSchema = new mongoose.Schema({
     hotelId: {
         type: String,
         required: [true, 'Invalid hotel!']
     }, 
-    no: {
+    name: {
         type: String,
-        minLength: [1, 'Invalid no!'],
-        maxLength: [10, 'Invalid no!']
-    }, 
+        minLength: [3, 'Invalid name!'],
+        maxLength: [100, 'Invalid name!']
+    },
+    price: {
+        type: Number,
+        default: 0,
+        required: [true, 'Price require!'],
+        min: [1, 'Invalid price!']
+    },
     description: {
         type: String,
         minLength: [3, 'Invalid description!'],
         maxLength: [1020, 'Invalid description!']
     }, 
-    guestId: {
-        type: String,
-        default: null
-    },
-    isOccupied: {
-        type: Boolean, 
-        default: false
-    },
     updatedDate: { 
         type: Date, 
         default: Date.now 
@@ -34,6 +32,6 @@ const tableSchema = new mongoose.Schema({
     }
 });
 
-const Table = new mongoose.model('Table', tableSchema);
+const Service = new mongoose.model('Service', serviceSchema);
 
-module.exports = Table;
+module.exports = Service;

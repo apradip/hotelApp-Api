@@ -1,6 +1,348 @@
 const mongoose = require("mongoose");
 const date = require("date-and-time");
-const validator = require("validator");
+// const validator = require("validator");
+
+const roomSchema = new mongoose.Schema({
+    id: { 
+        type:String,
+        required: [true, 'Table id require!'],   
+    },
+    no: { 
+        type:String,
+        required: [true, 'Table no require!'],   
+    },
+    tariff: {
+        type: Number,
+        default: 0,
+        min: [1, 'Invalid tariff!'],
+    },
+    extraBedCount: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid extra bed count!']
+    },
+    extraBedTariff: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid extra bed charge!']
+    },
+    extraPersonCount: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid extra person count!'],
+    },
+    extraPersonTariff: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid extra person charge!']
+    },
+    discount: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid discount!']
+    },
+    maxDiscount: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid max. discount!']
+    },
+    gstPercentage: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid gst percentage!']
+    },
+    gstAmount: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid gst!']
+    },
+    price: {
+        type: Number,
+        default: 0,
+        min: [0, 'Invalid price!']
+    },
+    checkInDate: { 
+        type: String, 
+        default: date.format(new Date(),'YYYY-MM-DD')
+    },
+    checkInTime: { 
+        type: String, 
+        default: date.format(new Date(),'HH:mm')
+    },
+    checkOutDate: { 
+        type: String, 
+    },
+    chekOutTime: { 
+        type: String, 
+    }
+});
+
+const foodSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: [true, 'Invalid food!']
+    },
+    name: {
+        type: String,
+        required: [true, 'Invalid food!']
+    },
+    quantity: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid quantity!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid quantity!");
+                }
+            }
+       }
+    },
+    serviceChargePercentage: {
+        type: Number,
+        default: 0,
+    },
+    serviceCharge: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid service change!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid service change!");
+                }
+            }
+       }
+    },
+    gstPercentage: {
+        type: Number,
+        default: 0,
+    },
+    gstCharge: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid gst!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid gst!");
+                }
+            }
+       }
+    },
+    price: {
+        type: Number,
+        default: 0,
+    },
+    orderDate: { 
+        type: String, 
+        default: date.format(new Date(),'YYYY-MM-DD')
+    },
+    orderTime: { 
+        type: String, 
+        default: date.format(new Date(),'HH:mm')
+    },
+    despatchDate: { 
+        type: String,
+        default: null 
+    },
+    despatchTime: { 
+        type: String,
+        default: null 
+    }
+});
+
+const tableSchema = new mongoose.Schema({
+    id: { 
+        type:String,
+    },
+    no: { 
+        type:String,
+    },
+    inDate: { 
+        type: String, 
+        default: date.format(new Date(),'YYYY-MM-DD')
+    },
+    inTime: { 
+        type: String, 
+        default: date.format(new Date(),'HH:mm')
+    },
+    foods: [foodSchema],
+    total: {
+        type: Number,
+        default: 0,
+    },
+    outDate: { 
+        type: String, 
+        default: null
+    },
+    outTime: { 
+        type: String, 
+        default: null
+    },
+    updatedDate: { 
+        type: Date, 
+        default: Date.now 
+    }
+});
+
+const itemSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: [true, 'Invalid food!']
+    },
+    name: {
+        type: String,
+        required: [true, 'Invalid food!']
+    },
+    serviceChargePercentage: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid service charge!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid service charge!");
+                }
+            }
+       }
+    },
+    serviceCharge: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid service change!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid service change!");
+                }
+            }
+       }
+    },
+    price: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid price!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid price!");
+                }
+            }
+       }
+    },
+    quantity: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid quantity!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid quantity!");
+                }
+            }
+       }
+    },
+    orderDate: { 
+        type: String, 
+        default: date.format(new Date(),'YYYY-MM-DD')
+    },
+    orderTime: { 
+        type: String, 
+        default: date.format(new Date(),'HH:mm')
+    },
+    despatchDate: { 
+        type: String, 
+    },
+    despatchTime: { 
+        type: String, 
+    }
+});
+
+const serviceSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: [true, 'Invalid food!']
+    },
+    name: {
+        type: String,
+        required: [true, 'Invalid food!']
+    },
+    serviceChargePercentage: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid service charge!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid service charge!");
+                }
+            }
+       }
+    },
+    serviceCharge: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid service change!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid service change!");
+                }
+            }
+       }
+    },
+    price: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid price!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid price!");
+                }
+            }
+       }
+    },
+    quantity: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid quantity!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid quantity!");
+                }
+            }
+       }
+    },
+    orderDate: { 
+        type: String, 
+        default: date.format(new Date(),'YYYY-MM-DD')
+    },
+    orderTime: { 
+        type: String, 
+        default: date.format(new Date(),'HH:mm')
+    },
+    despatchDate: { 
+        type: String, 
+    },
+    despatchTime: { 
+        type: String, 
+    }
+});
+
 
 const guestSchema = new mongoose.Schema({
     hotelId: {
@@ -8,22 +350,16 @@ const guestSchema = new mongoose.Schema({
         required: [true, 'Invalid hotel!']
     },
     idDocumentId: {
-                type: String, 
-                required: [true, 'Invalid id document!']
+        type: String, 
     },
     idNo: {
         type: String,
         minLength: [6, 'Invalid id no!'],
         maxLength: [100, 'Invalid id no!'],
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("ID No. require!");
-            }
-       }
     }, 
     name: {
         type: String,
-        minLength: [6, 'Invalid name!'],
+        minLength: [3, 'Invalid name!'],
         maxLength: [100, 'Invalid name!'],
         validate(value) {
             if (value === "" || value === null) {
@@ -34,58 +370,32 @@ const guestSchema = new mongoose.Schema({
     age: {
         type: Number,
         default: 0,
-        required: [true, 'Age require!'],
-        min: [1, 'Invalid age!'],
+        // min: [1, 'Invalid age!'],
     },
     fatherName: {
         type: String,
-        minLength: [6, 'Invalid name!'],
+        minLength: [3, 'Invalid name!'],
         maxLength: [100, 'Invalid name!'],
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Name require!");
-            }
-       }
     }, 
     address: {
         type: String,
         minLength: [3, 'Invalid address!'],
-        maxLength: [1020, 'Invalid address!'],
-        validate(value) {
-            if (value ===  "" || value ===  null) {
-                throw new Error("Address require!");
-            }
-       }
+        maxLength: [1020, 'Invalid address!']
     }, 
     city: {
         type: String,
         minLength: [3, 'Invalid city!'],
         maxLength: [100, 'Invalid city!'],
-        validate(value) {
-            if (value ===  "" || value ===  null) {
-                throw new Error("City require!");
-            }
-       }
     },
     policeStation: {
         type: String,
         minLength: [3, 'Invalid p.s!'],
         maxLength: [100, 'Invalid p.s!'],
-        validate(value) {
-            if (value ===  "" || value ===  null) {
-                throw new Error("P.S require!");
-            }
-       }
     },
     state: {
         type: String,
         minLength: [3, 'Invalid state!'],
         maxLength: [100, 'Invalid state!'],
-        validate(value) {
-            if (value ===  "" || value ===  null) {
-                throw new Error("State require!");
-            }
-       }
     },
     pin: {
         type: String,
@@ -109,99 +419,116 @@ const guestSchema = new mongoose.Schema({
         type: String,
         minLength: [6, 'Invalid email!'],
         maxLength: [160, 'Invalid email!'],
-        validate(value) {
-            if (value ===  "" || value ===  null) {
-                throw new Error("Email require!");
-            }
-       },
-       match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email!']
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email!']
     },
     guestCount: {
         type: Number,
         default: 0,
-        required: [true, 'No. of guest require!'],
         min: [1, 'Invalid no. of guest!'],
     },
     guestMaleCount: {
         type: Number,
-        default: 0,
-        required: [true, 'No. of male guest require!'],
-        // min: [1, 'Invalid no. of male guest!'],
+        default: 0
     },
     guestFemaleCount: {
         type: Number,
-        default: 0,
-        required: [true, 'No. of female guest require!'],
-        // min: [1, 'Invalid no. of female guest!'],
-    },
-    roomNos: {
-        type: String,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Room no. require!");
-            }
-       }
-    },
-    checkInDate: {
-        type: Date,
-        default: date.format(new Date(),'YYYY-MM-DD'),
-        required: [true, 'Check in date require!'],
-    },
-    checkInTime: {
-        type: String,
-        default: date.format(new Date(),'HH:mm'),
-        required: [true, 'Check in time require!'],
-    },
-    dayCount: {
-        type: Number,
-        default: 0,
-        required: [true, 'No. of day stays require!'],
-    },
-    bookingAgentId: {
-        type: String, 
-        required: [true, 'Invalid booking agent!']
-    },
-    planId: {
-        type: String, 
-        required: [true, 'Invalid plan!']
+        default: 0
     },
     corporateName: {
         type: String,
-    //     minLength: [6, 'Invalid corporate name!'],
-    //     maxLength: [100, 'Invalid corporate name!'],
-    //     validate(value) {
-    //         if (value === "" || value === null) {
-    //             throw new Error("Corporate name require!");
-    //         }
-    //    }
+        // minLength: [3, 'Invalid corporate name!'],
+        // maxLength: [100, 'Invalid corporate name!'],
     }, 
     corporateAddress: {
         type: String,
-    //     minLength: [3, 'Invalid corporate address!'],
-    //     maxLength: [1020, 'Invalid corporate address!'],
-    //     validate(value) {
-    //         if (value ===  "" || value ===  null) {
-    //             throw new Error("Corporate address require!");
-    //         }
-    //    }
+        // minLength: [3, 'Invalid corporate address!'],
+        // maxLength: [1020, 'Invalid corporate address!'],
     },
     gstNo: {
         type: String,
         // minLength: [15, 'Invalid GST no.!'],
         // maxLength: [15, 'Invalid GST no.!'],
-        // validate(value) {
-        //     if (value ===  "" || value ===  null) {
-        //         throw new Error("State require!");
-        //     }
     },
-    checkOutDate: {
+    roomsDetail: {
+        bookingAgentId: {
+            type: String, 
+        },
+        planId: {
+            type: String, 
+        },
+        rooms: [roomSchema],
+        roomTotal: {
+            type: Number,
+            default: 0,
+        },
+        foods: [foodSchema],
+        foodTotal: {
+            type: Number,
+            default: 0,
+        },
+    },
+    tablesDetail: {
+        tables: [tableSchema],
+        total: {
+            type: Number,
+            default: 0,
+        }
+    },
+    itemsDetail: {
+        items: [itemSchema],
+        total: {
+            type: Number,
+            default: 0,
+        //     validate(value) {
+        //         if (value === "" || value === null) {
+        //             throw new Error("Invalid item total!");
+        //         } else {
+        //             if (value <= 0) {
+        //                 throw new Error("Invalid item total!");
+        //             }
+        //         }
+        //    }
+        }
+    },
+    servicesDetail: {
+        services: [serviceSchema],
+        total: {
+            type: Number,
+            default: 0,
+        //     validate(value) {
+        //         if (value === "" || value === null) {
+        //             throw new Error("Invalid service total!");
+        //         } else {
+        //             if (value <= 0) {
+        //                 throw new Error("Invalid service total!");
+        //             }
+        //         }
+        //    }
+        }
+    },
+    inDate: {
         type: Date,
-        default: Date.now,
-        required: [true, 'Check out date require!'],
+        default: date.format(new Date(),'YYYY-MM-DD'),
+        required: [true, 'Check in date require!'],
     },
-    isCheckedOut: {
+    inTime: {
+        type: String,
+        default: date.format(new Date(),'HH:mm'),
+        required: [true, 'Check in time require!'],
+    },
+    outDate: {
+        type: Date,
+        //default: Date.now,
+        //required: [true, 'Check out date require!'],
+    },
+    outTime: {
+        type: String,
+        // default: date.format(new Date(),'HH:mm'),
+        // required: [true, 'Check in time require!'],
+    },
+    isActive: {
         type: Boolean,
-        default: false
+        default: true
     },
     updatedDate: { 
         type: Date, 
@@ -214,5 +541,4 @@ const guestSchema = new mongoose.Schema({
 });
 
 const Guest = new mongoose.model('Guest', guestSchema);
-
 module.exports = Guest;

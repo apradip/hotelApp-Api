@@ -57,6 +57,9 @@ app.use("/api/logout", require("./routes/logout"));
 //change password api
 app.use("/api/changePassword", require("./routes/changePassword"));
 
+//hotel CURD api
+app.use("/api/hotels", require("./routes/api/hotels"));
+
 //GST CURD api
 app.use("/api/gsts", require("./routes/api/gsts"));
 
@@ -87,11 +90,20 @@ app.use("/api/tables", require("./routes/api/tables"));
 //foods CURD api
 app.use("/api/foods", require("./routes/api/foods"));
 
+//items CURD api
+app.use("/api/items", require("./routes/api/items"));
+
+//services CURD api
+app.use("/api/services", require("./routes/api/services"));
+
 //guests CURD api
 app.use("/api/guests", require("./routes/api/guests"));
 
 //guestRooms CURD api
 app.use("/api/guestRooms", require("./routes/api/guestRooms"));
+
+//guestTableFoods CURD api
+app.use("/api/guesttablefoods", require("./routes/api/guestTableFoods"));
 
 //guestpayments CURD api
 app.use("/api/guestExpensesPayments", require("./routes/api/guestExpensesPayments"));
