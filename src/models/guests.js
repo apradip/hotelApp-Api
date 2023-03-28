@@ -198,6 +198,32 @@ const itemSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Invalid food!']
     },
+    price: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid price!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid price!");
+                }
+            }
+       }
+    },
+    quantity: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid quantity!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid quantity!");
+                }
+            }
+       }
+    },
     serviceChargePercentage: {
         type: Number,
         default: 0,
@@ -224,28 +250,28 @@ const itemSchema = new mongoose.Schema({
             }
        }
     },
-    price: {
+    gstPercentage: {
         type: Number,
         default: 0,
         validate(value) {
             if (value === "" || value === null) {
-                throw new Error("Invalid price!");
+                throw new Error("Invalid gst charge!");
             } else {
                 if (value <= 0) {
-                    throw new Error("Invalid price!");
+                    throw new Error("Invalid gst charge!");
                 }
             }
        }
     },
-    quantity: {
+    gstCharge: {
         type: Number,
         default: 0,
         validate(value) {
             if (value === "" || value === null) {
-                throw new Error("Invalid quantity!");
+                throw new Error("Invalid gst change!");
             } else {
                 if (value <= 0) {
-                    throw new Error("Invalid quantity!");
+                    throw new Error("Invalid gst change!");
                 }
             }
        }

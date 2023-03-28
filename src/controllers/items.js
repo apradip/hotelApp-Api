@@ -60,7 +60,7 @@ const handelCreate = async (req, res) => {
             description: description.trim(), 
         });
 
-        const duplicate = await Item.find({hotelId, isEnable: true, name}).exec();
+        const duplicate = await Item.find({hotelId, isEnable: true, name: data.name}).exec();
         if (duplicate.length !== 0) return res.status(409).send("Item already exists!");
 
         const resAdd = await data.save();

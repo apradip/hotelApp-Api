@@ -102,7 +102,10 @@ app.use("/api/guests", require("./routes/api/guests"));
 //guestRooms CURD api
 app.use("/api/guestRooms", require("./routes/api/guestRooms"));
 
-//guestTableFoods CURD api
+//guestitems CURD apiItems
+app.use("/api/guestItems", require("./routes/api/guestItems"));
+
+//guests CURD api
 app.use("/api/guesttablefoods", require("./routes/api/guestTableFoods"));
 
 //guestpayments CURD api
