@@ -23,6 +23,7 @@ const serviceItem = {
     despatchTime: null
 };
 
+
 // handel show all orders
 //query string : hotel Id / guest Id / option: [non delivery / all]
 const handelDetail = async (req, res) => {
@@ -90,6 +91,7 @@ const handelDetail = async (req, res) => {
 
     return res.status(200).send(serviceList);
 }
+
 
 // handel service order
 //query string : hotel Id / guest Id
