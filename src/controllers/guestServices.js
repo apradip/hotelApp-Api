@@ -288,7 +288,6 @@ const handelCheckout = async (req, res) => {
             // Calculate item total    
             serviceTotal += service.totalPrice;
 
-
             // insert all services to guest service transactions
             const foundGuestServiceTransaction = await GuestServiceTransaction.findOne(
                 {
