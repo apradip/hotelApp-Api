@@ -177,11 +177,9 @@ const tableSchema = new mongoose.Schema({
     },
     outDate: { 
         type: String, 
-        default: null
     },
     outTime: { 
         type: String, 
-        default: null
     },
     updatedDate: { 
         type: Date, 
@@ -316,26 +314,38 @@ const serviceSchema = new mongoose.Schema({
     },
     serviceCharge: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid service change!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid service change!");
-                }
-            }
-       }
+        default: function() {
+            return (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)
+        }        
     },
-    price: {
+    gstPercentage: {
         type: Number,
         default: 0,
         validate(value) {
             if (value === "" || value === null) {
-                throw new Error("Invalid price!");
+                throw new Error("Invalid gst charge!");
             } else {
                 if (value <= 0) {
-                    throw new Error("Invalid price!");
+                    throw new Error("Invalid gst charge!");
+                }
+            }
+       }
+    },
+    gstCharge: {
+        type: Number,
+        default: function() {
+            return (this.unitPrice * this.quantity) * (this.gstPercentage / 100)
+        }        
+    },
+    unitPrice: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid unit price!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid unit price!");
                 }
             }
        }
@@ -353,6 +363,12 @@ const serviceSchema = new mongoose.Schema({
             }
        }
     },
+    totalPrice: {
+        type: Number,
+        default: function() {
+          return (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
+        }        
+    },
     orderDate: { 
         type: String, 
         default: date.format(new Date(),'YYYY-MM-DD')
@@ -368,6 +384,34 @@ const serviceSchema = new mongoose.Schema({
         type: String, 
     }
 });
+
+const expensesPaymentsSchema = new mongoose.Schema({
+    expenseAmount: {
+        type: Number,
+        default: 0,
+        required: [true, 'Expense amount require!'],
+    },
+    paymentAmount: {
+        type: Number,
+        default: 0,
+        required: [true, 'Payment amount require!'],
+    },
+    narration: {
+        type: String, 
+        required: [true, 'Invalid narration!']
+    },
+    transactionDate: {
+        type: Date,
+        default: date.format(new Date(),'YYYY-MM-DD'),
+        required: [true, 'Expense/Payment date require!'],
+    },
+    transactionTime: {
+        type: String,
+        default: date.format(new Date(),'HH:mm'),
+        required: [true, 'Expense/Payment time require!'],
+    }
+});
+
 
 
 const guestSchema = new mongoose.Schema({
@@ -395,7 +439,7 @@ const guestSchema = new mongoose.Schema({
     }, 
     age: {
         type: Number,
-        default: 0,
+        // default: 0,
         // min: [1, 'Invalid age!'],
     },
     fatherName: {
@@ -454,11 +498,11 @@ const guestSchema = new mongoose.Schema({
     },
     guestMaleCount: {
         type: Number,
-        default: 0
+        // default: 0
     },
     guestFemaleCount: {
         type: Number,
-        default: 0
+        // default: 0
     },
     corporateName: {
         type: String,
@@ -532,6 +576,13 @@ const guestSchema = new mongoose.Schema({
         //    }
         }
     },
+    expensesPaymentsDetail: {
+        expensesPayments: [expensesPaymentsSchema],
+        balance: {
+            type: Number,
+            default: 0
+        }
+    },
     inDate: {
         type: Date,
         default: date.format(new Date(),'YYYY-MM-DD'),
@@ -551,6 +602,11 @@ const guestSchema = new mongoose.Schema({
         type: String,
         // default: date.format(new Date(),'HH:mm'),
         // required: [true, 'Check in time require!'],
+    },
+    option: {
+        type: String,
+        default: "S",
+        required: [true, 'option require!'],
     },
     isActive: {
         type: Boolean,

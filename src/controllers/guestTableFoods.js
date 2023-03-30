@@ -16,8 +16,10 @@ const foodItem = {
     gstPercentage: 0,
     gstCharge: 0,
     price: 0,
-    orderDate: "",
-    orderTime: ""
+    orderDate: null,
+    orderTime: null,
+    despatchDate: null, 
+    despatchTime: null
 };
 
 
@@ -108,13 +110,12 @@ const handelDetail = async (req, res) => {
                     isEnable: true, 
                     'tablesDetail.tables': {
                         $elemMatch: {
-                            outDate: null, 
-                            outTime: null
+                            outDate: { $exists: false }, 
+                            outTime: { $exists: false }
                         }
                     }
                 }
             ).exec();        
-            // if (!foundGuestFoodList) return res.status(404).send();
         } else if (option === "A") {
             foundGuestFoodList = await Guest.findOne(
                 {
@@ -124,13 +125,12 @@ const handelDetail = async (req, res) => {
                     isEnable: true, 
                     'tablesDetail.tables': {
                         $elemMatch: {
-                            outDate: { $ne: null }, 
-                            outTime: { $ne: null }
+                            outDate: { $exists: true }, 
+                            outTime: { $exists: true }
                         }
                     }
                 }
             ).exec();        
-            // if (!foundGuestFoodList) return res.status(404).send();
         }
 
         if (!foundGuestFoodList) return res.status(404).send();
@@ -200,14 +200,14 @@ const handelOrder = async (req, res) => {
                         'tablesDetail.tables': {
                             $elemMatch: {
                                 id: tableId, 
-                                outDate: null, 
-                                outTime: null
+                                outDate: { $exists: false }, 
+                                outTime: { $exists: false }
                             }
                         }, 
                         'tablesDetail.tables.$.foods': {
                             $elemMatch: {
-                                despatchDate: null, 
-                                despatchTime: null
+                                despatchDate: { $exists: false }, 
+                                despatchTime: { $exists: false }
                             }
                         }
                     },
@@ -215,7 +215,7 @@ const handelOrder = async (req, res) => {
                         $pull: {
                             'tablesDetail.tables.$.foods': { 
                                 id: food.id,
-                                despatchDate: null 
+                                despatchDate: { $exists: false }
                             }
                         }
                     }
@@ -260,8 +260,8 @@ const handelOrder = async (req, res) => {
                         'tablesDetail.tables': {
                             $elemMatch:{
                                 id: tableId, 
-                                outDate: null, 
-                                outTime: null
+                                outDate: { $exists: false }, 
+                                outTime: { $exists: false }
                             }
                         }
                     },
@@ -324,15 +324,15 @@ const handelDelivery = async (req, res) => {
                     'tablesDetail.tables': {
                         $elemMatch: {
                             id: tableId, 
-                            outDate: null, 
-                            outTime: null
+                            outDate: { $exists: false }, 
+                            outTime: { $exists: false }
                         }
                     }, 
                     'tablesDetail.tables.foods': {
                         $elemMatch: {
                             id: food.id,
-                            despatchDate: null,
-                            despatchTime: null
+                            despatchDate: { $exists: false },
+                            despatchTime: { $exists: false }
                         }
                     }
                 },
@@ -399,8 +399,8 @@ const handelCheckout = async (req, res) => {
                 'tablesDetail.tables': {
                     $elemMatch: {
                         id: foundTables[0]._id, 
-                        outDate: null, 
-                        outTime: null
+                        outDate: { $exists: false }, 
+                        outTime: { $exists: false }
                     }
                 }
             }
@@ -421,8 +421,8 @@ const handelCheckout = async (req, res) => {
                     'tablesDetail.tables': {
                         $elemMatch:{
                             id: table._id, 
-                            outDate: null, 
-                            outTime: null
+                            outDate: { $exists: false }, 
+                            outTime: { $exists: false }
                         }
                     }
                 },
@@ -447,8 +447,8 @@ const handelCheckout = async (req, res) => {
                 _id: guestId, 
                 'tablesDetail.tables': {
                     $elemMatch: {
-                        outDate: { $ne : null }, 
-                        outTime: { $ne : null }
+                        outDate: { $exists: true }, 
+                        outTime: { $exists: true }
                     }
                 }
             }

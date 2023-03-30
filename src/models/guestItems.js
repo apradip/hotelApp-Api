@@ -24,22 +24,22 @@ const guestItemSchema = new mongoose.Schema({
     orderDate: {
         type: Date,
         default: date.format(new Date(),'YYYY-MM-DD'),
-        required: [true, 'Occupancy date require!'],
+        required: [true, 'Order date require!'],
     },
     orderTime: {
         type: String,
         default: date.format(new Date(),'HH:mm'),
-        required: [true, 'Occupancy time require!'],
+        required: [true, 'Order time require!'],
     },
     deliveryDate: {
         type: Date,
         default: date.format(new Date(),'YYYY-MM-DD'),
-        required: [true, 'Occupancy date require!'],
+        required: [true, 'Delivery date require!'],
     },
     deliveryTime: {
         type: String,
         default: date.format(new Date(),'HH:mm'),
-        required: [true, 'Occupancy time require!'],
+        required: [true, 'Delivery time require!'],
     },
     updatedDate: { 
         type: Date, 

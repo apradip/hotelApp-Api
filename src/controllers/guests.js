@@ -85,7 +85,8 @@ const handelCreate = async (req, res) => {
                     planId, 
                     corporateName, 
                     corporateAddress, 
-                    gstNo});
+                    gstNo,
+                    option});
 
             const resAdd = await data.save();
             if (!resAdd) return res.status(400).send();
@@ -102,7 +103,8 @@ const handelCreate = async (req, res) => {
                 guestCount,
                 corporateName, 
                 corporateAddress, 
-                gstNo});
+                gstNo,
+                option});
 
             const resAdd = await data.save();
             if (!resAdd) return res.status(400).send();
