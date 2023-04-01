@@ -1,20 +1,20 @@
-const Item = require('../models/items');
+const Miscellaneous = require('../models/miscellaneouses');
 
 
-//handel search item
+//handel search miscellaneous
 //query string : hotel Id?search= name
 const handelSearch = async (req, res) => {
     try {
         const hotelId = req.params.hotelId;
         const search = req.query.search;
         
-        const data = await Item.find({hotelId, isEnable: true})
+        const data = await Miscellaneous.find({hotelId, isEnable: true})
                                         .sort('name')                                
                                         .select('hotelId _id name price description').exec();
         if (!data) return res.status(404).send();
 
         if (search) {
-            const filterData = await Item.find({hotelId, isEnable: true, name: {$regex: '.*' + search.trim().toUpperCase() + '.*'}})
+            const filterData = await Miscellaneous.find({hotelId, isEnable: true, name: {$regex: '.*' + search.trim().toUpperCase() + '.*'}})
                                                 .sort('name')                                
                                                 .select('hotelId _id name price description').exec();
             if (!filterData) return res.status(404).send();
@@ -29,12 +29,12 @@ const handelSearch = async (req, res) => {
 }
 
 
-//handel detail item
+//handel detail miscellaneous
 //query string : hotel Id / item Id
 const handelDetail = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Item.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Miscellaneous.findOne({hotelId, isEnable: true, _id}).exec();
 
         if (!data) return res.status(404).send();
 
@@ -45,7 +45,7 @@ const handelDetail = async (req, res) => {
 }
 
 
-//handel add item
+//handel add miscellaneous
 //query string : hotel Id
 //body : { "name" : "", "price": 0,"description" : "" }
 const handelCreate = async (req, res) => {
@@ -53,15 +53,15 @@ const handelCreate = async (req, res) => {
         const hotelId = req.params.hotelId;
         const {name, price, description} =  req.body;
         
-        const data = new Item({
+        const data = new Miscellaneous({
             hotelId,
             name: name.trim().toUpperCase(),
             price: price,
             description: description.trim(), 
         });
 
-        const duplicate = await Item.find({hotelId, isEnable: true, name: data.name}).exec();
-        if (duplicate.length !== 0) return res.status(409).send("Item already exists!");
+        const duplicate = await Miscellaneous.find({hotelId, isEnable: true, name: data.name}).exec();
+        if (duplicate.length !== 0) return res.status(409).send("Miscellaneous already exists!");
 
         const resAdd = await data.save();
         if (!resAdd) return res.status(400).send();
@@ -73,26 +73,27 @@ const handelCreate = async (req, res) => {
 }
 
 
-//handel update item
-//query string : hotel Id / item Id
+//handel update miscellaneous
+//query string : hotel Id / miscellaneous Id
 //body : { "name" : "", "price": 0, "description" : "" }
 const handelUpdate = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
         const {name, price, description} =  req.body;
-        const data = await Item.findOne({hotelId, isEnable: true, _id}).exec();
+
+        const data = await Miscellaneous.findOne({hotelId, isEnable: true, _id}).exec();
         if (!data) return res.status(404).send();
 
-        const duplicate = await Item.find({hotelId, isEnable: true, name: name.trim().toUpperCase()}).exec();
+        const duplicate = await Miscellaneous.find({hotelId, isEnable: true, name: name.trim().toUpperCase()}).exec();
         if (duplicate.length > 0) {
-            duplicate.map((item) => {
-                if (item._id.toString() !== _id) {
-                    return res.status(409).send("Item already exists!");
+            duplicate.map((miscellaneous) => {
+                if (miscellaneous._id.toString() !== _id) {
+                    return res.status(409).send("Miscellaneous already exists!");
                 }
             })
         }
 
-        const resUpdate = await Item.findByIdAndUpdate(_id, {
+        const resUpdate = await Miscellaneous.findByIdAndUpdate(_id, {
                                                                 name: name.trim().toUpperCase(),
                                                                 price: price, 
                                                                 description: description.trim()}).exec();
@@ -105,16 +106,17 @@ const handelUpdate = async (req, res) => {
 }
 
 
-//handel delete item
-//query string : hotel Id / item Id
+//handel delete miscellaneous
+//query string : hotel Id / miscellaneous Id
 const handelRemove = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Item.findOne({hotelId, isEnable: true, _id}).exec();
+
+        const data = await Miscellaneous.findOne({hotelId, isEnable: true, _id}).exec();
 
         if (!data) return res.status(404).send();
 
-        const resDelete = await Item.findByIdAndUpdate(_id, {isEnable: false}).exec();
+        const resDelete = await Miscellaneous.findByIdAndUpdate(_id, {isEnable: false}).exec();
         if (!resDelete) return res.status(400).send(resDelete);
 
         return res.status(200).send(resDelete);

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
+// const validator = require("validator");
 
-const itemSchema = new mongoose.Schema({
+const miscellaneousSchema = new mongoose.Schema({
     hotelId: {
         type: String,
         required: [true, 'Invalid hotel!']
@@ -32,6 +32,6 @@ const itemSchema = new mongoose.Schema({
     }
 });
 
-const Item = new mongoose.model('Item', itemSchema);
+const Miscellaneous = new mongoose.model('Miscellaneous', miscellaneousSchema);
 
-module.exports = Item;
+module.exports = Miscellaneous;

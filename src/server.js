@@ -90,8 +90,8 @@ app.use("/api/tables", require("./routes/api/tables"));
 //foods CURD api
 app.use("/api/foods", require("./routes/api/foods"));
 
-//items CURD api
-app.use("/api/items", require("./routes/api/items"));
+//miscellaneouses CURD api
+app.use("/api/miscellaneouses", require("./routes/api/miscellaneouses"));
 
 //services CURD api
 app.use("/api/services", require("./routes/api/services"));
@@ -102,8 +102,8 @@ app.use("/api/guests", require("./routes/api/guests"));
 //guestRooms CURD api
 app.use("/api/guestRooms", require("./routes/api/guestRooms"));
 
-//guestitems CURD apiRoomItems
-app.use("/api/guestItems", require("./routes/api/guestItems"));
+//guestitems CURD apiRoomMiscellaneouses
+app.use("/api/guestMiscellaneouses", require("./routes/api/guestMiscellaneouses"));
 
 //guestitems CURD apiRoomServices
 app.use("/api/guestServices", require("./routes/api/guestServices"));

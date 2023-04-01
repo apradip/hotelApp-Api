@@ -122,20 +122,11 @@ const foodSchema = new mongoose.Schema({
     },
     gstCharge: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid gst!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid gst!");
-                }
-            }
-       }
+        default: 0
     },
     price: {
         type: Number,
-        default: 0,
+        default: 0
     },
     orderDate: { 
         type: String, 
@@ -147,11 +138,9 @@ const foodSchema = new mongoose.Schema({
     },
     despatchDate: { 
         type: String,
-        default: null 
     },
     despatchTime: { 
         type: String,
-        default: null 
     }
 });
 
@@ -187,7 +176,7 @@ const tableSchema = new mongoose.Schema({
     }
 });
 
-const itemSchema = new mongoose.Schema({
+const miscellaneousSchema = new mongoose.Schema({
     id: {
         type: String,
         required: [true, 'Invalid food!']
@@ -195,32 +184,6 @@ const itemSchema = new mongoose.Schema({
     name: {
         type: String,
         required: [true, 'Invalid food!']
-    },
-    price: {
-        type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid price!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid price!");
-                }
-            }
-       }
-    },
-    quantity: {
-        type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid quantity!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid quantity!");
-                }
-            }
-       }
     },
     serviceChargePercentage: {
         type: Number,
@@ -273,6 +236,38 @@ const itemSchema = new mongoose.Schema({
                 }
             }
        }
+    },
+    unitPrice: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid price!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid price!");
+                }
+            }
+       }
+    },
+    quantity: {
+        type: Number,
+        default: 0,
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Invalid quantity!");
+            } else {
+                if (value <= 0) {
+                    throw new Error("Invalid quantity!");
+                }
+            }
+       }
+    },
+    totalPrice: {
+        type: Number,
+        default: function() {
+          return (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
+        }        
     },
     orderDate: { 
         type: String, 
@@ -544,36 +539,18 @@ const guestSchema = new mongoose.Schema({
             default: 0,
         }
     },
-    itemsDetail: {
-        items: [itemSchema],
+    miscellaneousesDetail: {
+        miscellaneouses: [miscellaneousSchema],
         total: {
             type: Number,
             default: 0,
-        //     validate(value) {
-        //         if (value === "" || value === null) {
-        //             throw new Error("Invalid item total!");
-        //         } else {
-        //             if (value <= 0) {
-        //                 throw new Error("Invalid item total!");
-        //             }
-        //         }
-        //    }
         }
     },
     servicesDetail: {
         services: [serviceSchema],
         total: {
             type: Number,
-            default: 0,
-        //     validate(value) {
-        //         if (value === "" || value === null) {
-        //             throw new Error("Invalid service total!");
-        //         } else {
-        //             if (value <= 0) {
-        //                 throw new Error("Invalid service total!");
-        //             }
-        //         }
-        //    }
+            default: 0
         }
     },
     expensesPaymentsDetail: {

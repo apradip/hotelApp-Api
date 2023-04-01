@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const date = require("date-and-time");
 // const validator = require("validator");
 
-const guestServiceTransactionSchema = new mongoose.Schema({
+const guestMiscellaneousTransactionSchema = new mongoose.Schema({
     hotelId: {
         type: String,
         required: [true, 'Invalid hotel!']
@@ -11,13 +11,13 @@ const guestServiceTransactionSchema = new mongoose.Schema({
         type: String, 
         required: [true, 'Invalid guest!']
     },
-    serviceId: {
+    miscellaneousId: {
         type: String, 
-        required: [true, 'Invalid service!']
+        required: [true, 'Invalid miscellaneous!']
     },
     name: {
         type: String, 
-        required: [true, 'Invalid service!']
+        required: [true, 'Invalid miscellaneous!']
     },
     serviceChargePercentage: {
         type: Number,
@@ -57,14 +57,14 @@ const guestServiceTransactionSchema = new mongoose.Schema({
     },
     despatchDate: {
         type: Date,
-        required: [true, 'Invalid delivery date!']
+        required: [true, 'Invalid despatch date!']
     },
     despatchTime: {
         type: String,
-        required: [true, 'Invalid delivery time!']
+        required: [true, 'Invalid despatch time!']
     }
 });
 
-const GuestServiceTransaction = new mongoose.model('GuestServiceTransaction', guestServiceTransactionSchema);
+const GuestMiscellaneousTransaction = new mongoose.model('GuestMiscellaneousTransaction', guestMiscellaneousTransactionSchema);
 
-module.exports = GuestServiceTransaction;
+module.exports = GuestMiscellaneousTransaction;

@@ -1,3 +1,4 @@
+// const mongoose = require("mongoose");
 const Guest = require("../models/guests");
 const Table = require("../models/tables");
 const Food = require("../models/foods");
@@ -18,8 +19,8 @@ const foodItem = {
     price: 0,
     orderDate: null,
     orderTime: null,
-    despatchDate: null, 
-    despatchTime: null
+    // despatchDate: null, 
+    // despatchTime: null
 };
 
 
@@ -30,333 +31,415 @@ const handelTableBooking = async (req, res) => {
     try {
         const {hotelId, guestId} = req.params;
         const {tables} = req.body;
+        
+        const filter = {
+            _id: guestId, 
+            hotelId, 
+            isActive: true, 
+            isEnable: true
+        };
 
-        const foundGuest = await Guest.findOne(
-            {
-                hotelId, _id: guestId, 
-                isActive: true, 
-                isEnable: true
-            }).exec();
-        if (!foundGuest) return res.status(404).send();
- 
-        tables.forEach(async table => {
-            // check if the table is empty
-            const foundTable = await Table.findOne(
-                {
-                    hotelId, 
-                    _id: table.id, 
+        await Guest.findOne(filter)  
+        .exec((err, guest) => {
+            if (err) return res.status(500).send(err);
+            if (!guest) return res.status(404).send("Guest not found!");
+
+
+            tables.forEach(async paramTable => {
+
+                // check if the table is empty
+                const filter = {
+                    _id: paramTable.id, 
+                    hotelId: hotelId, 
                     isOccupied: false, 
                     isEnable: true
-                }).exec();
+                };
+                await Table.findOne(filter)
+                .exec(async (err, table) => {
+                    if (err) return res.status(500).send(err);
+                    if (!table) return res.status(404).send("Table not found!");
 
-            if (foundTable) {
-                // change table occupancy status
-                const resTableUpdate = await Table.findOneAndUpdate(
-                    {
-                        hotelId, 
-                        _id: foundTable._id
-                    },
-                    {
-                        guestId: guestId, 
+
+                    //add table in the guest
+                    const data = {
+                        id: table._id,
+                        no: table.no, 
+                        inDate: date.format(new Date(),'YYYY-MM-DD'),
+                        inTime: date.format(new Date(),'HH:mm')
+                    };
+                    const filterGuest = {_id: guest._id};
+
+                    const updateGuest = {$push: {'tablesDetail.tables': data}};
+                    await Guest.updateOne(filterGuest, updateGuest)  
+                    .exec(async (err) => {
+                        if (err) return res.status(500).send(err);
+                    });
+
+
+                    // change table occupancy status
+                    const filterTable = {
+                        _id: table._id,
+                        hotelId
+                    };
+                    const updateTable = {
+                        guestId: guest._id, 
                         isOccupied: true, 
                         updatedDate: new Date()
-                    }).exec();  
+                    };
 
-                if (resTableUpdate) { 
-                    //add table in the guest
-                    const dataTable = {
-                                id: foundTable._id,
-                                no: foundTable.no, 
-                                inDate: date.format(new Date(),'YYYY-MM-DD'),
-                                inTime: date.format(new Date(),'HH:mm')
-                            };
+                    await Table.updateOne(filterTable, updateTable)
+                    .exec(async (err) => {
+                        if (err) return res.status(500).send(err);
+                    });
 
-                    const resGuestUpdate = await Guest.findOneAndUpdate(
-                        {_id: foundGuest._id},
-                        {$push: {'tablesDetail.tables': dataTable}}).exec();  
+                });
 
-                    if (!resGuestUpdate) return res.status(400).send();
-                } else {
-                    return res.status(400).send("Not able to update table");    
-                }
-            } else {
-                return res.status(400).send("Table (" + table.id + ") not found ");
-            }
+            });
+
         });
-
-        return res.status(200).send();
     } catch(e) {
         return res.status(500).send(e);
-    }        
+    }
+
+    return res.status(200).send("Guest table alloted sucessfully.");
+}
+
+
+// handel food order
+//query string : hotel Id / guest Id
+//body : {"foods": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
+const handelOrder = async (req, res) => {
+    try {
+        const {hotelId, guestId} = req.params;
+        const {foods} = req.body;
+
+
+        // get guest
+        const filterGuest = {
+            _id: guestId, 
+            hotelId, 
+            isActive: true, 
+            isEnable: true
+        };
+
+        await Guest.findOne(filterGuest)
+        .exec(async (err, guest) => {
+            if (err) return res.status(500).send(err);
+            if (!guest) return res.status(404).send("Guest not found!");
+
+
+            // get table
+            const filterTable = {
+                hotelId, 
+                guestId: guest._id, 
+                isOccupied: true, 
+                isEnable: true
+            };
+            
+            await Table.findOne(filterTable)
+            .exec(async (err, table) => {
+                if (err) return res.status(500).send(err);
+                if (!table) return res.status(404).send("No table assigned to the guest!");
+
+
+                // delete all remove / modify operation foods    
+                foods.forEach(async food => {
+
+                    if (((food.operation) === "M") || ((food.operation) === "R")) {
+                        const filterDelete = {
+                            _id: guest._id, 
+                            'tablesDetail.tables': {
+                                $elemMatch: {
+                                    id: table._id, 
+                                    outDate: { $exists: false }, 
+                                    outTime: { $exists: false }
+                                }
+                            }, 
+                            'tablesDetail.tables.$.foods': {
+                                $elemMatch: {
+                                    despatchDate: { $exists: false }, 
+                                    despatchTime: { $exists: false }
+                                }
+                            }
+                        };
+                        const updateDelete = {
+                            $pull: {
+                                'tablesDetail.tables.$.foods': { 
+                                    id: food.id,
+                                    despatchDate: { $exists: false }
+                                }
+                            }
+                        };
+
+                        await Guest.updateOne(filterDelete, updateDelete)
+                        .exec(async (err) => {
+                            if (err) return res.status(404).send(err);
+                        });
+                    }
+                });
+
+
+                // insert all add / modify operation foods
+                foods.forEach(async food => {
+
+                    // delete all remove / modify operation foods    
+                    if (((food.operation) === "A") || ((food.operation) === "M")) {
+                        
+                        // check for food existance
+                        const filterFood = {
+                            hotelId, 
+                            _id: food.id, 
+                            isEnable: true
+                        };
+
+                        await Food.findOne(filterFood)
+                        .exec(async (err, foodDetail) => {
+                            if (err) return res.status(500).send(err);
+                            if (!foodDetail) return res.status(404).send("Ordered food not found!");
+
+
+                            //add food in the guest table
+                            const dataOrder = {
+                                id: foodDetail._id,
+                                name: foodDetail.name, 
+                                price: parseInt(foodDetail.price).toFixed(decimalPlace),
+                                quantity: food.quantity,
+                                serviceChargePercentage: parseInt(serviceChargePercentage).toFixed(decimalPlace),
+                                serviceCharge: parseInt(((foodDetail.price * food.quantity) * (serviceChargePercentage / 100))).toFixed(decimalPlace),
+                                gstPercentage: gstPercentage,
+                                gstCharge: parseInt(((foodDetail.price * food.quantity) * (gstPercentage / 100))).toFixed(decimalPlace),
+                                orderDate: date.format(new Date(),'YYYY-MM-DD'),
+                                orderTime: date.format(new Date(),'HH:mm')
+                            };
+                            const filterInsert = {
+                                _id: guest._id, 
+                                'tablesDetail.tables': {
+                                    $elemMatch:{
+                                        id: table._id, 
+                                        outDate: { $exists: false }, 
+                                        outTime: { $exists: false }
+                                    }
+                                }
+                            };
+                            const updateInsert = {
+                                $push: {
+                                    'tablesDetail.tables.$.foods': dataOrder
+                                }
+                            };
+
+                            await Guest.updateOne(filterInsert, updateInsert)
+                            .exec(async (err) => {
+                                if (err) return res.status(500).send(err);
+                            });
+
+                        });
+
+                    }
+
+                });
+
+            });
+
+        });
+    } catch(e) {
+        return res.status(500).send(e);
+    }
+
+    return res.status(200).send("Order successfully accepted.");
 }
 
 
 // handel show all orders
 //query string : hotel Id / guest Id / option: [non checkout / all]
 const handelDetail = async (req, res) => {
-    let foodList = [];
 
     try {
         const {hotelId, guestId, option} = req.params;
-        
-        let foundGuestFoodList = null;
 
         if (option === "N") {
-            foundGuestFoodList = await Guest.findOne(
-                {
-                    hotelId, 
-                    _id: guestId, 
-                    isActive: true, 
-                    isEnable: true, 
-                    'tablesDetail.tables': {
-                        $elemMatch: {
-                            outDate: { $exists: false }, 
-                            outTime: { $exists: false }
-                        }
-                    }
-                }
-            ).exec();        
-        } else if (option === "A") {
-            foundGuestFoodList = await Guest.findOne(
-                {
-                    hotelId, 
-                    _id: guestId, 
-                    isActive: true, 
-                    isEnable: true, 
-                    'tablesDetail.tables': {
-                        $elemMatch: {
-                            outDate: { $exists: true }, 
-                            outTime: { $exists: true }
-                        }
-                    }
-                }
-            ).exec();        
-        }
+            let foodList = [];
 
-        if (!foundGuestFoodList) return res.status(404).send();
-
-        foundGuestFoodList.tablesDetail.tables.forEach(async table => {
-            table.foods.forEach(async food => {
-                let dataOrder = foodItem;
-                dataOrder.id = food.id;
-                dataOrder.name = food.name;
-                dataOrder.price = food.price;
-                dataOrder.quantity = food.quantity;
-                dataOrder.serviceChargePercentage = food.serviceChargePercentage;
-                dataOrder.serviceCharge = food.serviceCharge;
-                dataOrder.gstPercentage = food.gstPercentage;
-                dataOrder.gstCharge = food.gstCharge;
-                dataOrder.orderDate = food.orderDate;
-                dataOrder.orderTime = food.orderTime;
-                foodList.push(dataOrder);   
-            });
-        });
-    } catch(e) {
-        return res.status(500).send(e);
-    }        
-
-    return res.status(200).send(foodList);
-}
-
-// handel food order
-//query string : hotel Id / guest Id / table Id
-//body : {"foods": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
-const handelOrder = async (req, res) => {
-    try {
-        const {hotelId, guestId, tableId} = req.params;
-        const {foods} = req.body;
-
-        // get guest
-        const foundGuest = await Guest.findOne(
-            {
+            const filter = {
                 hotelId, 
                 _id: guestId, 
                 isActive: true, 
-                isEnable: true
-            }
-        ).exec();
+                isEnable: true, 
+                'tablesDetail.tables': {
+                    $elemMatch: {
+                        outDate: { $exists: false }, 
+                        outTime: { $exists: false }
+                    }
+                }
+            };
 
-        if (!foundGuest) return res.status(404).send();
+            await Guest.findOne(filter)
+            .exec((err, foods) => {
+                if (err) return res.status(500).send(err);
+                
+                if (foods) {
+                    
+                    foods.tablesDetail.tables.forEach(async table => {
 
-        // get table
-        const foundTable = await Table.findOne(
-            {
+                        table.foods.forEach(async food => {
+                            let dataOrder = foodItem;
+                            dataOrder.id = food.id;
+                            dataOrder.name = food.name;
+                            dataOrder.price = food.price;
+                            dataOrder.quantity = food.quantity;
+                            dataOrder.serviceChargePercentage = food.serviceChargePercentage;
+                            dataOrder.serviceCharge = food.serviceCharge;
+                            dataOrder.gstPercentage = food.gstPercentage;
+                            dataOrder.gstCharge = food.gstCharge;
+                            dataOrder.orderDate = food.orderDate;
+                            dataOrder.orderTime = food.orderTime;
+
+                            foodList.push(dataOrder);   
+                        });
+
+                    });
+
+                }
+
+                return res.status(200).send(foodList);
+            });
+
+        } else if (option === "A") {
+            let foodList = [];
+            
+            const filter = {
                 hotelId, 
-                guestId: guestId, 
-                _id: tableId, 
-                isOccupied: true, 
-                isEnable: true
-            }
-        ).exec();
-
-        if (!foundTable) return res.status(404).send();
-
-        // delete all remove / modify operation foods    
-        foods.forEach(async food => {
-            if (((food.operation) === "M") || ((food.operation) === "R")) {
-                const resFoodRemove = await Guest.updateOne(
-                    {
-                        _id: guestId, 
-                        'tablesDetail.tables': {
-                            $elemMatch: {
-                                id: tableId, 
-                                outDate: { $exists: false }, 
-                                outTime: { $exists: false }
-                            }
-                        }, 
-                        'tablesDetail.tables.$.foods': {
-                            $elemMatch: {
-                                despatchDate: { $exists: false }, 
-                                despatchTime: { $exists: false }
-                            }
-                        }
-                    },
-                    {
-                        $pull: {
-                            'tablesDetail.tables.$.foods': { 
-                                id: food.id,
-                                despatchDate: { $exists: false }
-                            }
-                        }
+                _id: guestId, 
+                isActive: true, 
+                isEnable: true, 
+                'tablesDetail.tables': {
+                    $elemMatch: {
+                        outDate: { $exists: true }, 
+                        outTime: { $exists: true }
                     }
-                ).exec();  
-        
-                if (!resFoodRemove) return res.status(404).send();
-            }
-        });
+                }
+            };
 
-        // insert all add / modify operation foods
-        foods.forEach(async food => {
-            // delete all remove / modify operation foods    
-            if (((food.operation) === "A") || ((food.operation) === "M")) {
-                // check for food existance
-                const foundFood = await Food.findOne(
-                    {
-                        hotelId, 
-                        _id: food.id, 
-                        isEnable: true
-                    }
-                ).exec();
+            await Guest.findOne(filter)
+            .exec((err, foods) => {
+                if (err) return res.status(500).send(err);
 
-                if (!foundFood) return res.status(404).send();
+                if (foods) {
+                    
+                    foods.tablesDetail.tables.forEach(async table => {
 
-                //add food in the guest table
-                const dataOrder = {
-                    id: food.id,
-                    name: foundFood.name, 
-                    price: parseInt(foundFood.price).toFixed(decimalPlace),
-                    quantity: food.quantity,
-                    serviceChargePercentage: parseInt(serviceChargePercentage).toFixed(decimalPlace),
-                    serviceCharge: parseInt(((foundFood.price * food.quantity) * (serviceChargePercentage / 100))).toFixed(decimalPlace),
-                    gstPercentage: gstPercentage,
-                    gstCharge: parseInt(((foundFood.price * food.quantity) * (gstPercentage / 100))).toFixed(decimalPlace),
-                    orderDate: date.format(new Date(),'YYYY-MM-DD'),
-                    orderTime: date.format(new Date(),'HH:mm')
-                };
-    
-                const resOrderUpdate = await Guest.findOneAndUpdate(
-                    {
-                        _id: guestId, 
-                        'tablesDetail.tables': {
-                            $elemMatch:{
-                                id: tableId, 
-                                outDate: { $exists: false }, 
-                                outTime: { $exists: false }
-                            }
-                        }
-                    },
-                    {
-                        $push: {
-                            'tablesDetail.tables.$.foods': dataOrder
-                        }
-                    }
-                ).exec();  
+                        table.foods.forEach(async food => {
+                            let dataOrder = foodItem;
+                            dataOrder.id = food.id;
+                            dataOrder.name = food.name;
+                            dataOrder.price = food.price;
+                            dataOrder.quantity = food.quantity;
+                            dataOrder.serviceChargePercentage = food.serviceChargePercentage;
+                            dataOrder.serviceCharge = food.serviceCharge;
+                            dataOrder.gstPercentage = food.gstPercentage;
+                            dataOrder.gstCharge = food.gstCharge;
+                            dataOrder.orderDate = food.orderDate;
+                            dataOrder.orderTime = food.orderTime;
 
-                if (!resOrderUpdate) return res.status(400).send();
-            }
-        });
+                            foodList.push(dataOrder);   
+                        });
+
+                    });
+
+                }
+
+                return res.status(200).send(foodList);
+            });
+        }
+
     } catch(e) {
         return res.status(500).send(e);
-    }
-
-    return res.status(200).send();
+    }        
+    
 }
 
 
 // handel food delivery
-//query string : hotel Id / guest Id / table Id
+//query string : hotel Id / guest Id
 //body : {"foods": [{"id": ""}]}
 const handelDelivery = async (req, res) => {
     try {
-        const {hotelId, guestId, tableId} = req.params;
+        const {hotelId, guestId} = req.params;
         const {foods} = req.body;
 
         // get guest
-        const foundGuest = await Guest.findOne(
-            {
-                hotelId, 
-                _id: guestId, 
-                isActive: true, 
-                isEnable: true
-            }
-        ).exec();
+        const filterGuest = {
+            hotelId, 
+            _id: guestId, 
+            isActive: true, 
+            isEnable: true
+        };
 
-        if (!foundGuest) return res.status(404).send();
+        await Guest.findOne(filterGuest)
+        .exec(async (err, guest) => {
+            if (err) return res.status(500).send(err);
+            if (!guest) return res.status(404).send("Guest not found!");
 
-        // get table
-        const foundTable = await Table.findOne(
-            {
+
+            // get table
+            const filterTable = {
                 hotelId, 
-                guestId: guestId, 
-                _id: tableId, 
+                guestId: guest._id, 
                 isOccupied: true, 
                 isEnable: true
-            }
-        ).exec();
+            };
 
-        if (!foundTable) return res.status(404).send();
+            await Table.findOne(filterTable)
+            .exec((err, table) => {
+                if (err) return res.status(500).send(err);
+                if (!table) return res.status(404).send("Table not assigned to the guest!");
 
-        // update all delivery date & time
-        foods.forEach(async food => {
-            const resFoodDelivery = await Guest.findOneAndUpdate(
-                {
-                    _id: guestId, 
-                    'tablesDetail.tables': {
-                        $elemMatch: {
-                            id: tableId, 
-                            outDate: { $exists: false }, 
-                            outTime: { $exists: false }
+
+                // update all delivery date & time
+                foods.forEach(async food => {
+                    const filter = {
+                        _id: guest._id, 
+                        'tablesDetail.tables': {
+                            $elemMatch: {
+                                id: table._id, 
+                                outDate: { $exists: false }, 
+                                outTime: { $exists: false }
+                            }
+                        }, 
+                        'tablesDetail.tables.foods': {
+                            $elemMatch: {
+                                id: food.id,
+                                despatchDate: { $exists: false },
+                                despatchTime: { $exists: false }
+                            }
                         }
-                    }, 
-                    'tablesDetail.tables.foods': {
-                        $elemMatch: {
-                            id: food.id,
-                            despatchDate: { $exists: false },
-                            despatchTime: { $exists: false }
+                    };
+                    const update = {
+                        $set: {
+                            'tablesDetail.tables.$[et].foods.$[ef].despatchDate': date.format(new Date(),'YYYY-MM-DD'), 
+                            'tablesDetail.tables.$[et].foods.$[ef].despatchTime': date.format(new Date(),'HH:mm')
                         }
-                    }
-                },
-                {
-                    $set: {
-                        'tablesDetail.tables.$[et].foods.$[ef].despatchDate': date.format(new Date(),'YYYY-MM-DD'), 
-                        'tablesDetail.tables.$[et].foods.$[ef].despatchTime': date.format(new Date(),'HH:mm')
-                    }
-                },
-                {
-                    arrayFilters: [
-                        { 'et.id': tableId },
-                        { 'ef.id': food.id }
-                    ]
-                }
-            ).exec();  
-    
-            if (!resFoodDelivery) return res.status(404).send();
+                    };
+                    const arrayFilter = {
+                        arrayFilters: [
+                            { 'et.id': table._id },
+                            { 'ef.id': food.id }
+                        ]
+                    };
+
+                    await Guest.updateOne(filter, update, arrayFilter)
+                    .exec((err) => {
+                        if (err) return res.status(500).send(err);
+                    });
+                });
+
+            });
+
         });
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(200).send();
+    return res.status(200).send("Order delivered successfully.");
 }
 
 
@@ -367,136 +450,164 @@ const handelCheckout = async (req, res) => {
         const {hotelId, guestId} = req.params;
 
         // get guest
-        const foundGuest = await Guest.findOne(
-            {
-                hotelId, 
-                _id: guestId, 
-                isActive: true, 
-                isEnable: true
-            }
-        ).exec();
+        const filterGuest = {
+            hotelId, 
+            _id: guestId, 
+            isActive: true, 
+            isEnable: true
+        };
 
-        if (!foundGuest) return res.status(404).send();
+        await Guest.findOne(filterGuest)
+        .exec(async (err, guest) => {
+            if (err) return res.status(500).send(err);
+            if (!guest) return res.status(404).send("Guest not found!");
 
-        // get tables
-        const foundTables = await Table.find(
-            {
+            // get tables
+            const filterTable = {
                 hotelId, 
-                guestId: guestId, 
+                guestId: guest._id, 
                 isOccupied: true, 
                 isEnable: true
-            }
-        ).exec();
+            };
 
-        if (!foundTables) return res.status(404).send();
+            await Table.find(filterTable)
+            .exec(async (err, tables) => {
+                if (err) return res.status(500).send(err);
+                if (!tables) return res.status(404).send("Table not found!");
 
-        // calculate and update table food total
-        let foodTotal = 0;
+                // calculate and update table food total
+                tables.forEach(async table => {
 
-        const resFoods = await Guest.find(
-            {
-                _id: guestId, 
-                'tablesDetail.tables': {
-                    $elemMatch: {
-                        id: foundTables[0]._id, 
-                        outDate: { $exists: false }, 
-                        outTime: { $exists: false }
-                    }
-                }
-            }
-        ).exec();  
+                    const filterNonCheckoutTable = {
+                        _id: guestId, 
+                    };
 
-        if (!resFoods) return res.status(404).send();
+                    await Guest.findOne(filterNonCheckoutTable)
+                    .exec(async (err, nonCheckoutTable) => {
+                        if (err) return res.status(500).send(err);
 
-        // Calculate food total    
-        resFoods[0].tablesDetail.tables[0].foods.forEach(async food => {
-            foodTotal += (food.price * food.quantity) + food.serviceCharge + food.gstCharge;
-        });
+                        if (nonCheckoutTable) {
 
-        foundTables.forEach(async table => {
-            // update food total    
-            const resFoodTotalUpdate = await Guest.findOneAndUpdate(
-                {
-                    _id: guestId, 
-                    'tablesDetail.tables': {
-                        $elemMatch:{
-                            id: table._id, 
-                            outDate: { $exists: false }, 
-                            outTime: { $exists: false }
+                            // Calculate food total    
+                            nonCheckoutTable.tablesDetail.tables.forEach(async nonCheckTableItem => {
+
+                                if ((nonCheckTableItem.id == table._id) && (typeof(nonCheckTableItem.outDate) == "undefined")) {
+
+                                    let foodTotal = 0;
+
+                                    nonCheckTableItem.foods.forEach(async food => {
+                                        foodTotal += (food.price * food.quantity) + food.serviceCharge + food.gstCharge;
+                                    });
+
+                                    // update all tables food total    
+                                    const filterTotal = {
+                                        _id: guestId, 
+                                        'tablesDetail.tables': {
+                                            $elemMatch:{
+                                                id: nonCheckTableItem.id, 
+                                                outDate: { $exists: false }, 
+                                                outTime: { $exists: false }
+                                            }
+                                        }
+                                    };
+                                    const updateTotal = {
+                                        $set: {
+                                            'tablesDetail.tables.$.total': parseInt(foodTotal).toFixed(decimalPlace),
+                                            'tablesDetail.tables.$.outDate': date.format(new Date(),'YYYY-MM-DD'),
+                                            'tablesDetail.tables.$.outTime': date.format(new Date(),'HH:mm')
+                                        }
+                                    };
+
+                                    await Guest.updateOne(filterTotal, updateTotal)
+                                    .exec((err) => {
+                                        if (err) return res.status(500).send(err);
+                                    });
+
+                                }
+                            });
+
                         }
-                    }
-                },
-                {
-                    $set: {
-                        'tablesDetail.tables.$.total': parseInt(foodTotal).toFixed(decimalPlace),
-                        'tablesDetail.tables.$.outDate': date.format(new Date(),'YYYY-MM-DD'),
-                        'tablesDetail.tables.$.outTime': date.format(new Date(),'HH:mm')
-                    }
+                        
+                    });
+
+                });
+
+            });
+
+
+            // calculate and update table total
+            const filterCheckoutTables = {
+                _id: guest._id, 
+            //     'tablesDetail.tables': {
+            //         $elemMatch: {
+            //             outDate: { $exists: true }, 
+            //             outTime: { $exists: true }
+            //         }
+            //     }
+            };
+
+            await Guest.findOne(filterCheckoutTables)
+            .exec(async (err, checkoutTables) => {
+                if (err) return res.status(500).send(err);
+
+                if (checkoutTables) {
+
+                    // Calculate table total    
+                    let tableTotal = 0;
+
+                    checkoutTables.tablesDetail.tables.forEach(async checkTableItem => {
+                        tableTotal += checkTableItem.total;
+                    });
+
+                    // update food total
+                    const filterTableTotal = {
+                        _id: guest._id,
+                        hotelId
+                    };
+                    const updateTableTotal = {
+                        $set: {
+                            'tablesDetail.total': parseInt(tableTotal).toFixed(decimalPlace),
+                        }
+                    };
+
+                    await Guest.findOneAndUpdate(filterTableTotal, updateTableTotal)
+                    .exec((err, updateTotal) => {
+                        if (err) return res.status(500).send(err);
+                        if (!updateTotal) return res.status(404).send("Guest table total not updated!");
+                    });
+                    
                 }
-            ).exec();  
 
-            if (!resFoodTotalUpdate) return res.status(404).send();
+            });
 
-            foodTotal = 0;
-        });
 
-        // calculate and update table total
-        let tableTotal = 0;
-        const resTables = await Guest.find(
-            {
-                _id: guestId, 
-                'tablesDetail.tables': {
-                    $elemMatch: {
-                        outDate: { $exists: true }, 
-                        outTime: { $exists: true }
-                    }
-                }
-            }
-        ).exec();  
-
-        if (!resTables) return res.status(404).send();
-
-        // Calculate table total    
-        resTables[0].tablesDetail.tables.forEach(async table => {
-            tableTotal += table.total;
-        });
-    
-        // update food total    
-        const resTableTotalUpdate = await Guest.findOneAndUpdate(
-            {
-                _id: guestId
-            },
-            {
-                $set: {
-                    'tablesDetail.total': parseInt(tableTotal).toFixed(decimalPlace),
-                }
-            }
-        ).exec();  
-
-        if (!resTableTotalUpdate) return res.status(404).send();
-
-        // release all the tables
-        const resTablesUpdate = await Table.updateMany(
-            {
+            // release all the tables
+            const filterOccupiedTable = {
                 hotelId, 
-                guestId: guestId
-            },
-            {
+                guestId: guest._id
+            };
+            const updateOccupiedTable = {
                 $set: 
                 {
                     guestId: null, 
                     isOccupied: false, 
                     updatedDate: new Date()
                 }
-            }
-        ).exec();  
+            };
 
-        if (!resTablesUpdate) return res.status(404).send();
+            await Table.updateMany(filterOccupiedTable, updateOccupiedTable)
+            .exec((err, updateStatus) => {
+                if (err) return res.status(500).send(err);
+                if (!updateStatus) return res.status(404).send("No table found for realised!");
+            });
+
+        });
+
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(200).send();
+    return res.status(200).send("Table checkedout successfully.");
 }
 
 
