@@ -1,4 +1,4 @@
-// const mongoose = require("mongoose");
+const mongoose = require("mongoose");
 const Guest = require("../models/guests");
 const Table = require("../models/tables");
 const Food = require("../models/foods");
@@ -19,8 +19,6 @@ const foodItem = {
     price: 0,
     orderDate: null,
     orderTime: null,
-    // despatchDate: null, 
-    // despatchTime: null
 };
 
 
@@ -252,12 +250,12 @@ const handelOrder = async (req, res) => {
 // handel show all orders
 //query string : hotel Id / guest Id / option: [non checkout / all]
 const handelDetail = async (req, res) => {
-
+    let foodList = [];
+    
     try {
         const {hotelId, guestId, option} = req.params;
 
         if (option === "N") {
-            let foodList = [];
 
             const filter = {
                 hotelId, 
@@ -273,12 +271,13 @@ const handelDetail = async (req, res) => {
             };
 
             await Guest.findOne(filter)
-            .exec((err, foods) => {
+            .exec((err, data) => {
                 if (err) return res.status(500).send(err);
-                
-                if (foods) {
+                if (!data) return res.status(404).send("No food found.");
+
+                if (data) {
                     
-                    foods.tablesDetail.tables.forEach(async table => {
+                    data.tablesDetail.tables.forEach(async table => {
 
                         table.foods.forEach(async food => {
                             let dataOrder = foodItem;
@@ -300,33 +299,31 @@ const handelDetail = async (req, res) => {
 
                 }
 
-                return res.status(200).send(foodList);
             });
 
         } else if (option === "A") {
-            let foodList = [];
-            
+            // const guest_Id = mongoose.Types.ObjectId (guestId);
+
             const filter = {
-                hotelId, 
-                _id: guestId, 
-                isActive: true, 
-                isEnable: true, 
-                'tablesDetail.tables': {
-                    $elemMatch: {
-                        outDate: { $exists: true }, 
-                        outTime: { $exists: true }
+                    hotelId, 
+                    _id: guestId, 
+                    isActive: true, 
+                    isEnable: true, 
+                    'tablesDetail.tables': {
+                        $elemMatch: {
+                            outDate: { $exists: true }, 
+                            outTime: { $exists: true }
+                        }
                     }
-                }
             };
 
             await Guest.findOne(filter)
-            .exec((err, foods) => {
+            .exec((err, data) => {
                 if (err) return res.status(500).send(err);
+                if (!data) return res.status(404).send("No food found.");
 
-                if (foods) {
-                    
-                    foods.tablesDetail.tables.forEach(async table => {
-
+                if (data) {
+                    data.tablesDetail.tables.forEach(async table => {
                         table.foods.forEach(async food => {
                             let dataOrder = foodItem;
                             dataOrder.id = food.id;
@@ -339,7 +336,6 @@ const handelDetail = async (req, res) => {
                             dataOrder.gstCharge = food.gstCharge;
                             dataOrder.orderDate = food.orderDate;
                             dataOrder.orderTime = food.orderTime;
-
                             foodList.push(dataOrder);   
                         });
 
@@ -347,14 +343,14 @@ const handelDetail = async (req, res) => {
 
                 }
 
-                return res.status(200).send(foodList);
             });
-        }
 
+        }
     } catch(e) {
         return res.status(500).send(e);
     }        
     
+    return res.status(200).send(foodList);
 }
 
 
