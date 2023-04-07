@@ -1,11 +1,9 @@
 const Guest = require("../models/guests");
 const Service = require("../models/services");
 const GuestServiceTransaction = require("../models/guestServicesTransaction");
+const getHotelDetail = require("./hotels");
 const date = require("date-and-time");
 
-const decimalPlace = 2;
-const serviceChargePercentage = 12.5;
-const gstPercentage = 10.4;
 
 const serviceItem = {
     id: "",
@@ -101,6 +99,8 @@ const handelOrder = async (req, res) => {
         const {hotelId, guestId} = req.params;
         const {services} = req.body;
 
+        const hotel = await getHotelDetail(hotelId);
+
         // get guest
         const foundGuest = await Guest.findOne(
             {
@@ -160,15 +160,15 @@ const handelOrder = async (req, res) => {
                 const dataOrder = {
                     id: service.id,
                     name: foundService.name, 
-                    unitPrice: parseInt(foundService.price).toFixed(decimalPlace),
+                    unitPrice: parseInt(foundService.price).toFixed(hotel.fincialDecimalPlace),
                     quantity: service.quantity,
-                    serviceChargePercentage: parseInt(serviceChargePercentage).toFixed(decimalPlace),
-                    serviceCharge: parseInt(((foundService.price * service.quantity) * (serviceChargePercentage / 100))).toFixed(decimalPlace),
-                    gstPercentage: parseInt(gstPercentage).toFixed(decimalPlace),
-                    gstCharge: parseInt(((foundService.price * service.quantity) * (gstPercentage / 100))).toFixed(decimalPlace),
+                    serviceChargePercentage: parseInt(hotel.serviceChargePercentage).toFixed(hotel.fincialDecimalPlace),
+                    serviceCharge: parseInt(((foundService.price * service.quantity) * (hotel.serviceChargePercentage / 100))).toFixed(hotel.fincialDecimalPlace),
+                    gstPercentage: parseInt(hotel.foodGstPercentage).toFixed(hotel.fincialDecimalPlace),
+                    gstCharge: parseInt(((foundService.price * service.quantity) * (hotel.foodGstPercentage / 100))).toFixed(hotel.fincialDecimalPlace),
                     totalPrice: parseInt(parseInt(foundService.price) + 
-                                parseInt(((foundService.price * service.quantity) * (serviceChargePercentage / 100))) + 
-                                parseInt(((foundService.price * service.quantity) * (gstPercentage / 100)))).toFixed(decimalPlace),
+                                parseInt(((foundService.price * service.quantity) * (hotel.serviceChargePercentage / 100))) + 
+                                parseInt(((foundService.price * service.quantity) * (hotel.foodGstPercentage / 100)))).toFixed(hotel.fincialDecimalPlace),
                     orderDate: date.format(new Date(),'YYYY-MM-DD'),
                     orderTime: date.format(new Date(),'HH:mm')
                 };
@@ -257,6 +257,8 @@ const handelCheckout = async (req, res) => {
     try {
         const {hotelId, guestId} = req.params;
 
+        const hotel = await getHotelDetail(hotelId);
+
         // get guest
         const foundGuest = await Guest.findOne(
             {
@@ -334,7 +336,7 @@ const handelCheckout = async (req, res) => {
             },
             {
                 $set: {
-                    'servicesDetail.total': parseInt(serviceTotal).toFixed(decimalPlace)
+                    'servicesDetail.total': parseInt(serviceTotal).toFixed(hotel.fincialDecimalPlace)
                 }
             }
         ).exec();  

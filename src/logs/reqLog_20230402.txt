@@ -1,7 +1,0 @@
-20230402	14:12:00	a7e65120-be45-492e-a992-1983a4928852	POST	undefined	/api/login/64252efb369c403b60effae8
-20230402	14:12:26	36faccbf-dcf6-4a50-bef8-86571949855f	GET	undefined	/api/guestTableFoods/64252efb369c403b60effae8/64256ac82a5c2846e1f8ee6a/A
-20230402	14:18:55	5dce71c6-e174-4bc5-a1ef-8c399286b932	GET	undefined	/api/guestTableFoods/64252efb369c403b60effae8/64256ac82a5c2846e1f8ee6a/A
-20230402	15:54:25	5aa69166-103d-4f64-ad5d-f8f7d9308010	GET	undefined	/api/guestTableFoods/64252efb369c403b60effae8/64256ac82a5c2846e1f8ee6a/A
-20230402	15:54:28	a3bf8a32-6d17-45ca-8c3c-2a3e6f8ec06d	POST	undefined	/api/login/64252efb369c403b60effae8
-20230402	15:54:38	4b825776-c398-4cc2-b91e-1d870a449d71	GET	undefined	/api/guestTableFoods/64252efb369c403b60effae8/64256ac82a5c2846e1f8ee6a/A
-20230402	15:58:19	fc6af2ee-43f8-44a1-9cdb-1fea1fa6b992	GET	undefined	/api/guestTableFoods/64252efb369c403b60effae8/64256ac82a5c2846e1f8ee6a/A

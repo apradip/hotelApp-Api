@@ -2,11 +2,8 @@ const mongoose = require("mongoose");
 const Guest = require("../models/guests");
 const Table = require("../models/tables");
 const Food = require("../models/foods");
+const getHotelDetail = require("./hotels");
 const date = require("date-and-time");
-
-const decimalPlace = 2;
-const serviceChargePercentage = 12.5;
-const gstPercentage = 10.4;
 
 const foodItem = {
     id: "",
@@ -111,6 +108,7 @@ const handelOrder = async (req, res) => {
         const {hotelId, guestId} = req.params;
         const {foods} = req.body;
 
+        const hotel = await getHotelDetail(hotelId);
 
         // get guest
         const filterGuest = {
@@ -200,12 +198,12 @@ const handelOrder = async (req, res) => {
                             const dataOrder = {
                                 id: foodDetail._id,
                                 name: foodDetail.name, 
-                                price: parseInt(foodDetail.price).toFixed(decimalPlace),
+                                price: parseInt(foodDetail.price).toFixed(hotel.fincialDecimalPlace),
                                 quantity: food.quantity,
-                                serviceChargePercentage: parseInt(serviceChargePercentage).toFixed(decimalPlace),
-                                serviceCharge: parseInt(((foodDetail.price * food.quantity) * (serviceChargePercentage / 100))).toFixed(decimalPlace),
-                                gstPercentage: gstPercentage,
-                                gstCharge: parseInt(((foodDetail.price * food.quantity) * (gstPercentage / 100))).toFixed(decimalPlace),
+                                serviceChargePercentage: parseInt(hotel.serviceChargePercentage).toFixed(hotel.fincialDecimalPlace),
+                                serviceCharge: parseInt(((foodDetail.price * food.quantity) * (hotel.serviceChargePercentage / 100))).toFixed(hotel.fincialDecimalPlace),
+                                gstPercentage: hotel.foodGstPercentage,
+                                gstCharge: parseInt(((foodDetail.price * food.quantity) * (hotel.foodGstPercentage / 100))).toFixed(hotel.fincialDecimalPlace),
                                 orderDate: date.format(new Date(),'YYYY-MM-DD'),
                                 orderTime: date.format(new Date(),'HH:mm')
                             };
@@ -445,6 +443,8 @@ const handelCheckout = async (req, res) => {
     try {
         const {hotelId, guestId} = req.params;
 
+        const hotel = await getHotelDetail(hotelId);
+
         // get guest
         const filterGuest = {
             hotelId, 
@@ -508,7 +508,7 @@ const handelCheckout = async (req, res) => {
                                     };
                                     const updateTotal = {
                                         $set: {
-                                            'tablesDetail.tables.$.total': parseInt(foodTotal).toFixed(decimalPlace),
+                                            'tablesDetail.tables.$.total': parseInt(foodTotal).toFixed(hotel.fincialDecimalPlace),
                                             'tablesDetail.tables.$.outDate': date.format(new Date(),'YYYY-MM-DD'),
                                             'tablesDetail.tables.$.outTime': date.format(new Date(),'HH:mm')
                                         }
@@ -562,7 +562,7 @@ const handelCheckout = async (req, res) => {
                     };
                     const updateTableTotal = {
                         $set: {
-                            'tablesDetail.total': parseInt(tableTotal).toFixed(decimalPlace),
+                            'tablesDetail.total': parseInt(tableTotal).toFixed(hotel.fincialDecimalPlace),
                         }
                     };
 

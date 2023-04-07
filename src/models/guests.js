@@ -179,96 +179,44 @@ const tableSchema = new mongoose.Schema({
 const miscellaneousSchema = new mongoose.Schema({
     id: {
         type: String,
-        required: [true, 'Invalid food!']
     },
     name: {
         type: String,
-        required: [true, 'Invalid food!']
     },
     serviceChargePercentage: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid service charge!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid service charge!");
-                }
-            }
-       }
     },
     serviceCharge: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid service change!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid service change!");
-                }
-            }
-       }
+        default: function() {
+            return (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)
+          }        
     },
     gstPercentage: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid gst charge!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid gst charge!");
-                }
-            }
-       }
     },
     gstCharge: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid gst change!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid gst change!");
-                }
-            }
-       }
+        default: function() {
+            return (this.unitPrice * this.quantity) * (this.gstPercentage / 100)
+          }        
     },
     unitPrice: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid price!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid price!");
-                }
-            }
-       }
     },
     quantity: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid quantity!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid quantity!");
-                }
-            }
-       }
     },
     totalPrice: {
         type: Number,
         default: function() {
           return (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
         }        
-    },
+    }
+});
+
+const miscellaneousTransactionSchema = new mongoose.Schema({
+    miscellaneouses: [miscellaneousSchema],
     orderDate: { 
         type: String, 
         default: date.format(new Date(),'YYYY-MM-DD')
@@ -278,11 +226,15 @@ const miscellaneousSchema = new mongoose.Schema({
         default: date.format(new Date(),'HH:mm')
     },
     despatchDate: { 
-        type: String, 
+        type: String
     },
     despatchTime: { 
-        type: String, 
-    }
+        type: String 
+    },
+    isPostedToExpense: {
+        type: Boolean,
+        default: false
+    },
 });
 
 const serviceSchema = new mongoose.Schema({
@@ -380,30 +332,31 @@ const serviceSchema = new mongoose.Schema({
     }
 });
 
-const expensesPaymentsSchema = new mongoose.Schema({
+const expensesPaymentsTransactionSchema = new mongoose.Schema({
+    type: {
+        type: String
+    },
+    expenseId: {
+        type: String
+    },
     expenseAmount: {
         type: Number,
-        default: 0,
-        required: [true, 'Expense amount require!'],
+        default: 0
     },
     paymentAmount: {
         type: Number,
-        default: 0,
-        required: [true, 'Payment amount require!'],
+        default: 0
     },
     narration: {
-        type: String, 
-        required: [true, 'Invalid narration!']
+        type: String
     },
     transactionDate: {
         type: Date,
-        default: date.format(new Date(),'YYYY-MM-DD'),
-        required: [true, 'Expense/Payment date require!'],
+        default: new Date()
     },
     transactionTime: {
         type: String,
-        default: date.format(new Date(),'HH:mm'),
-        required: [true, 'Expense/Payment time require!'],
+        default: date.format(new Date(),'HH:mm')
     }
 });
 
@@ -539,13 +492,7 @@ const guestSchema = new mongoose.Schema({
             default: 0,
         }
     },
-    miscellaneousesDetail: {
-        miscellaneouses: [miscellaneousSchema],
-        total: {
-            type: Number,
-            default: 0,
-        }
-    },
+    miscellaneousesDetail: [miscellaneousTransactionSchema],
     servicesDetail: {
         services: [serviceSchema],
         total: {
@@ -553,13 +500,7 @@ const guestSchema = new mongoose.Schema({
             default: 0
         }
     },
-    expensesPaymentsDetail: {
-        expensesPayments: [expensesPaymentsSchema],
-        balance: {
-            type: Number,
-            default: 0
-        }
-    },
+    expensesPaymentsDetail: [expensesPaymentsTransactionSchema],
     inDate: {
         type: Date,
         default: date.format(new Date(),'YYYY-MM-DD'),

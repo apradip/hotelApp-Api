@@ -180,12 +180,14 @@ const handelCreate = async (req, res) => {
         const {guestId, type, amount, narration, transactionDate, transactionTime} = req.body;
         
         if (type.toUpperCase() === "E") {
-            const data = new GuestExpensePayment({hotelId,
+            const data = new GuestExpensePayment({
+                                            hotelId,
                                             guestId,          
                                             expenseAmount: amount,
                                             narration,
                                             transactionDate,
-                                            transactionTime});
+                                            transactionTime
+                                        });
 
             const resAdd = await data.save();
             if (!resAdd) return res.status(400).send();

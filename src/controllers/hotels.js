@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Hotel = require("../models/hotels");
 
 //handel search hotel
@@ -142,11 +143,24 @@ const handelRemove = async (req, res) => {
     }
 }
 
+
+async function detail (id) {    
+    try {   
+        const _id = mongoose.Types.ObjectId(id);
+        const data = await Hotel.findOne({_id, isEnable: true});
+        return data;
+    } catch(e) {
+        throw e;
+    }
+}
+
+
 module.exports = {
     handelSearch,
     handelDetail,
     handelCreate,
     handelUpdate,
     handelRemove,
+    detail
     // handelCheckout
 }
