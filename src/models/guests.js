@@ -501,6 +501,10 @@ const guestSchema = new mongoose.Schema({
         }
     },
     expensesPaymentsDetail: [expensesPaymentsTransactionSchema],
+    balance: {
+        type: Number,
+        default: 0
+    },
     inDate: {
         type: Date,
         default: date.format(new Date(),'YYYY-MM-DD'),

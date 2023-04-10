@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
+const Hotel = require('./hotels');
 const Guest = require('../models/guests');
 const Miscellaneous = require('../models/miscellaneouses');
-const Hotel = require('./hotels');
+const GuestMiscellaneousTransaction = require('../models/guestMiscellaneousesTransaction');
 const date = require('date-and-time');
 
 class miscellaneousType {
@@ -11,7 +12,10 @@ class miscellaneousType {
       this.unitPrice = unitPrice;
       this.quantity = quantity;
       this.serviceChargePercentage = serviceChargePercentage;
+      this.serviceCharge = (unitPrice * quantity) * (serviceChargePercentage / 100)
       this.gstPercentage = gstPercentage;
+      this.gstCharge = (unitPrice * quantity) * (gstPercentage / 100)
+      this.totalPrice = parseInt(unitPrice * quantity) + parseInt(this.serviceCharge) + parseInt(this.gstPercentage)
     }
 };
 
@@ -111,6 +115,42 @@ const handelDetail = async (req, res) => {
             };  
             const pipeline = [filter1, filter2, filter3, filter4, filter5];
             foundGuestMiscellaneousList = await Guest.aggregate(pipeline);  
+
+        } else if (option.length === 24) {
+            const filter1 = {
+                $match: {
+                    _id: mongoose.Types.ObjectId(guestId),         
+                    hotelId,
+                    isActive: true,
+                    isEnable: true
+                }
+            };
+            const filter2 = {
+                $unwind: '$miscellaneousesDetail'
+            };
+            const filter3 = {
+                $match: {
+                    'miscellaneousesDetail._id': mongoose.Types.ObjectId(option),
+                }
+            };
+            const filter4 = {
+                $project: {
+                    _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
+                    corporateName: 0, corporateAddress: 0, gstNo: 0,
+                    roomsDetail: 0, tablesDetail: 0, servicesDetail: 0,
+                    expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
+                    option: 0, isActive: 0, isEnable: 0, updatedDate: 0
+    
+                }
+            };
+            const filter5 = { 
+                $unwind: '$miscellaneousesDetail.miscellaneouses' 
+            };  
+            const pipeline = [filter1, filter2, filter3, filter4, filter5];
+            foundGuestMiscellaneousList = await Guest.aggregate(pipeline);  
+    
+            if (!foundGuestMiscellaneousList) return res.status(404).send();
+    
         }
 
         if (!foundGuestMiscellaneousList) return res.status(404).send();
@@ -142,6 +182,7 @@ const handelDetail = async (req, res) => {
 
     return res.status(200).send(miscellaneousList);
 }
+
 
 
 // handel miscellaneous order
@@ -224,8 +265,6 @@ const handelOrder = async (req, res) => {
                         }
                     }
                 }
-            
-                // console.log(miscellaneousesDb);
 
                 const resMiscellaneousUpdate = await Guest.updateOne(
                     {
@@ -249,33 +288,32 @@ const handelOrder = async (req, res) => {
 
             } else {
                 
-                newMiscellaneousValues(hotel, miscellaneouses);
+                miscellaneousesDb = await newMiscellaneousValues(hotel, miscellaneouses);
             }
         } else {
+            miscellaneousesDb = await newMiscellaneousValues(hotel, miscellaneouses);
 
-            newMiscellaneousValues(hotel, miscellaneouses);
+            const resMiscellaneousUpdate = await Guest.updateOne(
+                {
+                    _id: mongoose.Types.ObjectId(guestId), 
+                    hotelId,
+                    isActive: true,
+                    isEnable: true
+                },
+                {
+                    $push: {
+                        miscellaneousesDetail: miscellaneousesDb
+                    }
+                },
+            );  
+            if (!resMiscellaneousUpdate) return res.status(404).send();
+
         }
 
-// Check existence of a key in the object
-
-        // find transaction block
-        // if found
-            // store items array in memory
-            // remove all "R" & "M" from memory   
-            // add all "M" & "A" to memory
-            // change items array with memory
-
-        // else
-            // exit with error
-
-// else
-    // add all the item in a new transaction block
-
+        return res.status(200).send();
     } catch(e) {
         return res.status(500).send(e);
     }
-
-    return res.status(200).send();
 }
 
 async function newMiscellaneousValues(hotel, miscellaneouses) {
@@ -300,9 +338,8 @@ async function newMiscellaneousValues(hotel, miscellaneouses) {
             );    
 
             if (foundMiscellaneous) {
-
                 transaction.miscellaneouses.push(new miscellaneousType(
-                    foundMiscellaneous._id, 
+                    miscellaneous.id, 
                     foundMiscellaneous.name, 
                     parseInt(foundMiscellaneous.price).toFixed(hotel.fincialDecimalPlace),
                     parseInt(miscellaneous.quantity),
@@ -379,9 +416,9 @@ const handelCheckout = async (req, res) => {
         const filter4 = {
             $project: {
                 _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                corporateName: 0, corporateAddress: 0, gstNo: 0,
+                corporateName: 0, corporateAddress: 0, gstNo: 0, 
                 roomsDetail: 0, tablesDetail: 0, servicesDetail: 0,
-                expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
+                expensesPaymentsDetail: 0, balance: 0, inDate: 0, inTime: 0,
                 option: 0, isActive: 0, isEnable: 0, updatedDate: 0
             }
         };
@@ -394,11 +431,43 @@ const handelCheckout = async (req, res) => {
               total: { $sum: "$miscellaneousesDetail.miscellaneouses.totalPrice" }
             }
         };
+
         const pipelineSum = [filter1, filter2, filter3, filter4, filter5, filter6];
         const resMiscellaneouses = await Guest.aggregate(pipelineSum);  
         if (!resMiscellaneouses) return res.status(404).send();
+
+        // insert miscellaneous to guest miscellaneous 
+        const pipelineItems = [filter1, filter2, filter3, filter4, filter5];
+        const resItems = await Guest.aggregate(pipelineItems);  
+        if (!resItems) return res.status(404).send();
+
+        for (const itemDetail of resItems) {    
+            if (itemDetail) {
+                const misc = itemDetail.miscellaneousesDetail.miscellaneouses;
+                const data = new GuestMiscellaneousTransaction({
+                    hotelId,
+                    guestId,
+                    miscellaneousId: misc.id,
+                    name: misc.name,
+                    serviceChargePercentage: misc.serviceChargePercentage,
+                    serviceCharge: misc.serviceCharge,
+                    gstPercentage: misc.gstPercentage,
+                    gstCharge: misc.gstCharge,
+                    unitPrice: misc.unitPrice,
+                    quantity: misc.quantity,
+                    totalPrice: misc.totalPrice,
+                    orderDate: itemDetail.miscellaneousesDetail.orderDate,
+                    orderTime: itemDetail.miscellaneousesDetail.orderTime,
+                    despatchDate: itemDetail.miscellaneousesDetail.despatchDate,
+                    despatchTime: itemDetail.miscellaneousesDetail.despatchTime
+                });
         
-        // insert into expense if the transaction is is not present
+                const resAdd = await data.save();
+                if (!resAdd) return res.status(400).send();
+            }
+        }
+
+        // insert into expense if the transaction is not present
         const resExpenseUpdate = await Guest.updateOne(
             {
                 _id: mongoose.Types.ObjectId(guestId),
@@ -412,16 +481,19 @@ const handelCheckout = async (req, res) => {
             },
             {
                 $push: {
-                    expensesPaymentsDetail: new expenseTransactionType(transactionId, resMiscellaneouses[0].total)
+                    'expensesPaymentsDetail': new expenseTransactionType(transactionId, resMiscellaneouses[0].total)
                 }
             }
         );    
         if (!resExpenseUpdate) return res.status(400).send();
 
-        // update expense status 
-        const pipelineUpdate = [filter1, filter2, filter3, filter4];
-        const resExpense = await Guest.aggregate(pipelineUpdate);  
-        if (!resExpense) return res.status(404).send();
+        // update balance
+        const resUpdateBalance = await Guest.findByIdAndUpdate(
+            mongoose.Types.ObjectId(guestId), 
+            { $inc: { balance: resMiscellaneouses[0].total} }
+        );  
+        if (!resUpdateBalance) return res.status(404).send();
+
 
         // update isPostedToExpense status
         const resUpdateExpenseStatus = await Guest.updateOne(
