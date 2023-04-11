@@ -76,57 +76,59 @@ const roomSchema = new mongoose.Schema({
     }
 });
 
+
+
+const tableSchema = new mongoose.Schema({
+    id: { 
+        type:String,
+    },
+    no: { 
+        type:String,
+    }
+});
+
 const foodSchema = new mongoose.Schema({
     id: {
-        type: String,
-        required: [true, 'Invalid food!']
+        type: String
     },
     name: {
-        type: String,
-        required: [true, 'Invalid food!']
-    },
-    quantity: {
-        type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid quantity!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid quantity!");
-                }
-            }
-       }
+        type: String
     },
     serviceChargePercentage: {
-        type: Number,
-        default: 0,
+        type: Number
     },
     serviceCharge: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid service change!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid service change!");
-                }
-            }
-       }
+        default: function() {
+            return (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)
+          }        
     },
     gstPercentage: {
         type: Number,
-        default: 0,
     },
     gstCharge: {
         type: Number,
-        default: 0
+        default: function() {
+            return (this.unitPrice * this.quantity) * (this.gstPercentage / 100)
+          }        
     },
-    price: {
+    unitPrice: {
         type: Number,
-        default: 0
     },
+    quantity: {
+        type: Number,
+    },
+    totalPrice: {
+        type: Number,
+        default: function() {
+          return (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
+        }        
+    }
+});
+
+const tableTransactionSchema = new mongoose.Schema({
+    tables: [tableSchema],
+    foods: [foodSchema],
     orderDate: { 
         type: String, 
         default: date.format(new Date(),'YYYY-MM-DD')
@@ -136,43 +138,15 @@ const foodSchema = new mongoose.Schema({
         default: date.format(new Date(),'HH:mm')
     },
     despatchDate: { 
-        type: String,
+        type: String
     },
     despatchTime: { 
-        type: String,
-    }
-});
-
-const tableSchema = new mongoose.Schema({
-    id: { 
-        type:String,
+        type: String 
     },
-    no: { 
-        type:String,
+    isPostedToExpense: {
+        type: Boolean,
+        default: false
     },
-    inDate: { 
-        type: String, 
-        default: date.format(new Date(),'YYYY-MM-DD')
-    },
-    inTime: { 
-        type: String, 
-        default: date.format(new Date(),'HH:mm')
-    },
-    foods: [foodSchema],
-    total: {
-        type: Number,
-        default: 0,
-    },
-    outDate: { 
-        type: String, 
-    },
-    outTime: { 
-        type: String, 
-    },
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
-    }
 });
 
 const miscellaneousSchema = new mongoose.Schema({
@@ -326,7 +300,6 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
 });
 
 
-
 const guestSchema = new mongoose.Schema({
     hotelId: {
         type: String,
@@ -450,13 +423,7 @@ const guestSchema = new mongoose.Schema({
             default: 0,
         },
     },
-    tablesDetail: {
-        tables: [tableSchema],
-        total: {
-            type: Number,
-            default: 0,
-        }
-    },
+    tablesDetail: [tableTransactionSchema],
     miscellaneousesDetail: [miscellaneousTransactionSchema],
     servicesDetail: [serviceTransactionSchema],
     expensesPaymentsDetail: [expensesPaymentsTransactionSchema],

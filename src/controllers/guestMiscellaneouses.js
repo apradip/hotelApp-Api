@@ -29,7 +29,7 @@ class miscellaneousTransactionType {
 
 class expenseTransactionType {
     constructor(expenseId, expenseAmount) {
-        this.type = "MISC",
+        this.type = "M",
         this.expenseId = expenseId,
         this.expenseAmount = expenseAmount,
         this.narration = 'Expense for the miscellaneous items.'
