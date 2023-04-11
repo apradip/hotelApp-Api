@@ -24,14 +24,12 @@ class miscellaneousTransactionType {
         this.miscellaneouses = miscellaneouses,
         this.orderDate = orderDate;
         this.orderTime = orderTime;
-        // this.despatchDate = null;
-        // this.despatchTime = null;
     }
 };
 
 class expenseTransactionType {
     constructor(expenseId, expenseAmount) {
-        this.type = "MIS",
+        this.type = "MISC",
         this.expenseId = expenseId,
         this.expenseAmount = expenseAmount,
         this.narration = 'Expense for the miscellaneous items.'
@@ -185,7 +183,7 @@ const handelDetail = async (req, res) => {
 
 
 
-// handel miscellaneous order
+// handel order
 //query string : hotel Id / guest Id
 //body : {"transactionId": "", "miscellaneouses": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
 const handelOrder = async (req, res) => {
@@ -354,7 +352,7 @@ async function newMiscellaneousValues(hotel, miscellaneouses) {
 }
 
 
-// handel miscellaneous delivery
+// handel delivery
 //query string : hotel Id / guest Id / transaction Id
 const handelDelivery = async (req, res) => {
     try {

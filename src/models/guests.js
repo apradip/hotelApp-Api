@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const date = require("date-and-time");
-// const validator = require("validator");
 
 const roomSchema = new mongoose.Schema({
     id: { 
@@ -240,82 +239,44 @@ const miscellaneousTransactionSchema = new mongoose.Schema({
 const serviceSchema = new mongoose.Schema({
     id: {
         type: String,
-        required: [true, 'Invalid food!']
     },
     name: {
         type: String,
-        required: [true, 'Invalid food!']
     },
     serviceChargePercentage: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid service charge!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid service charge!");
-                }
-            }
-       }
     },
     serviceCharge: {
         type: Number,
         default: function() {
             return (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)
-        }        
+          }        
     },
     gstPercentage: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid gst charge!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid gst charge!");
-                }
-            }
-       }
     },
     gstCharge: {
         type: Number,
         default: function() {
             return (this.unitPrice * this.quantity) * (this.gstPercentage / 100)
-        }        
+          }        
     },
     unitPrice: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid unit price!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid unit price!");
-                }
-            }
-       }
     },
     quantity: {
         type: Number,
-        default: 0,
-        validate(value) {
-            if (value === "" || value === null) {
-                throw new Error("Invalid quantity!");
-            } else {
-                if (value <= 0) {
-                    throw new Error("Invalid quantity!");
-                }
-            }
-       }
     },
     totalPrice: {
         type: Number,
         default: function() {
           return (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
         }        
-    },
+    }
+});
+
+const serviceTransactionSchema = new mongoose.Schema({
+    services: [serviceSchema],
     orderDate: { 
         type: String, 
         default: date.format(new Date(),'YYYY-MM-DD')
@@ -325,11 +286,15 @@ const serviceSchema = new mongoose.Schema({
         default: date.format(new Date(),'HH:mm')
     },
     despatchDate: { 
-        type: String, 
+        type: String
     },
     despatchTime: { 
-        type: String, 
-    }
+        type: String 
+    },
+    isPostedToExpense: {
+        type: Boolean,
+        default: false
+    },
 });
 
 const expensesPaymentsTransactionSchema = new mongoose.Schema({
@@ -493,13 +458,7 @@ const guestSchema = new mongoose.Schema({
         }
     },
     miscellaneousesDetail: [miscellaneousTransactionSchema],
-    servicesDetail: {
-        services: [serviceSchema],
-        total: {
-            type: Number,
-            default: 0
-        }
-    },
+    servicesDetail: [serviceTransactionSchema],
     expensesPaymentsDetail: [expensesPaymentsTransactionSchema],
     balance: {
         type: Number,
