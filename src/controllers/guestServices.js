@@ -484,7 +484,7 @@ const handelCheckout = async (req, res) => {
         // update balance
         const resUpdateBalance = await Guest.findByIdAndUpdate(
             mongoose.Types.ObjectId(guestId), 
-            { $inc: { balance: resServices[0].total } }
+            { $inc: { balance: (resServices[0].total * -1)} }
         );  
         if (!resUpdateBalance) return res.status(404).send();
 
