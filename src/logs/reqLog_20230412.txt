@@ -33,3 +33,6 @@
 20230412	15:41:19	04efe9a5-fdc6-4057-b24c-3737ac809b14	POST	undefined	/api/guestExpensesPayments/64252efb369c403b60effae8/6434ef4fa9133d27934ce3ad
 20230412	15:42:49	c5337640-b614-4b04-bb61-99612fd0714f	PUT	undefined	/api/guestExpensesPayments/64252efb369c403b60effae8/6434ef4fa9133d27934ce3ad/643683c77fc462fdd7846f6e
 20230412	15:43:10	6b6fe0d1-d8bb-47e2-bded-196f41c4f6b1	POST	undefined	/api/guestExpensesPayments/64252efb369c403b60effae8/6434ef4fa9133d27934ce3ad
+20230412	15:46:54	63878f83-7352-404a-8555-7b52febff3e5	POST	undefined	/api/login/64252efb369c403b60effae8
+20230412	15:47:49	f2a8b7c3-30d9-4afc-ac81-1f9faebd0e88	POST	undefined	/api/guestExpensesPayments/64252efb369c403b60effae8/6434f5f2a9133d27934ce3ca
+20230412	15:48:24	fa676968-df82-49cc-94fb-826355d3f7d1	POST	undefined	/api/guestExpensesPayments/64252efb369c403b60effae8/643534829b3a070bcd8d8e0c

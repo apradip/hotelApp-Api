@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Hotel = require('./hotels');
 const Guest = require('../models/guests');
 const GuestExpensePayment = require('../models/guestExpensesPayments');
 
