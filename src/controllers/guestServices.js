@@ -180,7 +180,6 @@ const handelDetail = async (req, res) => {
 }
 
 
-
 // handel order
 //query string : hotel Id / guest Id
 //body : {"transactionId": "", "services": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
@@ -280,9 +279,9 @@ const handelOrder = async (req, res) => {
                 );  
                 if (!resServiceUpdate) return res.status(404).send();
 
-            } else {
+            // } else {
                 
-                servicesDb = await newServiceValues(hotel, services);
+            //     servicesDb = await newServiceValues(hotel, services);
             }
         } else {
             servicesDb = await newServiceValues(hotel, services);

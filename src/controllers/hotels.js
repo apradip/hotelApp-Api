@@ -146,8 +146,9 @@ const handelRemove = async (req, res) => {
 
 async function detail (id) {    
     try {   
-        const _id = mongoose.Types.ObjectId(id);
-        const data = await Hotel.findOne({_id, isEnable: true});
+        const data = await Hotel.findOne({
+            _id: mongoose.Types.ObjectId(id), 
+            isEnable: true});
         return data;
     } catch(e) {
         throw e;

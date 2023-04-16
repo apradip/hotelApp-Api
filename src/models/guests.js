@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const date = require("date-and-time");
 
-const roomSchema = new mongoose.Schema({
+const roomTransactionSchema = new mongoose.Schema({
     id: { 
         type:String,
         required: [true, 'Table id require!'],   
@@ -50,30 +50,33 @@ const roomSchema = new mongoose.Schema({
         default: 0,
         min: [0, 'Invalid gst percentage!']
     },
-    gstAmount: {
+    gstCharge: {
         type: Number,
         default: 0,
         min: [0, 'Invalid gst!']
     },
-    price: {
+    totalPrice: {
         type: Number,
         default: 0,
         min: [0, 'Invalid price!']
     },
-    checkInDate: { 
-        type: String, 
-        default: date.format(new Date(),'YYYY-MM-DD')
-    },
-    checkInTime: { 
-        type: String, 
-        default: date.format(new Date(),'HH:mm')
-    },
-    checkOutDate: { 
-        type: String, 
-    },
-    chekOutTime: { 
+    occupancyDate: {
         type: String, 
     }
+    // checkInDate: { 
+    //     type: String, 
+    //     default: date.format(new Date(),'YYYY-MM-DD')
+    // },
+    // checkInTime: { 
+    //     type: String, 
+    //     default: date.format(new Date(),'HH:mm')
+    // },
+    // checkOutDate: { 
+    //     type: String, 
+    // },
+    // chekOutTime: { 
+    //     type: String, 
+    // }
 });
 
 
@@ -405,24 +408,13 @@ const guestSchema = new mongoose.Schema({
         // minLength: [15, 'Invalid GST no.!'],
         // maxLength: [15, 'Invalid GST no.!'],
     },
-    roomsDetail: {
-        bookingAgentId: {
-            type: String, 
-        },
-        planId: {
-            type: String, 
-        },
-        rooms: [roomSchema],
-        roomTotal: {
-            type: Number,
-            default: 0,
-        },
-        foods: [foodSchema],
-        foodTotal: {
-            type: Number,
-            default: 0,
-        },
+    bookingAgentId: {
+        type: String, 
     },
+    planId: {
+        type: String, 
+    },
+    roomsDetail: [roomTransactionSchema],
     tablesDetail: [tableTransactionSchema],
     miscellaneousesDetail: [miscellaneousTransactionSchema],
     servicesDetail: [serviceTransactionSchema],

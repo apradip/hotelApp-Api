@@ -1,6 +1,5 @@
 const GST = require('../models/gsts');
 
-
 //handel search gst
 //query string : search between minTariff, maxTariff
 const handelSearch = async (req, res) => {
@@ -23,6 +22,26 @@ const handelSearch = async (req, res) => {
         }
     } catch(e) {
         return res.status(500).send(e);
+    }
+}
+
+async function search(tariff) {
+    try {
+        if (tariff > 0) {
+            const data = await GST.findOne({
+                                            isEnable: true, 
+                                            minTariff: {$lte: tariff},
+                                            maxTariff: {$gte: tariff}});
+
+            if (!data) return 0;
+            
+            const percentage = data.gstPercentage;
+            return percentage;        
+        } else {
+            return 0;
+        }
+    } catch(e) {
+        throw e;
     }
 }
 
@@ -115,6 +134,7 @@ const handelRemove = async (req, res) => {
 
 module.exports = {
     handelSearch,
+    search,
     handelDetail,
     handelCreate,
     handelUpdate,

@@ -347,9 +347,9 @@ const handelOrder = async (req, res) => {
                 );  
                 if (!resFoodUpdate) return res.status(404).send();
 
-            } else {
+            // } else {
                 
-                foodsDb = await newFoodValues(hotel, foods);
+            //     foodsDb = await newFoodValues(hotel, foods);
             }
         } else {
 

@@ -284,9 +284,8 @@ const handelOrder = async (req, res) => {
                 );  
                 if (!resMiscellaneousUpdate) return res.status(404).send();
 
-            } else {
-                
-                miscellaneousesDb = await newMiscellaneousValues(hotel, miscellaneouses);
+            // } else {
+            //     miscellaneousesDb = await newMiscellaneousValues(hotel, miscellaneouses);
             }
         } else {
             miscellaneousesDb = await newMiscellaneousValues(hotel, miscellaneouses);
