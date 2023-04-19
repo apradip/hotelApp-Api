@@ -37,6 +37,87 @@ class expenseTransactionType {
 }
 
 
+//handel search guest
+//query string : hotel Id?search= guest name, mobile, corporate name, corporate address
+const handelSearch = async (req, res) => {
+    let returnList = [];
+
+    try {
+        const hotelId = req.params.hotelId;
+        const search = req.query.search;
+    
+        const filter1 = {
+            $match: {
+                hotelId: hotelId,
+                isActive: true,
+                isEnable: true,
+                balance: {$ne: 0}
+            }
+        };
+        const filter2 = {
+            $match: {
+                $or: [{name: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
+                {mobile: {$regex: ".*" + search.trim() + ".*"}},
+                {corporateName: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
+                {corporateAddress: {$regex: ".*" + search.trim().toUpperCase() + ".*"}}]
+            }
+        };
+        const filter3 = {
+            $unwind: '$miscellaneousesDetail'
+        };
+        const filter4 = {
+            $project: {
+                updatedDate: 0, roomsDetail: 0, tablesDetail: 0, servicesDetail: 0
+            }
+        };
+
+        if (!search) {
+            const pipeline = [filter1, filter3, filter4];
+            const data = await Guest.aggregate(pipeline);  
+            if (!data) return res.status(404).send();
+
+            await Promise.all(data.map(async (element) => {
+                const item = {
+                    id: element._id,
+                    name: element.name,
+                    mobile: element.mobile,
+                    corporateName: element.corporateName,
+                    corporateAddress: element.corporateAddress,
+                    totalExpense: await totalExpense(element.expensesPaymentsDetail),
+                    totalBalance: element.balance
+                };
+                
+                returnList.push(item);
+            }));
+
+        } else {
+            const pipeline = [filter1, filter2, filter3, filter4];
+            const data = await Guest.aggregate(pipeline);  
+            if (!data) return res.status(404).send();
+
+            await Promise.all(data.map(async (element) => {
+                const item = {
+                    id: element._id,
+                    name: element.name,
+                    mobile: element.mobile,
+                    corporateName: element.corporateName,
+                    corporateAddress: element.corporateAddress,
+                    totalExpense: await totalExpense(element.expensesPaymentsDetail),
+                    totalBalance: element.balance
+                };
+
+                returnList.push(item);
+            }));
+        }
+
+    } catch(e) {
+        return res.status(500).send(e);
+    }
+
+    return res.status(200).send(returnList);
+}
+
+
 // handel show all orders
 //query string : hotel Id / guest Id / option: [non delivery / all]
 const handelDetail = async (req, res) => {
@@ -159,8 +240,8 @@ const handelDetail = async (req, res) => {
             const dataOrder = {
                 id: miscellaneous.id,
                 name: miscellaneous.name,
-                unitPrice: miscellaneous.price,
                 quantity: miscellaneous.quantity,
+                unitPrice: miscellaneous.unitPrice,
                 serviceChargePercentage: miscellaneous.serviceChargePercentage,
                 serviceCharge: miscellaneous.serviceCharge,
                 gstPercentage: miscellaneous.gstPercentage,
@@ -520,8 +601,18 @@ const handelCheckout = async (req, res) => {
     return res.status(200).send();
 }
 
+async function totalExpense(detail) {
+    let total = 0;
+
+    for (const exp of detail) {
+        exp.type !== 'P' ? total += exp.expenseAmount : total += 0; 
+    }
+
+    return total;
+}
 
 module.exports = {
+    handelSearch,
     handelDetail,
     handelOrder,
     handelDelivery,

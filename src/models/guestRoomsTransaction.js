@@ -15,7 +15,7 @@ const guestRoomTransactionSchema = new mongoose.Schema({
         type: String, 
         // required: [true, 'Invalid room!']
     },
-    roomNo: {
+    no: {
         type: String, 
         // required: [true, 'Invalid room!']
     },
@@ -72,17 +72,15 @@ const guestRoomTransactionSchema = new mongoose.Schema({
     },
     occupancyDate: {
         type: Date,
-        // default: date.format(new Date(),'YYYY-MM-DD'),
-        // required: [true, 'Occupancy date require!'],
-    },
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
-    },
-    isEnable: {
-        type: Boolean,
-        default: true
     }
+    // updatedDate: { 
+    //     type: Date, 
+    //     default: Date.now 
+    // },
+    // isEnable: {
+    //     type: Boolean,
+    //     default: true
+    // }
 });
 
 const GuestRoomTransaction = new mongoose.model('GuestRoomTransaction', guestRoomTransactionSchema);

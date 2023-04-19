@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-// const Hotel = require('./hotels');
 const GST = require('./gsts');
 const Guest = require("../models/guests");
 const Room = require("../models/rooms");
@@ -32,22 +31,13 @@ class roomType {
     }
 };
 
-// class roomTransactionType {
-//     constructor(miscellaneouses, orderDate, orderTime) {
-//         this.miscellaneouses = miscellaneouses,
-//         this.orderDate = orderDate;
-//         this.orderTime = orderTime;
-//     }
-// };
-
-// class expenseTransactionType {
-//     constructor(expenseId, expenseAmount) {
-//         this.type = "R",
-//         this.expenseId = expenseId,
-//         this.expenseAmount = expenseAmount,
-//         this.narration = 'Expense for the room items.'
-//     }
-// }
+class expenseTransactionType {
+    constructor(expenseAmount) {
+        this.type = "R",
+        this.expenseAmount = expenseAmount,
+        this.narration = 'Expense for the room items.'
+    }
+}
 
 //handel search guest
 //query string : hotel Id?search= guest name, father name, mobile, address, city, police station, state, pin 
@@ -60,44 +50,42 @@ const handelSearch = async (req, res) => {
         if (!search) {
             const data = await Guest.find({hotelId, isEnable: true })
                                     .sort('name')                                
-                                    .select('_id idDocumentId idNo name age fatherName address city policeStation state pin phone mobile email guestCount guestMaleCount guestFemaleCount bookingAgentId planId corporateName corporateAddress gstNo roomNos checkInDate checkInTime dayCount checkOutDate checkOutTime isCheckedOut')
-                                    .exec();
-
+                                    .select('_id idDocumentId idNo name age fatherName address city policeStation state pin phone mobile email guestCount guestMaleCount guestFemaleCount bookingAgentId planId corporateName corporateAddress gstNo roomNos checkInDate checkInTime dayCount checkOutDate checkOutTime isCheckedOut');
             if (!data) return res.status(404).send();
             
             await Promise.all(data.map(async (element) => {
                 const object = {
-                    "_id": element._id,
-                    "idDocumentId": element.idDocumentId,
-                    "idNo": element.idNo,
-                    "name": element.name,
-                    "age": element.age,
-                    "fatherName": element.fatherName,
-                    "address": element.address,
-                    "city": element.city,
-                    "policeStation": element.policeStation,
-                    "state": element.state,
-                    "pin": element.pin,
-                    "phone": element.phone,
-                    "mobile": element.mobile,
-                    "email": element.email,
-                    "guestCount": element.guestCount,
-                    "guestMaleCount": element.guestMaleCount,
-                    "guestFemaleCount": element.guestFemaleCount,
-                    "bookingAgentId": element.bookingAgentId,
-                    "planId": element.planId,
-                    "corporateName": element.corporateName,
-                    "corporateAddress": element.corporateAddress,
-                    "gstNo": element.gstNo,
-                    "roomNos": element.roomNos,                        
-                    "totalExpenseAmount": await totalExpense(hotelId, element._id),
-                    "totalPaidAmount": await totalPayment(hotelId, element._id),
-                    "checkInDate": element.checkInDate,
-                    "checkInTime": element.checkInTime,
-                    "dayCount": element.dayCount,
-                    "checkOutDate": element.checkOutDate,
-                    "checkOutTime": element.checkOutTime,
-                    "isCheckedOut": element.isCheckedOut
+                    _id: element._id,
+                    idDocumentId: element.idDocumentId,
+                    idNo: element.idNo,
+                    name: element.name,
+                    age: element.age,
+                    fatherName: element.fatherName,
+                    address: element.address,
+                    city: element.city,
+                    policeStation: element.policeStation,
+                    state: element.state,
+                    pin: element.pin,
+                    phone: element.phone,
+                    mobile: element.mobile,
+                    email: element.email,
+                    guestCount: element.guestCount,
+                    guestMaleCount: element.guestMaleCount,
+                    guestFemaleCount: element.guestFemaleCount,
+                    bookingAgentId: element.bookingAgentId,
+                    planId: element.planId,
+                    corporateName: element.corporateName,
+                    corporateAddress: element.corporateAddress,
+                    gstNo: element.gstNo,
+                    roomNos: element.roomNos,                        
+                    // totalExpenseAmount: await totalExpense(hotelId, element._id),
+                    // totalPaidAmount: await totalPayment(hotelId, element._id),
+                    // checkInDate: element.checkInDate,
+                    // checkInTime: element.checkInTime,
+                    dayCount: element.dayCount,
+                    checkOutDate: element.checkOutDate,
+                    checkOutTime: element.checkOutTime,
+                    isCheckedOut: element.isCheckedOut
                 };
                 
                 newList.push(object);
@@ -124,37 +112,37 @@ const handelSearch = async (req, res) => {
 
             await Promise.all(filterData.map(async (element) => {
                 const object = {
-                    "_id": element._id,
-                    "idDocumentId": element.idDocumentId,
-                    "idNo": element.idNo,
-                    "name": element.name,
-                    "age": element.age,
-                    "fatherName": element.fatherName,
-                    "address": element.address,
-                    "city": element.city,
-                    "policeStation": element.policeStation,
-                    "state": element.state,
-                    "pin": element.pin,
-                    "phone": element.phone,
-                    "mobile": element.mobile,
-                    "email": element.email,
-                    "guestCount": element.guestCount,
-                    "guestMaleCount": element.guestMaleCount,
-                    "guestFemaleCount": element.guestFemaleCount,
-                    "bookingAgentId": element.bookingAgentId,
-                    "planId": element.planId,
-                    "corporateName": element.corporateName,
-                    "corporateAddress": element.corporateAddress,
-                    "gstNo": element.gstNo,
-                    "roomNos": element.roomNos,                        
-                    "totalExpenseAmount": await totalExpense(hotelId, element._id),
-                    "totalPaidAmount": await totalPayment(hotelId, element._id),
-                    "checkInDate": element.checkInDate,
-                    "checkInTime": element.checkInTime,
-                    "dayCount": element.dayCount,
-                    "checkOutDate": element.checkOutDate,
-                    "checkOutTime": element.checkOutTime,
-                    "isCheckedOut": element.isCheckedOut
+                    _id: element._id,
+                    idDocumentId: element.idDocumentId,
+                    idNo: element.idNo,
+                    name: element.name,
+                    age: element.age,
+                    fatherName: element.fatherName,
+                    address: element.address,
+                    city: element.city,
+                    policeStation: element.policeStation,
+                    state: element.state,
+                    pin: element.pin,
+                    phone: element.phone,
+                    mobile: element.mobile,
+                    email: element.email,
+                    guestCount: element.guestCount,
+                    guestMaleCount: element.guestMaleCount,
+                    guestFemaleCount: element.guestFemaleCount,
+                    bookingAgentId: element.bookingAgentId,
+                    planId: element.planId,
+                    corporateName: element.corporateName,
+                    corporateAddress: element.corporateAddress,
+                    gstNo: element.gstNo,
+                    roomNos: element.roomNos,                        
+                    // totalExpenseAmount: await totalExpense(hotelId, element._id),
+                    // totalPaidAmount: await totalPayment(hotelId, element._id),
+                    // checkInDate: element.checkInDate,
+                    // checkInTime: element.checkInTime,
+                    dayCount: element.dayCount,
+                    checkOutDate: element.checkOutDate,
+                    checkOutTime: element.checkOutTime,
+                    isCheckedOut: element.isCheckedOut
                 };
 
                 newList.push(object);
@@ -203,8 +191,8 @@ const handelDetail = async (req, res) => {
                     corporateAddress: dataGuest.corporateAddress, 
                     gstNo: dataGuest.gstNo,
                     roomNos: dataGuest.roomNos,
-                    totalExpenseAmount: await totalExpense(hotelId, _id),
-                    totalPaidAmount: await totalPayment(hotelId, _id),
+                    //totalExpenseAmount: await totalExpense(hotelId, _id),
+                    //totalPaidAmount: await totalPayment(hotelId, _id),
                     checkInDate: dataGuest.checkInDate, 
                     checkInTime: dataGuest.checkInTime, 
                     checkOutDate: dataGuest.checkOutDate,
@@ -217,7 +205,6 @@ const handelDetail = async (req, res) => {
         return res.status(500).send(e);
     }
 }
-
 
 
 // //handel add guest
@@ -413,6 +400,10 @@ const handelCreate = async (req, res) => {
         const { rooms } = req.body;
 
         let roomsDb = [];
+        let prvBalanceDb = 0;
+        let prvRoomBalance = 0;
+        let roomBalance = 0;
+        let balanceDb = 0;
 
         // find all booked rooms
         const filter1 = {
@@ -429,7 +420,7 @@ const handelCreate = async (req, res) => {
                 guestCount: 0, guestMaleCount: 0, guestFemaleCount: 0, 
                 name: 0, fatherName: 0, age: 0, address: 0, 
                 city: 0, policeStation: 0, state: 0, pin: 0, phone: 0, mobile: 0, email: 0,
-                guestCount: 0, corporateName: 0, corporateAddress: 0, gstNo: 0, balance: 0,
+                guestCount: 0, corporateName: 0, corporateAddress: 0, gstNo: 0,
                 miscellaneousesDetail: 0, tablesDetail: 0, servicesDetail: 0,
                 expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
                 option: 0, isActive: 0, isEnable: 0, updatedDate: 0, __v: 0
@@ -440,8 +431,14 @@ const handelCreate = async (req, res) => {
         if (!resRoomsDetail) return res.status(404).send();
 
         if (resRoomsDetail[0].roomsDetail.length > 0) {
-            for (const room of resRoomsDetail[0].roomsDetail){
+            // get previous balance
+            prvBalanceDb = resRoomsDetail[0].balance;
+
+            for (const room of resRoomsDetail[0].roomsDetail) {
                 roomsDb.push(room);
+
+                // previous room price
+                prvRoomBalance += room.totalPrice;
             }
         }
 
@@ -505,7 +502,16 @@ const handelCreate = async (req, res) => {
         }
 
         // update the array to the db
-        if (roomsDb.length > 0) {    
+        if (roomsDb.length > 0) {  
+            
+            // calculate current room price total
+            for (const room of roomsDb) {
+                roomBalance += room.totalPrice;
+            }  
+
+            // calculate current balance
+            balanceDb = prvBalanceDb - prvRoomBalance + roomBalance;
+
             const resRoomUpdate = await Guest.updateOne(
                 {
                     _id: mongoose.Types.ObjectId(guestId), 
@@ -515,12 +521,66 @@ const handelCreate = async (req, res) => {
                 },
                 {
                     $set: {
-                        roomsDetail: roomsDb
+                        roomsDetail: roomsDb,
+                        balance: balanceDb
                     }
                 }
             );  
             if (!resRoomUpdate) return res.status(404).send();
+
+            // remove room transaction
+            const resDelete = GuestRoomTransaction.deleteMany({hotelId, guestId});
+
+            // insert room transaction
+            for (const room of roomsDb) {
+                const data = new GuestRoomTransaction({
+                    hotelId:  hotelId,
+                    guestId: guestId,
+                    roomId: room.id,
+                    no: room.no,
+                    tariff: room.tariff,
+                    extraBedCount: room.extraBedCount,
+                    extraBedTariff: room.extraBedTariff,
+                    extraPersonCount: room.extraPersonCount,
+                    extraPersonTariff: room.extraPersonTariff,
+                    discount: room.discount,
+                    maxDiscount: room.maxDiscount,
+                    gstPercentage: room.gstPercentage,
+                    gstCharge: room.gstCharge,
+                    totalPrice: room.totalPrice,
+                    occupancyDate: room.occupancyDate
+                });
+        
+                const resAdd = await data.save();
+                if (!resAdd) return res.status(400).send();
+            }  
         }
+
+        // remove room expense from guest
+        const resExpenseRemove = await Guest.updateOne(
+            {
+                _id: mongoose.Types.ObjectId(guestId)
+            },
+            {
+                $pull: {
+                    expensesPaymentsDetail: {$elemMatch: {type: 'R'}}
+                }
+            }
+        );    
+        if (!resExpenseRemove) return res.status(400).send();
+
+        // insert room expense into guest
+        const resExpenseUpdate = await Guest.updateOne(
+            {
+                _id: mongoose.Types.ObjectId(guestId),
+            },
+            {
+                $push: {
+                    'expensesPaymentsDetail': new expenseTransactionType(balanceDb)
+                }
+            }
+        );    
+        if (!resExpenseUpdate) return res.status(400).send();
 
         return res.status(200).send();
     } catch(e) {
@@ -529,146 +589,8 @@ const handelCreate = async (req, res) => {
 }
 
 
-
-// //handel update guest
-// //query string : hotel Id / _Id
-// //body : {"idDocumentId" : "", "idNo" : "", "name" : "", "age" : 0, "fatherName" : "", "address" : "", "city" : "", "policeStation" : "", "state" : "",
-// //        "pin" : "", "phone" : "", "mobile" : "", "email" : "", "guestCount" : 0, "guestMaleCount" : 0, "guestMaleCount" : 0, "guestFemaleCount" : 0,
-// //        "dayCount" : 0, "bookingAgentId" : "", "planId" : "", "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
-// const handelUpdate = async (req, res) => {
-//     try {
-//         const {hotelId, _id} = req.params;
-//         const {idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, 
-//                pin, phone, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
-//                dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} =  req.body;
-//         const data = await Guest.findOne({hotelId, isEnable: true, _id}).exec();
-//         if (!data) return res.status(404).send();
-
-//         const resUpdate = await Guest.findByIdAndUpdate(_id, 
-//                                                             {idDocumentId,
-//                                                              idNo: idNo.trim().toUpperCase(), 
-//                                                              name: name.trim().toUpperCase(), 
-//                                                              age,
-//                                                              fatherName: fatherName.trim().toUpperCase(),
-//                                                              address: address.trim().toUpperCase(),
-//                                                              city: city.trim().toUpperCase(),
-//                                                              policeStation: policeStation.trim().toUpperCase(),
-//                                                              state: state.trim().toUpperCase(),
-//                                                              pin: pin.trim(),
-//                                                              phone,
-//                                                              mobile,
-//                                                              email,
-//                                                              guestCount,
-//                                                              guestMaleCount,
-//                                                              guestFemaleCount,
-//                                                              dayCount, 
-//                                                              bookingAgentId, 
-//                                                              planId, 
-//                                                              corporateName, 
-//                                                              corporateAddress, 
-//                                                              gstNo}).exec();
-//         if (!resUpdate) return res.status(400).send(resUpdate);
-
-//         return res.status(200).send(resUpdate);
-//     } catch(e) {
-//         return res.status(500).send(e);
-//     }
-// }
-
-
-//handel delete guest
-//query string : hotel Id / _Id
-// const handelRemove = async (req, res) => {
-//     try {
-//         const {hotelId, _id} = req.params;
-
-//         // find guest
-//         const dataGuest = await Guest.findOne({hotelId, isEnable: true, _id}).exec();
-//         if (!dataGuest) return res.status(404).send();
-
-//         // disable guest
-//         const resGuestDelete = await Guest.findByIdAndUpdate(_id, {isEnable: false}).exec();
-//         if (!resGuestDelete) return res.status(400).send(resGuestDelete);
-
-//         // find guest room
-//         const dataGuestRoom = await GuestRoom.find({hotelId, isEnable: true, guestId: _id}).exec();
-//         if (!dataGuestRoom) return res.status(404).send();
-
-//         // disable all guest rooms
-//         dataGuestRoom.forEach(async element => {
-//             // find guest room
-//             const resGuestRoomDelete = await GuestRoom.findByIdAndUpdate(element._id, {isEnable: false}).exec();
-//             if (!resGuestRoomDelete) return res.status(400).send(resGuestRoomDelete);
-
-//             // disable room
-//             const resRoomDelete = await Room.findByIdAndUpdate(element.roomId, {isOccupied: false}).exec();
-//             if (!resRoomDelete) return res.status(400).send(resRoomDelete);
-//         });
-
-//         // find guest expense & payment
-//         const dataGuestExpensePayment = await GuestExpensePayment.find({hotelId, isEnable: true, guestId: _id}).exec();
-//         if (!dataGuestExpensePayment) return res.status(404).send();
-
-//         // disable all guest expense & payment
-//         dataGuestExpensePayment.forEach(async element => {
-//             // find guest expense & payment
-//             const resGuestExpensePaymentDelete = await GuestExpensePayment.findByIdAndUpdate(element._id, {isEnable: false}).exec();
-//             if (!resGuestExpensePaymentDelete) return res.status(400).send(resGuestExpensePaymentDelete);
-//         });
-
-//         return res.status(200).send(resGuestDelete);
-//     } catch(e) {
-//         return res.status(500).send(e);
-//     }
-// }
-
-
-// async function totalExpense(hotelId, guestId) {
-//     try {
-//         return new Promise((resolve, reject) => {
-//             setTimeout(async () => {
-//                 let total = 0;
-//                 const data = await GuestExpensePayment.find({hotelId, guestId, isEnable: true})
-//                                         .select('expenseAmount')
-//                                         .exec();
-
-//                 data.forEach(element => {
-//                     total +=  element.expenseAmount;
-//                 });
-
-//                 resolve(total);
-//             },1);
-//         });
-//     } catch(e) {
-//         return 0;
-//     }        
-// }
-
-// async function totalPayment(hotelId, guestId) {
-//     try {
-//         return new Promise((resolve, reject) => {
-//             setTimeout(async () => {
-//                 let total = 0;
-//                 const data = await GuestExpensePayment.find({hotelId, guestId, isEnable: true})
-//                                         .select('paymentAmount')
-//                                         .exec();
-
-//                 data.forEach(element => {
-//                     total +=  element.paymentAmount;
-//                 });
-
-//                 resolve(total);
-//             },1);
-//         });
-//     } catch(e) {
-//         return 0;
-//     }        
-// }
-
-
 module.exports = {
     handelSearch,
     handelDetail,
     handelCreate,
-    // handelRemove
 }
