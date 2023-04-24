@@ -62,9 +62,9 @@ const hotelSchema = new mongoose.Schema({
         type: Number,
         default: 10.5
     },
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
+    lastBillNo: {
+        type: Number,
+        default: 0
     },
     isEnable: {
         type: Boolean,

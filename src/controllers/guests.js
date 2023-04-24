@@ -49,19 +49,21 @@ const handelDetail = async (req, res) => {
 }
 
 //handel add guest
-//query string : hotel Id / option [D = detail / S = small]
-//body detail: {"idDocumentId" : "", "idNo" : "", "name" : "", "age" : 0, "fatherName" : "", "address" : "", "city" : "", "policeStation" : "", "state" : "",
+//query string : hotel Id
+//body detail: {option [D = detail / S = small],
+//        "idDocumentId" : "", "idNo" : "", "name" : "", "age" : 0, "fatherName" : "", "address" : "", "city" : "", "policeStation" : "", "state" : "",
 //        "pin" : "", "phone" : "", "mobile" : "", "email" : "", "guestCount" : 0, "guestMaleCount" : 0, "guestFemaleCount" : 0,
 //        "dayCount" : 0, "bookingAgentId" : "", "planId" : "", "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 //body small: {"name" : "", "mobile" : "", "guestCount" : 0, "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 const handelCreate = async (req, res) => {
     try {
-        const {hotelId, option} = req.params;
+        const {hotelId} = req.params
+        const {option} = req.body
 
         if (option.trim().toUpperCase() === "D") {
             const {idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, 
                 pin, phone, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
-                dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} = req.body;
+                dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} = req.body
 
                 const data = new Guest({hotelId,
                     idDocumentId,
@@ -86,15 +88,15 @@ const handelCreate = async (req, res) => {
                     corporateName, 
                     corporateAddress, 
                     gstNo,
-                    option});
+                    option})
 
-            const resAdd = await data.save();
-            if (!resAdd) return res.status(400).send();
+            const resAdd = await data.save()
+            if (!resAdd) return res.status(400).send()
     
-            return res.status(200).send(data);
+            return res.status(200).send(data)
                             
         } else if (option.trim().toUpperCase() === "S") {
-            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body;
+            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body
 
             const data = new Guest({
                 hotelId,
@@ -104,18 +106,18 @@ const handelCreate = async (req, res) => {
                 corporateName, 
                 corporateAddress, 
                 gstNo,
-                option});
+                option})
 
-            const resAdd = await data.save();
-            if (!resAdd) return res.status(400).send();
+            const resAdd = await data.save()
+            if (!resAdd) return res.status(400).send()
     
-            return res.status(200).send(data);
+            return res.status(200).send(data)
         }
     } catch(e) {
-        return res.status(500).send(e);
+        return res.status(500).send(e)
     }
     
-    return res.status(404).send();
+    return res.status(404).send()
 }
 
 //handel update guest

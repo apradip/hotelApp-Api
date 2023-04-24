@@ -4,9 +4,17 @@ const GuestExpensePayment = require('../models/guestExpensesPayments');
 
 
 class paymentTransactionType {
-    constructor(paymentAmount, narration) {
+    constructor(amount, narration) {
         this.type = "P",
-        this.paymentAmount = paymentAmount,
+        this.paymentAmount = amount,
+        this.narration = narration
+    }
+}
+
+class expenseTransactionType {
+    constructor(type, amount, narration) {
+        this.type = type,
+        this.paymentAmount = amount,
         this.narration = narration
     }
 }
@@ -186,60 +194,32 @@ async function totalPayment(hotelId, guestId) {
 //body : {"amount" : 0, "narration" : ""}
 const handelCreate = async (req, res) => {
     try {
-        const { hotelId, guestId } = req.params;
-        const { amount, narration } = req.body;
-        
-        // if (type.toUpperCase() === "E") {
-        //     // const data = new GuestExpensePayment({
-        //     //                                 hotelId,
-        //     //                                 guestId,          
-        //     //                                 expenseAmount: amount,
-        //     //                                 narration,
-        //     //                                 transactionDate,
-        //     //                                 transactionTime
-        //     //                             });
+        const { hotelId, guestId } = req.params
+        const { amount, narration } = req.body
 
-        //     // const resAdd = await data.save();
-        //     // if (!resAdd) return res.status(400).send();
-
-        //     return res.status(200).send();
-
-        // } else if (type.toUpperCase() === "P") {
-
-            // insert into guest payment 
-            const resPaymentUpdate = await Guest.updateOne(
-                {
-                    _id: mongoose.Types.ObjectId(guestId)
-                },
-                {
-                    $push: {
-                        'expensesPaymentsDetail': new paymentTransactionType(amount, narration)
-                    }
+        // insert into guest payment 
+        const resPaymentUpdate = await Guest.updateOne(
+            {
+                _id: mongoose.Types.ObjectId(guestId)
+            },
+            {
+                $push: {
+                    'expensesPaymentsDetail': new paymentTransactionType(amount, narration)
                 }
-            );    
-            if (!resPaymentUpdate) return res.status(400).send();
+            }
+        )   
+        if (!resPaymentUpdate) return res.status(400).send()
 
-            // update balance
-            const resBalanceUpdate = await Guest.findByIdAndUpdate(
-                mongoose.Types.ObjectId(guestId), 
-                { $inc: { balance: amount } }
-            );  
-            if (!resBalanceUpdate) return res.status(404).send();
+        // update balance
+        const resBalanceUpdate = await Guest.findByIdAndUpdate(
+            mongoose.Types.ObjectId(guestId), 
+            {$inc: {balance: amount}}
+        )
+        if (!resBalanceUpdate) return res.status(404).send()
 
-            // // insert into guest transaction payment 
-            // const data = new GuestExpensePayment({hotelId,
-            //                                 guestId,          
-            //                                 paymentAmount: amount,
-            //                                 narration});
-
-            // const resAdd = await data.save();
-            // if (!resAdd) return res.status(400).send();
-
-            return res.status(200).send();
-        // }
-
+        return res.status(200).send()
     } catch(e) {
-        return res.status(500).send(e);
+        return res.status(500).send(e)
     }        
 }
 

@@ -11,9 +11,7 @@ router.route("/:hotelId")
                     ROLE_LIST.KITCHEN_ADMIN,
                     ROLE_LIST.OFFICE_STAFF, 
                     ROLE_LIST.RECEPTIONIST, 
-                    ROLE_LIST.RESTAURANT_MANAGER), handelSearch);
-
-router.route("/:hotelId/:option")
+                    ROLE_LIST.RESTAURANT_MANAGER), handelSearch)
     .post(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
                     ROLE_LIST.HOTEL_ADMIN, 
                     ROLE_LIST.KITCHEN_ADMIN,
@@ -28,18 +26,18 @@ router.route("/:hotelId/:_id")
                     ROLE_LIST.OFFICE_STAFF, 
                     ROLE_LIST.RECEPTIONIST, 
                     ROLE_LIST.RESTAURANT_MANAGER), handelDetail)
-    .delete(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-                        ROLE_LIST.HOTEL_ADMIN,
-                        ROLE_LIST.KITCHEN_ADMIN, 
-                        ROLE_LIST.OFFICE_STAFF, 
-                        ROLE_LIST.RESTAURANT_MANAGER), handelRemove)
     .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-        ROLE_LIST.HOTEL_ADMIN, 
-        ROLE_LIST.KITCHEN_ADMIN,
-        ROLE_LIST.OFFICE_STAFF, 
-        ROLE_LIST.RECEPTIONIST, 
-        ROLE_LIST.RESTAURANT_MANAGER), handelCheckout);
-        
+                    ROLE_LIST.HOTEL_ADMIN, 
+                    ROLE_LIST.KITCHEN_ADMIN,
+                    ROLE_LIST.OFFICE_STAFF, 
+                    ROLE_LIST.RECEPTIONIST, 
+                    ROLE_LIST.RESTAURANT_MANAGER), handelCheckout)
+    .delete(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+                    ROLE_LIST.HOTEL_ADMIN,
+                    ROLE_LIST.KITCHEN_ADMIN, 
+                    ROLE_LIST.OFFICE_STAFF, 
+                    ROLE_LIST.RESTAURANT_MANAGER), handelRemove);
+
 router.route("/:hotelId/:_id/option")
     .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
                     ROLE_LIST.HOTEL_ADMIN, 

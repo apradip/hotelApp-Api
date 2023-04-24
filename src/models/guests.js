@@ -12,8 +12,10 @@ const roomTransactionSchema = new mongoose.Schema({
     },
     tariff: {
         type: Number,
-        default: 0,
         min: [1, 'Invalid tariff!'],
+        default: function() {
+            return this.tariff ? (this.tariff).toFixed(2) : 0
+        }        
     },
     extraBedCount: {
         type: Number,
@@ -22,8 +24,10 @@ const roomTransactionSchema = new mongoose.Schema({
     },
     extraBedTariff: {
         type: Number,
-        default: 0,
-        min: [0, 'Invalid extra bed charge!']
+        min: [0, 'Invalid extra bed charge!'],
+        default: function() {
+            return this.extraBedTariff ? (this.extraBedTariff).toFixed(2) : 0
+        }        
     },
     extraPersonCount: {
         type: Number,
@@ -32,33 +36,45 @@ const roomTransactionSchema = new mongoose.Schema({
     },
     extraPersonTariff: {
         type: Number,
-        default: 0,
-        min: [0, 'Invalid extra person charge!']
+        min: [0, 'Invalid extra person charge!'],
+        default: function() {
+            return this.extraPersonTariff ? (this.extraPersonTariff).toFixed(2) : 0
+        }        
     },
     discount: {
         type: Number,
-        default: 0,
-        min: [0, 'Invalid discount!']
+        min: [0, 'Invalid discount!'],
+        default: function() {
+            return this.discount ? (this.discount).toFixed(2) : 0
+        }        
     },
     maxDiscount: {
         type: Number,
-        default: 0,
-        min: [0, 'Invalid max. discount!']
+        min: [0, 'Invalid max. discount!'],
+        default: function() {
+            return this.maxDiscount ? (this.maxDiscount).toFixed(2) : 0
+        }        
     },
     gstPercentage: {
         type: Number,
-        default: 0,
-        min: [0, 'Invalid gst percentage!']
+        min: [0, 'Invalid gst percentage!'],
+        default: function() {
+            return this.gstPercentage ? (this.gstPercentage).toFixed(2) : 0
+        }        
     },
     gstCharge: {
         type: Number,
-        default: 0,
-        min: [0, 'Invalid gst!']
+        min: [0, 'Invalid gst!'],
+        default: function() {
+            return this.gstCharge ? (this.gstCharge).toFixed(2) : 0
+        }        
     },
     totalPrice: {
         type: Number,
-        default: 0,
-        min: [0, 'Invalid price!']
+        min: [0, 'Invalid price!'],
+        default: function() {
+            return this.totalPrice ? (this.totalPrice).toFixed(2) : 0
+        }        
     },
     occupancyDate: {
         type: String, 
@@ -79,8 +95,6 @@ const roomTransactionSchema = new mongoose.Schema({
     // }
 });
 
-
-
 const tableSchema = new mongoose.Schema({
     id: { 
         type:String,
@@ -98,7 +112,10 @@ const foodSchema = new mongoose.Schema({
         type: String
     },
     serviceChargePercentage: {
-        type: Number
+        type: Number,
+        default: function() {
+            return this.serviceChargePercentage ? (this.serviceChargePercentage).toFixed(2) : 0
+        }        
     },
     serviceCharge: {
         type: Number,
@@ -108,6 +125,9 @@ const foodSchema = new mongoose.Schema({
     },
     gstPercentage: {
         type: Number,
+        default: function() {
+            return this.gstPercentage ? (this.gstPercentage).toFixed(2) : 0
+        }        
     },
     gstCharge: {
         type: Number,
@@ -117,9 +137,13 @@ const foodSchema = new mongoose.Schema({
     },
     unitPrice: {
         type: Number,
+        default: function() {
+            return this.unitPrice ? (this.unitPrice).toFixed(2) : 0
+        }        
     },
     quantity: {
         type: Number,
+        default: 0
     },
     totalPrice: {
         type: Number,
@@ -154,39 +178,48 @@ const tableTransactionSchema = new mongoose.Schema({
 
 const miscellaneousSchema = new mongoose.Schema({
     id: {
-        type: String,
+        type: String
     },
     name: {
-        type: String,
-    },
-    serviceChargePercentage: {
-        type: Number,
-    },
-    serviceCharge: {
-        type: Number,
-        default: function() {
-            return (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)
-          }        
-    },
-    gstPercentage: {
-        type: Number,
-    },
-    gstCharge: {
-        type: Number,
-        default: function() {
-            return (this.unitPrice * this.quantity) * (this.gstPercentage / 100)
-          }        
+        type: String
     },
     unitPrice: {
         type: Number,
+        default: function() {
+            return (this.unitPrice).toFixed(2)
+        }        
     },
     quantity: {
         type: Number,
     },
+    serviceChargePercentage: {
+        type: Number,
+        default: function() {
+            return (this.serviceChargePercentage).toFixed(2)
+        }        
+    },
+    serviceCharge: {
+        type: Number,
+        default: function() {
+            return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(2)
+        }        
+    },
+    gstPercentage: {
+        type: Number,
+        default: function() {
+            return (this.gstPercentage).toFixed(2)
+        }        
+    },
+    gstCharge: {
+        type: Number,
+        default: function() {
+            return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(2)
+        }        
+    },
     totalPrice: {
         type: Number,
         default: function() {
-          return (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
+          return ((this.unitPrice * this.quantity) + (this.gstCharge + this.serviceCharge)).toFixed(2)
         }        
     }
 });
@@ -215,39 +248,48 @@ const miscellaneousTransactionSchema = new mongoose.Schema({
 
 const serviceSchema = new mongoose.Schema({
     id: {
-        type: String,
+        type: String
     },
     name: {
-        type: String,
+        type: String
     },
     serviceChargePercentage: {
         type: Number,
+        default: function() {
+            return (this.serviceChargePercentage).toFixed(2)
+        }        
     },
     serviceCharge: {
         type: Number,
         default: function() {
-            return (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)
-          }        
+            return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(2)
+        }        
     },
     gstPercentage: {
         type: Number,
+        default: function() {
+            return (this.gstPercentage).toFixed(2)
+        }        
     },
     gstCharge: {
         type: Number,
         default: function() {
-            return (this.unitPrice * this.quantity) * (this.gstPercentage / 100)
-          }        
+            return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(2)
+        }        
     },
     unitPrice: {
         type: Number,
+        default: function() {
+            return (this.unitPrice).toFixed(2)
+        }        
     },
     quantity: {
-        type: Number,
+        type: Number
     },
     totalPrice: {
         type: Number,
         default: function() {
-          return (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
+          return ((this.unitPrice * this.quantity) + (this.gstCharge + this.serviceCharge)).toFixed(2)
         }        
     }
 });
@@ -275,6 +317,9 @@ const serviceTransactionSchema = new mongoose.Schema({
 });
 
 const expensesPaymentsTransactionSchema = new mongoose.Schema({
+    billNo: {
+        type: Number,
+    },
     type: {
         type: String
     },
@@ -283,18 +328,22 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
     },
     expenseAmount: {
         type: Number,
-        default: 0
+        default: function() {
+            return (this.expenseAmount).toFixed(2)
+        }        
     },
     paymentAmount: {
         type: Number,
-        default: 0
+        default: function() {
+            return this.paymentAmount ? (this.paymentAmount).toFixed(2) : 0
+        }        
     },
     narration: {
         type: String
     },
     transactionDate: {
-        type: Date,
-        default: new Date()
+        type: String,
+        default: date.format(new Date(),'YYYY-MM-DD')
     },
     transactionTime: {
         type: String,
@@ -421,10 +470,12 @@ const guestSchema = new mongoose.Schema({
     expensesPaymentsDetail: [expensesPaymentsTransactionSchema],
     balance: {
         type: Number,
-        default: 0
+        default: function() {
+            return this.balance ? (this.balance).toFixed(2) : 0
+        }        
     },
     inDate: {
-        type: Date,
+        type: String,
         default: date.format(new Date(),'YYYY-MM-DD'),
         required: [true, 'Check in date require!'],
     },
@@ -434,14 +485,10 @@ const guestSchema = new mongoose.Schema({
         required: [true, 'Check in time require!'],
     },
     outDate: {
-        type: Date,
-        //default: Date.now,
-        //required: [true, 'Check out date require!'],
+        type: String,
     },
     outTime: {
         type: String,
-        // default: date.format(new Date(),'HH:mm'),
-        // required: [true, 'Check in time require!'],
     },
     option: {
         type: String,
@@ -451,10 +498,6 @@ const guestSchema = new mongoose.Schema({
     isActive: {
         type: Boolean,
         default: true
-    },
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
     },
     isEnable: {
         type: Boolean,

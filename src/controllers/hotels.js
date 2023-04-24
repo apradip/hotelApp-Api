@@ -114,7 +114,7 @@ const handelUpdate = async (req, res) => {
                 gstNo, 
                 fincialDecimalPlace, 
                 serviceChargePercentage, 
-                foodGstPercentage}).exec();
+                foodGstPercentage});
 
         if (!resUpdate) return res.status(400).send(resUpdate);
 
@@ -155,6 +155,28 @@ async function detail (id) {
     }
 }
 
+async function getLastBillNo (id) {    
+    try {   
+        const data = await Hotel.findOne({
+            _id: mongoose.Types.ObjectId(id), 
+            isEnable: true})
+
+        return data.lastBillNo
+    } catch(e) {
+        throw e;
+    }
+}
+
+async function setLastBillNo (id, no) {    
+    try {   
+        const data = await Hotel.findByIdAndUpdate(id, {lastBillNo: no})
+    } catch(e) {
+        throw e
+    }
+
+    return true
+}
+
 
 module.exports = {
     handelSearch,
@@ -162,6 +184,7 @@ module.exports = {
     handelCreate,
     handelUpdate,
     handelRemove,
-    detail
-    // handelCheckout
+    detail,
+    getLastBillNo,
+    setLastBillNo
 }
