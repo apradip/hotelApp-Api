@@ -1,88 +1,53 @@
 const mongoose = require("mongoose");
-const date = require("date-and-time");
 const validator = require("validator");
 
 const guestRoomTransactionSchema = new mongoose.Schema({
     hotelId: {
-        type: String,
-        // required: [true, 'Invalid hotel!']
+        type: String
     },
     guestId: {
-        type: String, 
-        // required: [true, 'Invalid guest!']
+        type: String
     },
     roomId: {
-        type: String, 
-        // required: [true, 'Invalid room!']
+        type: String
     },
     no: {
-        type: String, 
-        // required: [true, 'Invalid room!']
+        type: String
     },
     tariff: {
-        type: Number,
-        // default: 0,
-        // required: [true, 'Ttariff require!'],
-        // min: [1, 'Invalid tariff!'],
+        type: Number
     },
     extraBedCount: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid extra bed count!']
+        type: Number
     },
     extraBedTariff: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid extra bed charge!']
+        type: Number
     },
     extraPersonCount: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid extra person count!'],
+        type: Number
     },
     extraPersonTariff: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid extra person charge!']
+        type: Number
     },
     discount: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid discount!']
+        type: Number
     },
     maxDiscount: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid max. discount!']
+        type: Number
     },
     gstPercentage: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid gst percentage!']
+        type: Number
     },
     gstAmount: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid gst!']
+        type: Number
     },
     totalPrice: {
-        type: Number,
-        // default: 0,
-        // min: [0, 'Invalid price!']
+        type: Number
     },
     occupancyDate: {
-        type: Date,
+        type: String
     }
-    // updatedDate: { 
-    //     type: Date, 
-    //     default: Date.now 
-    // },
-    // isEnable: {
-    //     type: Boolean,
-    //     default: true
-    // }
 });
 
-const GuestRoomTransaction = new mongoose.model('GuestRoomTransaction', guestRoomTransactionSchema);
-
+const GuestRoomTransaction = new mongoose.model("GuestRoomTransaction", guestRoomTransactionSchema);
 module.exports = GuestRoomTransaction;

@@ -9,6 +9,6 @@ const SMS_SETTINGS = {
     headers: {
         "Content-Type": "application/x-www-form-urlencoded"
     },
-}
+};
 
-module.exports = {SMS_SETTINGS}
+module.exports = {SMS_SETTINGS};

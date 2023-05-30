@@ -11,7 +11,7 @@ const handleLogin = async (req, res) => {
     const { userName, password } = req.body;
     let foundEmployee;
 
-    if (!userName || !password) return res.status(400).json({"message": "Mobile no. and password are required."});
+    if (!userName || !password) return res.status(400).json({message: "Mobile no. and password are required."});
 
     if (parseInt(userName)) {
         foundEmployee = await Employee.findOne({hotelId, isEnable: true, mobile: parseInt(userName.trim())}).exec();
@@ -35,33 +35,33 @@ const handleLogin = async (req, res) => {
             // create JWTs
             const accessToken = jwt.sign(
                 {
-                    "UserInfo": {
-                        "userid": foundEmployee._id,
-                        "username": foundEmployee.name,
-                        "roles": employeeRoles
+                    UserInfo: {
+                        userid: foundEmployee._id,
+                        username: foundEmployee.name,
+                        roles: employeeRoles
                     }
                 },
                 process.env.ACCESS_TOKEN_SECRET,
-                { expiresIn: "1h" }
+                {expiresIn: "1h"}
             );
 
             const refreshToken = jwt.sign(
-                { "username": foundEmployee.name },
+                {username: foundEmployee.name},
                 process.env.REFRESH_TOKEN_SECRET,
-                { expiresIn: '1d' }
+                {expiresIn: "1d"}
             );
 
             // Saving refreshToken with current user
             foundEmployee.refreshToken = refreshToken;
             const result = await foundEmployee.save();
-            res.json({ accessToken, refreshToken });
+            res.json({accessToken, refreshToken});
         } else {
             res.sendStatus(401);   
         }
     } else {
         res.sendStatus(401);
     }
-}
+};
 
 //handel login with otp
 //query string : hotelId
@@ -72,8 +72,8 @@ const handelOtpLogin = async (req, res) => {
         const {userName, otp} = req.body;
         let foundEmployee;
 
-        if (!userName) return res.status(400).json({ "message": "Mobile no. or email is required." });
-        if (!otp) return res.status(400).json({ "message": "OTP is required." });
+        if (!userName) return res.status(400).json({message: "Mobile no. or email is required."});
+        if (!otp) return res.status(400).json({message: "OTP is required."});
 
         if (parseInt(userName)) {
             foundEmployee = await Employee.findOne({hotelId, isEnable: true, mobile: parseInt(userName.trim())}).exec();
@@ -104,10 +104,10 @@ const handelOtpLogin = async (req, res) => {
                 // create JWTs
                 const accessToken = jwt.sign(
                     {
-                        "UserInfo": {
-                            "userid": foundEmployee._id,
-                            "username": foundEmployee.name,
-                            "roles": employeeRoles
+                        UserInfo: {
+                            userid: foundEmployee._id,
+                            username: foundEmployee.name,
+                            roles: employeeRoles
                         }
                     },
                     process.env.ACCESS_TOKEN_SECRET,
@@ -115,9 +115,9 @@ const handelOtpLogin = async (req, res) => {
                 );
 
                 const refreshToken = jwt.sign(
-                    { "username": foundEmployee.name },
+                    {username: foundEmployee.name },
                     process.env.REFRESH_TOKEN_SECRET,
-                    { expiresIn: "1d" }
+                    {expiresIn: "1d"}
                 );
 
                 // Saving refreshToken with current user
@@ -141,8 +141,7 @@ const handelOtpLogin = async (req, res) => {
         }
     } catch (e) {
         return res.status(400).send(e);
-    }
-}
+    };
+};
 
-
-module.exports = { handleLogin, handelOtpLogin };
+module.exports = {handleLogin, handelOtpLogin};

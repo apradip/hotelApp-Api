@@ -1,8 +1,8 @@
-const Employee = require('../models/employees');
+const Employee = require("../models/employees");
 
 const handelLogout = async (req, res) => {
     // On client, also delete the accessToken
-    const { hotelId, _id } = req.params;
+    const {hotelId, _id} = req.params;
     
     // Is refreshToken in db?
     const foundEmployee = await Employee.findOne({hotelId, isEnable: true, _id}).exec();
@@ -11,7 +11,7 @@ const handelLogout = async (req, res) => {
     }
 
     // Delete refreshToken in db
-    foundEmployee.refreshToken = '';
+    foundEmployee.refreshToken = "";
     const result = await foundEmployee.save();
 
     res.sendStatus(200);

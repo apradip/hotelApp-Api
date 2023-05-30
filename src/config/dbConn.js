@@ -9,6 +9,6 @@ const connectDB = async () => {
     }).catch((e) => {
         console.log(`db - hotelApp not connected...\n${e.message}`);
     });
-}
+};
 
-module.exports = connectDB
+module.exports = connectDB;

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
+// const validator = require("validator");
 
 const roomCategorySchema = new mongoose.Schema({
     hotelId: {
@@ -14,32 +14,34 @@ const roomCategorySchema = new mongoose.Schema({
             if (value === "" || value === null) {
                 throw new Error("Name require!");
             }
-
-            // if (hotelId + name === this.hotelId + value ) {
-            //     throw new Error("This data already exists!");
-            // }
        }
     }, 
     tariff: {
         type: Number,
-        default: 0,
         required: [true, 'Ttariff require!'],
         min: [1, 'Invalid tariff!'],
+        default: function() {
+            return this.tariff ? (this.tariff).toFixed(2) : 0
+        }        
     },
     maxDiscount: {
         type: Number,
-        default: 0,
         min: [0, 'Invalid discount!'],
+        default: function() {
+            return this.maxDiscount ? (this.maxDiscount).toFixed(2) : 0
+        },        
         validate(value) {
             if (this.tariff < value) {
                 throw new Error("Incorrect discount!");
             }
-        }
+        },
     },
     extraBedTariff: {
         type: Number,
-        default: 0,
         min: [0, 'Invalid extra bed charge!'],
+        default: function() {
+            return this.extraBedTariff ? (this.extraBedTariff).toFixed(2) : 0
+        },        
         validate(value) {
             if (this.tariff < value) {
                 throw new Error("Incorrect extra bed charge!");
@@ -48,17 +50,15 @@ const roomCategorySchema = new mongoose.Schema({
     },
     extraPersonTariff: {
         type: Number,
-        default: 0,
         min: [0, 'Invalid extra person charge!'],
+        default: function() {
+            return this.extraPersonTariff ? (this.extraPersonTariff).toFixed(2) : 0
+        },        
         validate(value) {
             if (this.tariff < value) {
                 throw new Error("Incorrect extra person charge!");
             }
         }
-    },
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
     },
     isEnable: {
         type: Boolean,
@@ -66,6 +66,5 @@ const roomCategorySchema = new mongoose.Schema({
     }
 });
 
-const RoomCategory = new mongoose.model('RoomCategory', roomCategorySchema);
-
+const RoomCategory = new mongoose.model("RoomCategory", roomCategorySchema);
 module.exports = RoomCategory;

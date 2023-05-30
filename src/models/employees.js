@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
+// const validator = require("validator");
 
 const employeeSchema = new mongoose.Schema({
     hotelId: {
@@ -26,10 +26,6 @@ const employeeSchema = new mongoose.Schema({
             if (value === "" || value === null) {
                 throw new Error("Name require!");
             }
-
-            // if (hotelId + name === this.hotelId + value ) {
-            //     throw new Error("This data already exists!");
-            // }
        }
     }, 
     address: {
@@ -79,16 +75,11 @@ const employeeSchema = new mongoose.Schema({
         type: String,
         default: null
     },
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
-    },
     isEnable: {
         type: Boolean,
         default: true
     }
 });
 
-const Employee = new mongoose.model('Employee', employeeSchema);
-
+const Employee = new mongoose.model("Employee", employeeSchema);
 module.exports = Employee;

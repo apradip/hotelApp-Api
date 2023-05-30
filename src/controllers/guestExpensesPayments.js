@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const Guest = require('../models/guests');
-const GuestExpensePayment = require('../models/guestExpensesPayments');
-
+const mongoose = require("mongoose");
+const Guest = require("../models/guests");
+const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
 
 class paymentTransactionType {
     constructor(amount, narration) {
@@ -9,15 +8,8 @@ class paymentTransactionType {
         this.paymentAmount = amount,
         this.narration = narration
     }
-}
+};
 
-class expenseTransactionType {
-    constructor(type, amount, narration) {
-        this.type = type,
-        this.paymentAmount = amount,
-        this.narration = narration
-    }
-}
 
 //handel search payment
 //query string : hotel Id
@@ -26,13 +18,6 @@ const handelSearch = async (req, res) => {
     try {
         const {hotelId} = req.params;
         const search = req.query.search;
-
-        // const searchStructure = {
-        //                             guest: "",
-        //                             amount: {min: 0, max: 0}, 
-        //                             date: {min: '', max: ''}
-        //                         };
-
         const searchGuest = search.guest;
         const searchAmount = search.amount; 
         const searchAmountMin = searchAmount.min;
@@ -44,8 +29,8 @@ const handelSearch = async (req, res) => {
         var filterData = [];
 
         filterData = await GuestExpensePayment.find({hotelId, isEnable: true})
-                    .sort('transactionDate')                                
-                    .select('_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate')
+                    .sort("transactionDate")                                
+                    .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
                     .exec();
 
         if (searchGuest !== "") {
@@ -63,8 +48,8 @@ const handelSearch = async (req, res) => {
             
             if (filterGuestData) {                                            
                 filterData = await filterData.find({guestId: {$in:filterGuestData}})
-                    .sort('transactionDate')                                
-                    .select('_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate')
+                    .sort("transactionDate")                                
+                    .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
                     .exec();
             }
         }
@@ -75,16 +60,16 @@ const handelSearch = async (req, res) => {
                                                             {paymentAmount: {$lte: searchAmountMin}},
                                                             {paymentAmount: {$gte: searchAmountMax}},
                                                             ]})
-                                                        .sort('transactionDate')                                
-                                                        .select('_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate')
+                                                        .sort("transactionDate")                                
+                                                        .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
                                                         .exec();
         }
 
         if ((searchDateStart !== "") || (searchDateEnd !== "")) {
             filterData = await filterData.find({transactionDate: {$lte: searchDateEnd},
                 transactionDate: {$gte: searchDateStart}})
-                                                        .sort('transactionDate')                                
-                                                        .select('_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate')
+                                                        .sort("transactionDate")
+                                                        .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
                                                         .exec();
         }
         
@@ -92,7 +77,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel detail payment
@@ -145,7 +130,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 async function totalExpense(hotelId, guestId) {
     try {
@@ -166,7 +151,7 @@ async function totalExpense(hotelId, guestId) {
     } catch(e) {
         return 0;
     }        
-}
+};
 
 async function totalPayment(hotelId, guestId) {
     try {
@@ -187,15 +172,15 @@ async function totalPayment(hotelId, guestId) {
     } catch(e) {
         return 0;
     }        
-}
+};
 
 //handel add payment
 //query string : hotel Id / guest Id 
 //body : {"amount" : 0, "narration" : ""}
 const handelCreate = async (req, res) => {
     try {
-        const { hotelId, guestId } = req.params
-        const { amount, narration } = req.body
+        const {hotelId, guestId} = req.params;
+        const {amount, narration} = req.body;
 
         // insert into guest payment 
         const resPaymentUpdate = await Guest.updateOne(
@@ -204,11 +189,23 @@ const handelCreate = async (req, res) => {
             },
             {
                 $push: {
-                    'expensesPaymentsDetail': new paymentTransactionType(amount, narration)
+                    "expensesPaymentsDetail": new paymentTransactionType(amount, narration)
                 }
             }
         )   
         if (!resPaymentUpdate) return res.status(400).send()
+
+        // insert into guest payment transaction
+        const dataPayment = new GuestExpensePayment({
+            hotelId,
+            guestId,
+            type: "P",
+            paymentAmount: amount,
+            narration: narration
+        });
+
+        const resAddPayment = await dataPayment.save();
+        if (!resAddPayment) return res.status(400).send();
 
         // update balance
         const resBalanceUpdate = await Guest.findByIdAndUpdate(
@@ -217,11 +214,11 @@ const handelCreate = async (req, res) => {
         )
         if (!resBalanceUpdate) return res.status(404).send()
 
-        return res.status(200).send()
+        return res.status(200).send();
     } catch(e) {
-        return res.status(500).send(e)
+        return res.status(500).send(e);
     }        
-}
+};
 
 async function create(hotelId, guestId, type, amount, narration, transactionDate) {
     try {
@@ -254,15 +251,15 @@ async function create(hotelId, guestId, type, amount, narration, transactionDate
     } catch(e) {
         return false;
     }        
-}
+};
 
 //handel update payment
 //query string : hotel Id / guest Id / transaction Id
 //body : {"amount" : 0, "narration" : ""}
 const handelUpdate = async (req, res) => {
     try {
-        const { hotelId, guestId, transactionId } = req.params;
-        const { amount, narration } = req.body;
+        const {hotelId, guestId, transactionId} = req.params;
+        const {amount, narration} = req.body;
 
         // calculate and update miscellaneous total
         const filter1 = {
@@ -278,7 +275,7 @@ const handelUpdate = async (req, res) => {
         };
         const filter3 = {
             $match: {
-                'expensesPaymentsDetail._id': mongoose.Types.ObjectId(transactionId)
+                "expensesPaymentsDetail._id": mongoose.Types.ObjectId(transactionId)
             }
         };
         const filter4 = {
@@ -316,14 +313,14 @@ const handelUpdate = async (req, res) => {
             },
             {
                 $set: { 
-                        'expensesPaymentsDetail.$[ed].paymentAmount': amount,
-                        'expensesPaymentsDetail.$[ed].narration': narration,
-                        'expensesPaymentsDetail.$[ed].transactionDate': new Date(),
+                        "expensesPaymentsDetail.$[ed].paymentAmount": amount,
+                        "expensesPaymentsDetail.$[ed].narration": narration,
+                        "expensesPaymentsDetail.$[ed].transactionDate": new Date(),
                 }
             },
             { 
                 arrayFilters: [{
-                    'ed._id': mongoose.Types.ObjectId(transactionId)
+                    "ed._id": mongoose.Types.ObjectId(transactionId)
                 }]           
             }
         );    
@@ -332,32 +329,21 @@ const handelUpdate = async (req, res) => {
         // update balance
         const resBalanceUpdate = await Guest.findByIdAndUpdate(
             mongoose.Types.ObjectId(guestId), 
-            { $inc: { balance: (prvAmount * -1) + amount } }
+            {$inc: {balance: (prvAmount * -1) + amount }}
         );  
         if (!resBalanceUpdate) return res.status(404).send();
-
-
-        // if (await remove(hotelId, _id)) {
-        //     if (await create(hotelId, guestId, type, amount, narration, transactionDate)) {
-        //         return res.status(200);
-        //     } else {
-        //         return res.status(404);
-        //     }
-        // } else {
-        //     return res.status(404);
-        // }
     } catch(e) {
         return res.status(500).send(e);
     }
 
     return res.status(200).send();
-}
+};
 
 //handel delete payment
 //query string : hotel Id / guest Id / transaction Id
 const handelRemove = async (req, res) => {
     try {
-        const { hotelId, guestId, transactionId } = req.params;
+        const {hotelId, guestId, transactionId} = req.params;
 
         // calculate and update miscellaneous total
         const filter1 = {
@@ -373,7 +359,7 @@ const handelRemove = async (req, res) => {
         };
         const filter3 = {
             $match: {
-                'expensesPaymentsDetail._id': mongoose.Types.ObjectId(transactionId)
+                "expensesPaymentsDetail._id": mongoose.Types.ObjectId(transactionId)
             }
         };
         const filter4 = {
@@ -415,32 +401,25 @@ const handelRemove = async (req, res) => {
         );  
         if (!resBalanceUpdate) return res.status(404).send();
 
-
-        // // const data = await GuestExpensePayment.find({hotelId, _id, isEnable: true}).exec();
-        // // if (!data) return res.status(404).send();
-
-        // // const resDelete = await GuestExpensePayment.updateMany(hotelId, _id, {$set: {isEnable: false}}).exec();
-        // // if (!resDelete) return res.status(400).send(resDelete);
-
         return res.status(200).send();
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 async function remove(hotelId, _id) {
     try {
-        const data = await GuestExpensePayment.find({hotelId, _id, isEnable: true}).exec();
+        const data = await Guest.find({hotelId, _id, isEnable: true}).exec();
         if (!data) return false;
 
-        const resDelete = await GuestExpensePayment.updateMany(hotelId, _id, {$set: {isEnable: false}}).exec();
+        const resDelete = await Guest.updateMany(hotelId, _id, {$set: {isEnable: false}}).exec();
         if (!resDelete) return false;
 
         return true;
     } catch(e) {
         return false;
     }
-}
+};
 
 module.exports = {
     handelSearch,
@@ -452,4 +431,4 @@ module.exports = {
     handelUpdate,
     handelRemove,
     remove
-}
+};

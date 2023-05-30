@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const Hotel = require('./hotels');
-const Guest = require('../models/guests');
+const mongoose = require("mongoose");
+const Hotel = require("./hotels");
+const Guest = require("../models/guests");
 const Table = require("../models/tables");
-const Food = require('../models/foods');
-const GuestFoodTransaction = require('../models/guestFoodsTransaction');
-const date = require('date-and-time');
+const Food = require("../models/foods");
+const GuestFoodTransaction = require("../models/guestFoodsTransaction");
+const date = require("date-and-time");
 
 
 class tableType {
@@ -69,7 +69,7 @@ const handelTableBooking = async (req, res) => {
                 isOccupied: false, 
                 isEnable: true
             };
-            const foundTable = await Table.findOne(filter);
+            const foundTable = await findOne(filter);
 
             if (foundTable) {
                 transaction.tables.push(new tableType(
@@ -83,13 +83,13 @@ const handelTableBooking = async (req, res) => {
                 isOccupied: true, 
                 updatedDate: new Date()
             };
-            const resTableUpdate = await Table.updateOne(filter, update);
+            const resTableUpdate = await _updateOne(filter, update);
             if (!resTableUpdate) return res.status(404).send();
         }
 
         const filterGuest = {_id: guestId};
         const updateGuest = {$push: {tablesDetail: transaction}};
-        const resGuestUpdate = await Guest.updateOne(filterGuest, updateGuest);  
+        const resGuestUpdate = await updateOne(filterGuest, updateGuest);  
         if (!resGuestUpdate) return res.status(404).send();
 
     } catch(e) {
@@ -97,8 +97,7 @@ const handelTableBooking = async (req, res) => {
     }
 
     return res.status(200).send();
-}
-
+};
 
 
 // handel show all orders
@@ -142,7 +141,7 @@ const handelDetail = async (req, res) => {
                 $unwind: '$tablesDetail.foods' 
             };  
             const pipeline = [filter1, filter2, filter3, filter4, filter5];
-            foundGuestFoodList = await Guest.aggregate(pipeline);  
+            foundGuestFoodList = await aggregate(pipeline);  
 
         } else if (option === "A") {
             const filter1 = {
@@ -176,7 +175,7 @@ const handelDetail = async (req, res) => {
                 $unwind: '$tablesDetail.foods' 
             };  
             const pipeline = [filter1, filter2, filter3, filter4, filter5];
-            foundGuestFoodList = await Guest.aggregate(pipeline);  
+            foundGuestFoodList = await aggregate(pipeline);  
 
         } else if (option.length === 24) {
             const filter1 = {
@@ -209,7 +208,7 @@ const handelDetail = async (req, res) => {
                 $unwind: '$tablesDetail.foods' 
             };  
             const pipeline = [filter1, filter2, filter3, filter4, filter5];
-            foundGuestFoodList = await Guest.aggregate(pipeline);  
+            foundGuestFoodList = await aggregate(pipeline);  
     
             if (!foundGuestFoodList) return res.status(404).send();
     
@@ -243,7 +242,7 @@ const handelDetail = async (req, res) => {
     }        
 
     return res.status(200).send(foodList);
-}
+};
 
 
 // handel food order
@@ -257,7 +256,7 @@ const handelOrder = async (req, res) => {
         let foodsDb = undefined;
         
         // get hotel tax details    
-        const hotel = await Hotel.detail(hotelId);
+        const hotel = await detail(hotelId);
 
         if (transactionId !== undefined) {
             if (transactionId) {
@@ -287,7 +286,7 @@ const handelOrder = async (req, res) => {
                     }
                 };
                 const pipelineSum = [filter1, filter2, filter3, filter4];
-                const resFoodsDetail = await Guest.aggregate(pipelineSum);  
+                const resFoodsDetail = await aggregate(pipelineSum);  
                 if (!resFoodsDetail) return res.status(404).send();
                 
                 foodsDb = resFoodsDetail[0].tablesDetail.foods;
@@ -306,7 +305,7 @@ const handelOrder = async (req, res) => {
                     if (((food.operation) === "A") || ((food.operation) === "M")) {
                         
                         // check for item existance
-                        const foundFood = await Food.findOne(
+                        const foundFood = await _findOne(
                             {
                                 _id: mongoose.Types.ObjectId(food.id), 
                                 hotelId: hotel._id, 
@@ -327,7 +326,7 @@ const handelOrder = async (req, res) => {
                     }
                 }
 
-                const resFoodUpdate = await Guest.updateOne(
+                const resFoodUpdate = await updateOne(
                     {
                         _id: mongoose.Types.ObjectId(guestId), 
                         hotelId,
@@ -355,7 +354,7 @@ const handelOrder = async (req, res) => {
 
             foodsDb = await newFoodValues(hotel, foods);
 
-            const resFoodUpdate = await Guest.updateOne(
+            const resFoodUpdate = await updateOne(
                 {
                     _id: mongoose.Types.ObjectId(guestId), 
                     hotelId,
@@ -381,7 +380,7 @@ const handelOrder = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 async function newFoodValues(hotel, foods) {
     const foodList = [];
@@ -392,7 +391,7 @@ async function newFoodValues(hotel, foods) {
         if ((food.operation) === "A") {
             
             // check for item existance
-            const foundFood = await Food.findOne(
+            const foundFood = await _findOne(
                 {
                     _id: mongoose.Types.ObjectId(food.id), 
                     hotelId: hotel._id, 
@@ -414,8 +413,7 @@ async function newFoodValues(hotel, foods) {
     }
 
     return foodList;
-}
-
+};
 
 
 // handel food delivery
@@ -426,7 +424,7 @@ const handelDelivery = async (req, res) => {
         const { hotelId, guestId, transactionId } = req.params;
 
         // update all delivery date & time
-        const resDelivery = await Guest.updateOne(
+        const resDelivery = await updateOne(
             {
                 hotelId: hotelId,
                 _id: mongoose.Types.ObjectId(guestId), 
@@ -452,7 +450,7 @@ const handelDelivery = async (req, res) => {
         return res.status(500).send(e);
     }
    
-}
+};
 
 
 // handle table checkout 
@@ -498,12 +496,12 @@ const handelCheckout = async (req, res) => {
         };
 
         const pipelineSum = [filter1, filter2, filter3, filter4, filter5, filter6];
-        const resFoods = await Guest.aggregate(pipelineSum);  
+        const resFoods = await aggregate(pipelineSum);  
         if (!resFoods) return res.status(404).send();
 
         // insert miscellaneous to guest miscellaneous 
         const pipelineItems = [filter1, filter2, filter3, filter4, filter5];
-        const resItems = await Guest.aggregate(pipelineItems);  
+        const resItems = await aggregate(pipelineItems);  
         if (!resItems) return res.status(404).send();
 
         for (const itemDetail of resItems) {    
@@ -533,7 +531,7 @@ const handelCheckout = async (req, res) => {
         }
 
         // insert into expense if the transaction is not present
-        const resExpenseUpdate = await Guest.updateOne(
+        const resExpenseUpdate = await updateOne(
             {
                 _id: mongoose.Types.ObjectId(guestId),
                 'expensesPaymentsDetail': {
@@ -553,7 +551,7 @@ const handelCheckout = async (req, res) => {
         if (!resExpenseUpdate) return res.status(400).send();
 
         // update balance
-        const resUpdateBalance = await Guest.findByIdAndUpdate(
+        const resUpdateBalance = await findByIdAndUpdate(
             mongoose.Types.ObjectId(guestId), 
             { $inc: { balance: (resFoods[0].total * -1) } }
         );  
@@ -561,7 +559,7 @@ const handelCheckout = async (req, res) => {
 
 
         // update isPostedToExpense status
-        const resUpdateExpenseStatus = await Guest.updateOne(
+        const resUpdateExpenseStatus = await updateOne(
             {
                 _id: mongoose.Types.ObjectId(guestId), 
                 hotelId,
@@ -586,7 +584,7 @@ const handelCheckout = async (req, res) => {
     }
 
     return res.status(200).send();
-}
+};
 
 module.exports = {
     handelTableBooking,
@@ -594,4 +592,4 @@ module.exports = {
     handelOrder,
     handelDelivery,
     handelCheckout
-}
+};

@@ -38,4 +38,4 @@ router.route("/:hotelId/:_id")
         ROLE_LIST.KITCHEN_ADMIN, 
         ROLE_LIST.HOUSEKEEPING), handelRemove);
     
-module.exports = router;
+    module.exports = router;

@@ -13,25 +13,22 @@ const miscellaneousSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
-        default: 0,
         required: [true, 'Price require!'],
-        min: [1, 'Invalid price!']
+        min: [1, 'Invalid price!'],
+        default: function() {
+            return this.price ? (this.price).toFixed(2) : 0
+        }        
     },
     description: {
         type: String,
-        minLength: [3, 'Invalid description!'],
+        // minLength: [3, 'Invalid description!'],
         maxLength: [1020, 'Invalid description!']
     }, 
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
-    },
     isEnable: {
         type: Boolean,
         default: true
     }
 });
 
-const Miscellaneous = new mongoose.model('Miscellaneous', miscellaneousSchema);
-
+const Miscellaneous = new mongoose.model("Miscellaneous", miscellaneousSchema);
 module.exports = Miscellaneous;

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 const date = require("date-and-time");
 
 const roomTransactionSchema = new mongoose.Schema({
@@ -79,20 +80,6 @@ const roomTransactionSchema = new mongoose.Schema({
     occupancyDate: {
         type: String, 
     }
-    // checkInDate: { 
-    //     type: String, 
-    //     default: date.format(new Date(),'YYYY-MM-DD')
-    // },
-    // checkInTime: { 
-    //     type: String, 
-    //     default: date.format(new Date(),'HH:mm')
-    // },
-    // checkOutDate: { 
-    //     type: String, 
-    // },
-    // chekOutTime: { 
-    //     type: String, 
-    // }
 });
 
 const tableSchema = new mongoose.Schema({
@@ -158,11 +145,15 @@ const tableTransactionSchema = new mongoose.Schema({
     foods: [foodSchema],
     orderDate: { 
         type: String, 
-        default: date.format(new Date(),'YYYY-MM-DD')
+        default: function() {
+            return date.format(new Date(), "YYYY-MM-DD")
+        }        
     },
     orderTime: { 
         type: String, 
-        default: date.format(new Date(),'HH:mm')
+        default: function() {
+            return date.format(new Date(), "HH:mm")
+        }        
     },
     despatchDate: { 
         type: String
@@ -177,7 +168,7 @@ const tableTransactionSchema = new mongoose.Schema({
 });
 
 const miscellaneousSchema = new mongoose.Schema({
-    id: {
+    miscellaneousId: {
         type: String
     },
     name: {
@@ -228,11 +219,15 @@ const miscellaneousTransactionSchema = new mongoose.Schema({
     miscellaneouses: [miscellaneousSchema],
     orderDate: { 
         type: String, 
-        default: date.format(new Date(),'YYYY-MM-DD')
+        default: function() {
+            return date.format(new Date(), "YYYY-MM-DD")
+        }        
     },
     orderTime: { 
         type: String, 
-        default: date.format(new Date(),'HH:mm')
+        default: function() {
+            return date.format(new Date(), "HH:mm")
+        }        
     },
     despatchDate: { 
         type: String
@@ -298,11 +293,15 @@ const serviceTransactionSchema = new mongoose.Schema({
     services: [serviceSchema],
     orderDate: { 
         type: String, 
-        default: date.format(new Date(),'YYYY-MM-DD')
+        default: function() {
+            return date.format(new Date(), "YYYY-MM-DD")
+        }        
     },
     orderTime: { 
         type: String, 
-        default: date.format(new Date(),'HH:mm')
+        default: function() {
+            return date.format(new Date(), "HH:mm")
+        }        
     },
     despatchDate: { 
         type: String
@@ -329,7 +328,7 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
     expenseAmount: {
         type: Number,
         default: function() {
-            return (this.expenseAmount).toFixed(2)
+            return this.expenseAmount ? (this.expenseAmount).toFixed(2) : 0
         }        
     },
     paymentAmount: {
@@ -343,11 +342,15 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
     },
     transactionDate: {
         type: String,
-        default: date.format(new Date(),'YYYY-MM-DD')
+        default: function() {
+            return date.format(new Date(), "YYYY-MM-DD")
+        }        
     },
     transactionTime: {
         type: String,
-        default: date.format(new Date(),'HH:mm')
+        default: function() {
+            return date.format(new Date(), "HH:mm")
+        }        
     }
 });
 
@@ -358,12 +361,12 @@ const guestSchema = new mongoose.Schema({
         required: [true, 'Invalid hotel!']
     },
     idDocumentId: {
-        type: String, 
+        type: String
     },
     idNo: {
         type: String,
         minLength: [6, 'Invalid id no!'],
-        maxLength: [100, 'Invalid id no!'],
+        maxLength: [100, 'Invalid id no!']
     }, 
     name: {
         type: String,
@@ -376,14 +379,12 @@ const guestSchema = new mongoose.Schema({
        }
     }, 
     age: {
-        type: Number,
-        // default: 0,
-        // min: [1, 'Invalid age!'],
+        type: Number
     },
     fatherName: {
         type: String,
         minLength: [3, 'Invalid name!'],
-        maxLength: [100, 'Invalid name!'],
+        maxLength: [100, 'Invalid name!']
     }, 
     address: {
         type: String,
@@ -393,22 +394,22 @@ const guestSchema = new mongoose.Schema({
     city: {
         type: String,
         minLength: [3, 'Invalid city!'],
-        maxLength: [100, 'Invalid city!'],
+        maxLength: [100, 'Invalid city!']
     },
     policeStation: {
         type: String,
         minLength: [3, 'Invalid p.s!'],
-        maxLength: [100, 'Invalid p.s!'],
+        maxLength: [100, 'Invalid p.s!']
     },
     state: {
         type: String,
         minLength: [3, 'Invalid state!'],
-        maxLength: [100, 'Invalid state!'],
+        maxLength: [100, 'Invalid state!']
     },
     pin: {
         type: String,
         minLength: [6, 'Invalid pin!'],
-        maxLength: [10, 'Invalid pin!'],
+        maxLength: [10, 'Invalid pin!']
     },
     phone: {
         type: String
@@ -432,7 +433,7 @@ const guestSchema = new mongoose.Schema({
     guestCount: {
         type: Number,
         default: 0,
-        min: [1, 'Invalid no. of guest!'],
+        min: [1, 'Invalid no. of guest!']
     },
     guestMaleCount: {
         type: Number,
@@ -458,10 +459,10 @@ const guestSchema = new mongoose.Schema({
         // maxLength: [15, 'Invalid GST no.!'],
     },
     bookingAgentId: {
-        type: String, 
+        type: String
     },
     planId: {
-        type: String, 
+        type: String
     },
     roomsDetail: [roomTransactionSchema],
     tablesDetail: [tableTransactionSchema],
@@ -476,24 +477,26 @@ const guestSchema = new mongoose.Schema({
     },
     inDate: {
         type: String,
-        default: date.format(new Date(),'YYYY-MM-DD'),
-        required: [true, 'Check in date require!'],
+        default: function() {
+            return date.format(new Date(), "YYYY-MM-DD")
+        }        
     },
     inTime: {
         type: String,
-        default: date.format(new Date(),'HH:mm'),
-        required: [true, 'Check in time require!'],
+        default: function() {
+            return date.format(new Date(), "HH:mm")
+        }        
     },
     outDate: {
-        type: String,
+        type: String
     },
     outTime: {
-        type: String,
+        type: String
     },
     option: {
         type: String,
         default: "S",
-        required: [true, 'option require!'],
+        required: [true, 'option require!']
     },
     isActive: {
         type: Boolean,
@@ -505,5 +508,5 @@ const guestSchema = new mongoose.Schema({
     }
 });
 
-const Guest = new mongoose.model('Guest', guestSchema);
+const Guest = new mongoose.model("Guest", guestSchema);
 module.exports = Guest;

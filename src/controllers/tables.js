@@ -10,13 +10,13 @@ const handelSearch = async (req, res) => {
         
         const data = await Table.find({hotelId, isEnable: true})
                                         .sort('no')                                
-                                        .select('hotelId _id no description isOccupied').exec();
+                                        .select('hotelId _id no description isOccupied');
         if (!data) return res.status(404).send();
 
         if (search) {
             const filterData = await Table.find({hotelId, isEnable: true, no: {$regex: '.*' + search.trim().toUpperCase() + '.*'}})
                                                 .sort('no')                                
-                                                .select('hotelId _id no description isOccupied').exec();
+                                                .select('hotelId _id no description isOccupied');
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -26,7 +26,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel detail table
@@ -34,7 +34,7 @@ const handelSearch = async (req, res) => {
 const handelDetail = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Table.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Table.findOne({hotelId, isEnable: true, _id});
 
         if (!data) return res.status(404).send();
 
@@ -42,7 +42,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel add table
@@ -55,11 +55,10 @@ const handelCreate = async (req, res) => {
         const data = new Table({
             hotelId,
             no: no.trim().toUpperCase(),
-            description: description.trim(), 
-            // isOccupied: false
+            description: description.length > 0 ? description.trim() : "", 
         });
 
-        const duplicate = await Table.find({hotelId, isEnable: true, no}).exec();
+        const duplicate = await Table.find({hotelId, isEnable: true, no});
         if (duplicate.length !== 0) return res.status(409).send("Table already exists!");
 
         const resAdd = await data.save();
@@ -69,7 +68,7 @@ const handelCreate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }        
-}
+};
 
 
 //handel update table
@@ -79,10 +78,10 @@ const handelUpdate = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
         const {no, description, isOccupied} =  req.body;
-        const data = await Table.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Table.findOne({hotelId, isEnable: true, _id});
         if (!data) return res.status(404).send();
 
-        const duplicate = await Table.find({hotelId, isEnable: true, no: no.trim().toUpperCase()}).exec();
+        const duplicate = await Table.find({hotelId, isEnable: true, no: no.trim().toUpperCase()});
         if (duplicate.length > 0) {
             duplicate.map((item) => {
                 if (item._id.toString() !== _id) {
@@ -93,15 +92,15 @@ const handelUpdate = async (req, res) => {
 
         const resUpdate = await Table.findByIdAndUpdate(_id, {
                                                                 no: no.trim().toUpperCase(), 
-                                                                description: description.trim(), 
-                                                                isOccupied}).exec();
+                                                                description: description.length > 0 ? description.trim() : "", 
+                                                                isOccupied});
         if (!resUpdate) return res.status(400).send(resUpdate);
 
         return res.status(200).send(resUpdate);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel delete table
@@ -109,18 +108,18 @@ const handelUpdate = async (req, res) => {
 const handelRemove = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Table.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Table.findOne({hotelId, isEnable: true, _id});
 
         if (!data) return res.status(404).send();
 
-        const resDelete = await Table.findByIdAndUpdate(_id, {isEnable: false}).exec();
+        const resDelete = await Table.findByIdAndUpdate(_id, {isEnable: false});
         if (!resDelete) return res.status(400).send(resDelete);
 
         return res.status(200).send(resDelete);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 module.exports = {
@@ -129,4 +128,4 @@ module.exports = {
     handelCreate,
     handelUpdate,
     handelRemove
-}
+};

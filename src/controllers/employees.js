@@ -1,6 +1,5 @@
-const bcrypt = require('bcrypt');
-const Employee = require('../models/employees');
-
+const Employee = require("../models/employees");
+const bcrypt = require("bcrypt");
 
 //handel search employee
 //query string : /hotel Id?search= employee name
@@ -10,17 +9,17 @@ const handelSearch = async (req, res) => {
         const search = req.query.search;
 
         const data = await Employee.find({hotelId, isEnable: true})
-                                        .sort('name, email, mobile')                                
-                                        .select('hotelId accessLevels _id name address mobile email').exec();
+                                        .sort("name, email, mobile")                                
+                                        .select("hotelId accessLevels _id name address mobile email");
         if (!data) return res.status(404).send();
 
         if (search) {
             const filterData = await Employee.find({hotelId, isEnable: true, 
-                                                    $or: [{name: {$regex: '.*' + search.trim().toUpperCase() + '.*'}},
-                                                          {email: {$regex: '.*' + search.trim().toLowerCase() + '.*'}}, 
-                                                          {mobile: {$regex: '.*' + search.trim() + '.*'}}]})
-                                                .sort('name, email, mobile')                                
-                                                .select('hotelId accessLevels _id name address mobile email').exec();
+                                                    $or: [{name: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
+                                                          {email: {$regex: ".*" + search.trim().toLowerCase() + ".*"}}, 
+                                                          {mobile: {$regex: ".*" + search.trim() + ".*"}}]})
+                                                .sort("name, email, mobile")                                
+                                                .select("hotelId accessLevels _id name address mobile email");
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -30,15 +29,15 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel detail employee
 //query string : hotel Id / employee Id
 const handelDetail = async (req, res) => {
     try {
-        const { hotelId, _id } = req.params;
-        const data = await Employee.findOne({hotelId, isEnable: true, _id: _id}).exec();
+        const {hotelId, _id} = req.params;
+        const data = await Employee.findOne({hotelId, isEnable: true, _id: _id});
 
         if (!data) return res.status(404).send();
 
@@ -46,7 +45,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel add employee
@@ -55,7 +54,7 @@ const handelDetail = async (req, res) => {
 const handelCreate = async (req, res) => {
     try {
         const hotelId = req.params.hotelId.trim();
-        const { accessLevels, name, address, mobile, email } = req.body;
+        const {accessLevels, name, address, mobile, email} = req.body;
         const data = new Employee({
             hotelId: hotelId,
             accessLevels: accessLevels,
@@ -65,7 +64,7 @@ const handelCreate = async (req, res) => {
             email: email.trim().toLowerCase()
         });
 
-        const duplicate = await Employee.find({hotelId, isEnable: true, $or: [{mobile: mobile}, {email: email}]}).exec();
+        const duplicate = await Employee.find({hotelId, isEnable: true, $or: [{mobile: mobile}, {email: email}]});
         if (duplicate.length !== 0) return res.status(409).send("Employee already exists!");
     
         data.password = await bcrypt.hash(req.body.mobile.toString().trim(), 10);
@@ -77,7 +76,7 @@ const handelCreate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }        
-}
+};
 
 
 //handel update employee
@@ -85,13 +84,13 @@ const handelCreate = async (req, res) => {
 //body : {"accessLevels" : "", "name" : "", "address" : "", "mobile" : "", "email" : ""}
 const handelUpdate = async (req, res) => {
     try {
-        const { hotelId, _id } = req.params;
-        const { accessLevels, name, address, mobile, email } = req.body;
-        const data = await Employee.findOne({hotelId, isEnable: true, _id}).exec();
+        const {hotelId, _id} = req.params;
+        const {accessLevels, name, address, mobile, email} = req.body;
+        const data = await Employee.findOne({hotelId, isEnable: true, _id});
 
         if (!data) return res.status(404).send();
             
-        const duplicate = await Employee.find({hotelId, isEnable: true, $or: [{mobile: mobile}, {email: email}]}).exec();
+        const duplicate = await Employee.find({hotelId, isEnable: true, $or: [{mobile: mobile}, {email: email}]});
 
         if (duplicate.length > 0) {
             duplicate.map((item) => {
@@ -102,7 +101,7 @@ const handelUpdate = async (req, res) => {
         }
     
         const password = await bcrypt.hash(req.body.mobile.toString().trim(), 10);
-        const resUpdate = await Employee.findByIdAndUpdate(_id, {accessLevels, name, address, mobile, email, password, otp: null, expiration_time: null, refreshToken: null}).exec();
+        const resUpdate = await Employee.findByIdAndUpdate(_id, {accessLevels, name, address, mobile, email, password, otp: null, expiration_time: null, refreshToken: null});
         
         if (!resUpdate)
             return res.status(400).send(resUpdate);
@@ -111,14 +110,14 @@ const handelUpdate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel delete employee
 //query string : hotel Id / employee Id
 const handelRemove = async (req, res) => {
     try {
-        const { hotelId, _id } = req.params;
+        const {hotelId, _id} = req.params;
         const data = await Employee.findOne({hotelId, isEnable: true, _id});
         if (!data) return res.status(404).send();
 
@@ -129,7 +128,7 @@ const handelRemove = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 module.exports = {
@@ -138,4 +137,4 @@ module.exports = {
     handelCreate,
     handelUpdate,
     handelRemove
-}
+};

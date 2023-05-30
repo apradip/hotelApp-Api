@@ -1,5 +1,4 @@
-const Room = require('../models/rooms');
-
+const Room = require("../models/rooms");
 
 //handel search room
 //query string : hotel Id?search= room no
@@ -9,14 +8,14 @@ const handelSearch = async (req, res) => {
         const search = req.query.search;
         
         const data = await Room.find({hotelId, isEnable: true})
-                                        .sort('no')                                
-                                        .select('hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied').exec();
+                                        .sort("no")                                
+                                        .select("hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
         if (!data) return res.status(404).send();
 
         if (search) {
-            const filterData = await Room.find({hotelId, isEnable: true, no: {$regex: '.*' + search.trim().toUpperCase() + '.*'}})
-                                                .sort('no')                                
-                                                .select('hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied').exec();
+            const filterData = await Room.find({hotelId, isEnable: true, no: {$regex: ".*" + search.trim().toUpperCase() + ".*"}})
+                                                .sort("no")                                
+                                                .select("hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -26,7 +25,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel detail room
@@ -34,7 +33,7 @@ const handelSearch = async (req, res) => {
 const handelDetail = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Room.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Room.findOne({hotelId, isEnable: true, _id});
 
         if (!data) return res.status(404).send();
 
@@ -42,7 +41,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel add room
@@ -63,7 +62,7 @@ const handelCreate = async (req, res) => {
             isOccupied: false
         });
 
-        const duplicate = await Room.find({hotelId, isEnable: true, categoryId, no}).exec();
+        const duplicate = await Room.find({hotelId, isEnable: true, categoryId, no});
         if (duplicate.length !== 0) return res.status(409).send("Room already exists!");
 
         const resAdd = await data.save();
@@ -73,7 +72,7 @@ const handelCreate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }        
-}
+};
 
 
 //handel update room
@@ -83,10 +82,10 @@ const handelUpdate = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
         const {categoryId, no, tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied} =  req.body;
-        const data = await Room.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Room.findOne({hotelId, isEnable: true, _id});
         if (!data) return res.status(404).send();
 
-        const duplicate = await Room.find({hotelId, isEnable: true, no: no.trim().toUpperCase()}).exec();
+        const duplicate = await Room.find({hotelId, isEnable: true, no: no.trim().toUpperCase()});
         if (duplicate.length > 0) {
             duplicate.map((item) => {
                 if (item._id.toString() !== _id) {
@@ -95,14 +94,14 @@ const handelUpdate = async (req, res) => {
             })
         }
 
-        const resUpdate = await Room.findByIdAndUpdate(_id, {categoryId, no: no.trim().toUpperCase(), tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied}).exec();
+        const resUpdate = await Room.findByIdAndUpdate(_id, {categoryId, no: no.trim().toUpperCase(), tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied});
         if (!resUpdate) return res.status(400).send(resUpdate);
 
         return res.status(200).send(resUpdate);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel delete room
@@ -110,18 +109,18 @@ const handelUpdate = async (req, res) => {
 const handelRemove = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Room.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Room.findOne({hotelId, isEnable: true, _id});
 
         if (!data) return res.status(404).send();
 
-        const resDelete = await Room.findByIdAndUpdate(_id, {isEnable: false}).exec();
+        const resDelete = await Room.findByIdAndUpdate(_id, {isEnable: false});
         if (!resDelete) return res.status(400).send(resDelete);
 
         return res.status(200).send(resDelete);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 module.exports = {
@@ -130,4 +129,4 @@ module.exports = {
     handelCreate,
     handelUpdate,
     handelRemove
-}
+};

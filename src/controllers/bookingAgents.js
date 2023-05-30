@@ -1,4 +1,4 @@
-const BookingAgent = require('../models/bookingAgents');
+const BookingAgent = require("../models/bookingAgents");
 
 
 //handel search booking agent
@@ -6,15 +6,15 @@ const BookingAgent = require('../models/bookingAgents');
 const handelSearch = async (req, res) => {
     try {
         const search = req.query.search;
-        const data = await BookingAgent.find({ isEnable: true })
-                                        .sort('name')                                
-                                        .select('_id name description').exec();
+        const data = await BookingAgent.find({isEnable: true})
+                                        .sort("name")                                
+                                        .select("_id name description");
         if (!data) return res.status(404).send();
 
         if (search) {
-            const filterData = await BookingAgent.find({ isEnable: true, name: { $regex: '.*' + search.trim().toUpperCase() + '.*' }})
-                                                .sort('name')                                
-                                                .select('_id name description').exec();
+            const filterData = await BookingAgent.find({isEnable: true, name: { $regex: ".*" + search.trim().toUpperCase() + ".*"}})
+                                                .sort("name")                                
+                                                .select("_id name description");
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -24,7 +24,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel detail booking agent
@@ -32,14 +32,14 @@ const handelSearch = async (req, res) => {
 const handelDetail = async (req, res) => {
     try{
         const _id = req.params._id;
-        const data = await BookingAgent.findOne({ isEnable: true, _id }).exec();
+        const data = await BookingAgent.findOne({isEnable: true, _id});
         if (!data) return res.status(404).send();
 
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel add booking agent
@@ -49,10 +49,10 @@ const handelCreate = async (req, res) => {
         const {name, description} = req.body;
         const data = new BookingAgent({ 
                                         name: name.trim().toUpperCase(), 
-                                        description: description.trim() 
+                                        description: description.length > 0 ? description.trim() : ""
                                     });
 
-        const duplicate = await BookingAgent.find({isEnable: true, name}).exec();
+        const duplicate = await BookingAgent.find({isEnable: true, name});
         if (duplicate.length !== 0) return res.status(409).send("Booking agent already exists!");
 
         const resAdd = await data.save();
@@ -62,7 +62,7 @@ const handelCreate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }        
-}
+};
 
 
 //handel update booking agent
@@ -75,7 +75,7 @@ const handelUpdate = async (req, res) => {
         const data = await BookingAgent.findOne({isEnable: true, _id}).exec();
         if (!data) return res.status(404).send();
 
-        const duplicate = await BookingAgent.find({ isEnable: true, $or: [{name: name}]}).exec();
+        const duplicate = await BookingAgent.find({isEnable: true, $or: [{name: name}]});
         if (duplicate.length > 0) {
             duplicate.map((item) => {
                 if (item._id.toString() !== _id) {
@@ -86,7 +86,7 @@ const handelUpdate = async (req, res) => {
 
         const resUpdate = await BookingAgent.findByIdAndUpdate(_id, { 
                                                                         name: name.trim().toUpperCase(), 
-                                                                        description: description.trim() 
+                                                                        description: description.length > 0 ? description.trim() : ""
                                                                     }).exec();
         if (!resUpdate) return res.status(400).send(resUpdate);
 
@@ -94,7 +94,7 @@ const handelUpdate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel delete booking agent
@@ -102,17 +102,17 @@ const handelUpdate = async (req, res) => {
 const handelRemove = async (req, res) => {
     try {
         const _id = req.params._id;
-        const data = await BookingAgent.findOne({isEnable: true, _id}).exec();
+        const data = await BookingAgent.findOne({isEnable: true, _id});
         if (!data) return res.status(404).send();
 
-        const resDelete = await BookingAgent.findByIdAndUpdate(_id, {isEnable: false}).exec();
+        const resDelete = await BookingAgent.findByIdAndUpdate(_id, {isEnable: false});
         if (!resDelete) return res.status(400).send(resDelete);
 
         return res.status(200).send(resDelete);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 module.exports = {
@@ -121,4 +121,4 @@ module.exports = {
     handelCreate,
     handelUpdate,
     handelRemove
-}
+};

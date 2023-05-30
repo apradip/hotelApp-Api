@@ -1,9 +1,9 @@
-const mongoose = require('mongoose');
-const GST = require('./gsts');
+const mongoose = require("mongoose");
+const GST = require("./gsts");
 const Guest = require("../models/guests");
 const Room = require("../models/rooms");
 const GuestRoomTransaction = require("../models/guestRoomsTransaction");
-const date = require('date-and-time');
+const date = require("date-and-time");
 
 class roomType {
     constructor(id, no, tariff, extraBedCount, extraBedTariff, 
@@ -37,7 +37,7 @@ class expenseTransactionType {
         this.expenseAmount = expenseAmount,
         this.narration = 'Expense for the room items.'
     }
-}
+};
 
 //handel search guest
 //query string : hotel Id?search= guest name, father name, mobile, address, city, police station, state, pin 
@@ -48,7 +48,7 @@ const handelSearch = async (req, res) => {
         let newList = [];
 
         if (!search) {
-            const data = await Guest.find({hotelId, isEnable: true })
+            const data = await find({hotelId, isEnable: true })
                                     .sort('name')                                
                                     .select('_id idDocumentId idNo name age fatherName address city policeStation state pin phone mobile email guestCount guestMaleCount guestFemaleCount bookingAgentId planId corporateName corporateAddress gstNo roomNos checkInDate checkInTime dayCount checkOutDate checkOutTime isCheckedOut');
             if (!data) return res.status(404).send();
@@ -95,7 +95,7 @@ const handelSearch = async (req, res) => {
         }
 
         if (search) {
-            const filterData = await Guest.find({isEnable: true, 
+            const filterData = await find({isEnable: true, 
                                                  $or: [{name: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
                                                  {fatherName: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
                                                  {address: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
@@ -153,7 +153,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel detail guest
@@ -161,7 +161,7 @@ const handelSearch = async (req, res) => {
 const handelDetail = async (req, res) => {
     try {
         const {hotelId, guestId} = req.params;
-        const dataGuest = await Guest.findOne({
+        const dataGuest = await findOne({
             hotelId: hotelId, 
             _id: mongoose.Types.ObjectId(guestId), 
             isEnable: true});
@@ -204,7 +204,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 // //handel add guest
@@ -427,7 +427,7 @@ const handelCreate = async (req, res) => {
             }
         };
         const pipeline = [filter1, filter2];
-        const resRoomsDetail = await Guest.aggregate(pipeline);  
+        const resRoomsDetail = await aggregate(pipeline);  
         if (!resRoomsDetail) return res.status(404).send();
 
         if (resRoomsDetail[0].roomsDetail.length > 0) {
@@ -466,7 +466,7 @@ const handelCreate = async (req, res) => {
                 if (((room.operation) === 'A') || ((room.operation) === 'M')) {
                     
                     // check for room existance
-                    const foundRoom = await Room.findOne(
+                    const foundRoom = await _findOne(
                         {
                             _id: mongoose.Types.ObjectId(room.id), 
                             hotelId: hotelId, 
@@ -481,7 +481,7 @@ const handelCreate = async (req, res) => {
                                         (room.extraPersonCount * foundRoom.extraPersonTariff) -
                                         room.discount;
             
-                        const gstPercentage = await GST.search(unitPrice);
+                        const gstPercentage = await _search(unitPrice);
 
                         roomsDb.push(new roomType(
                             foundRoom.id, 
@@ -512,7 +512,7 @@ const handelCreate = async (req, res) => {
             // calculate current balance
             balanceDb = prvBalanceDb - prvRoomBalance + roomBalance;
 
-            const resRoomUpdate = await Guest.updateOne(
+            const resRoomUpdate = await updateOne(
                 {
                     _id: mongoose.Types.ObjectId(guestId), 
                     hotelId,
@@ -529,7 +529,7 @@ const handelCreate = async (req, res) => {
             if (!resRoomUpdate) return res.status(404).send();
 
             // remove room transaction
-            const resDelete = GuestRoomTransaction.deleteMany({hotelId, guestId});
+            const resDelete = deleteMany({hotelId, guestId});
 
             // insert room transaction
             for (const room of roomsDb) {
@@ -557,7 +557,7 @@ const handelCreate = async (req, res) => {
         }
 
         // remove room expense from guest
-        const resExpenseRemove = await Guest.updateOne(
+        const resExpenseRemove = await updateOne(
             {
                 _id: mongoose.Types.ObjectId(guestId)
             },
@@ -570,7 +570,7 @@ const handelCreate = async (req, res) => {
         if (!resExpenseRemove) return res.status(400).send();
 
         // insert room expense into guest
-        const resExpenseUpdate = await Guest.updateOne(
+        const resExpenseUpdate = await updateOne(
             {
                 _id: mongoose.Types.ObjectId(guestId),
             },
@@ -586,11 +586,11 @@ const handelCreate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 module.exports = {
     handelSearch,
     handelDetail,
     handelCreate,
-}
+};

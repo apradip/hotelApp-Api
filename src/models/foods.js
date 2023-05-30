@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
+// const validator = require("validator");
 
 const foodSchema = new mongoose.Schema({
     hotelId: {
@@ -9,23 +9,26 @@ const foodSchema = new mongoose.Schema({
     name: {
         type: String,
         minLength: [3, 'Invalid name!'],
-        maxLength: [100, 'Invalid name!']
+        maxLength: [100, 'Invalid name!'],
+        validate(value) {
+            if (value === "" || value === null) {
+                throw new Error("Name require!");
+            }
+       }
     },
     price: {
         type: Number,
-        default: 0,
         required: [true, 'Price require!'],
-        min: [1, 'Invalid price!']
+        min: [1, 'Invalid price!'],
+        default: function() {
+            return this.price ? (this.price).toFixed(2) : 0
+        }        
     },
     description: {
         type: String,
-        minLength: [3, 'Invalid description!'],
+        // minLength: [3, 'Invalid description!'],
         maxLength: [1020, 'Invalid description!']
     }, 
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
-    },
     isEnable: {
         type: Boolean,
         default: true
@@ -33,5 +36,4 @@ const foodSchema = new mongoose.Schema({
 });
 
 const Food = new mongoose.model('Food', foodSchema);
-
 module.exports = Food;

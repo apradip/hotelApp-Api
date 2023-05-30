@@ -1,11 +1,10 @@
-const Employee = require('../models/employees');
-const AccessLevel = require('../models/accessLevels');
-const jwt = require('jsonwebtoken');
+const Employee = require("../models/employees");
+const jwt = require("jsonwebtoken");
 
 const handleRefreshToken = async (req, res) => {
     const authHeader = req.headers.authorization || req.headers.Authorization;
-    if (!authHeader?.startsWith('Bearer ')) return res.sendStatus(401);
-    const refreshToken = authHeader.split(' ')[1].trim();
+    if (!authHeader?.startsWith("Bearer ")) return res.sendStatus(401);
+    const refreshToken = authHeader.split(" ")[1].trim();
     const foundEmployee = await Employee.findOne({ isEnable: true, refreshToken }).exec();
     if (!foundEmployee) return res.sendStatus(403);
 
@@ -25,20 +24,20 @@ const handleRefreshToken = async (req, res) => {
                 
                 const accessToken = jwt.sign(
                     {
-                        'UserInfo': {
-                            'userid': foundEmployee._id,
-                            'username': decoded.username,
-                            'roles': employeeRoles
+                        UserInfo: {
+                            userid: foundEmployee._id,
+                            username: decoded.username,
+                            roles: employeeRoles
                         }
                     },
                     process.env.ACCESS_TOKEN_SECRET,
-                    {expiresIn: '1h'}
+                    {expiresIn: "1h"}
                 );
     
                 const refreshToken = jwt.sign(
-                    {'username': decoded.username},
+                    {username: decoded.username},
                     process.env.REFRESH_TOKEN_SECRET,
-                    {expiresIn: '1d'}
+                    {expiresIn: "1d"}
                 );
     
                 // Saving refreshToken with current user
@@ -49,6 +48,6 @@ const handleRefreshToken = async (req, res) => {
             }
         );
     }
-}
+};
 
-module.exports={ handleRefreshToken }
+module.exports = {handleRefreshToken};

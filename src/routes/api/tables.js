@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { handelSearch, handelDetail, handelCreate, handelUpdate, handelRemove } = require("../../controllers/tables");
+const {handelSearch, handelDetail, handelCreate, handelUpdate, handelRemove} = require("../../controllers/tables");
 const ROLE_LIST = require("../../config/roleList");
 const verifyRoles = require("../../middlewares/verifyRoles");
 

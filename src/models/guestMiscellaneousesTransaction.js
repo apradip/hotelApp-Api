@@ -1,69 +1,52 @@
 const mongoose = require("mongoose");
-const date = require("date-and-time");
 
 const guestMiscellaneousTransactionSchema = new mongoose.Schema({
     hotelId: {
-        type: String,
-        required: [true, 'Invalid hotel!']
+        type: String
     },
     guestId: {
-        type: String, 
-        required: [true, 'Invalid guest!']
+        type: String
     },
     miscellaneousId: {
-        type: String, 
-        required: [true, 'Invalid miscellaneous!']
+        type: String
     },
     name: {
-        type: String, 
-        required: [true, 'Invalid miscellaneous!']
+        type: String 
     },
     serviceChargePercentage: {
-        type: Number,
-        required: [true, 'Invalid service charge percentage!']
+        type: Number
     },
     serviceCharge: {
-        type: Number,
-        required: [true, 'Invalid service charge!']
+        type: Number
     },
     gstPercentage: {
-        type: Number,
-        required: [true, 'Invalid gst charge percentage!']
+        type: Number
     },
     gstCharge: {
-        type: Number,
-        required: [true, 'Invalid gst charge!']
+        type: Number
     },
     unitPrice: {
-        type: Number, 
-        required: [true, 'Invalid unit price!']
+        type: Number
     },
     quantity: {
-        type: Number, 
-        required: [true, 'Invalid quantity!']
+        type: Number 
     },
     totalPrice: {
-        type: Number, 
-        required: [true, 'Invalid total price!']
+        type: Number
     },
     orderDate: {
-        type: Date,
-        required: [true, 'Invalid order date!']
+        type: String
     },
     orderTime: {
-        type: String,
-        required: [true, 'Invalid order time!']
+        type: String
     },
     despatchDate: {
-        type: Date,
-        required: [true, 'Invalid despatch date!']
+        type: String
     },
     despatchTime: {
-        type: String,
-        required: [true, 'Invalid despatch time!']
+        type: String
     }
 });
 
-const GuestMiscellaneousTransaction = new mongoose.model('GuestMiscellaneousTransaction', guestMiscellaneousTransactionSchema);
-
+const GuestMiscellaneousTransaction = new mongoose.model("GuestMiscellaneousTransaction", guestMiscellaneousTransactionSchema);
 module.exports = GuestMiscellaneousTransaction;

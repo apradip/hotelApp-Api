@@ -1,4 +1,4 @@
-const GST = require('../models/gsts');
+const GST = require("../models/gsts");
 
 //handel search gst
 //query string : search between minTariff, maxTariff
@@ -13,8 +13,8 @@ const handelSearch = async (req, res) => {
             const filterData = await GST.findOne({isEnable: true, 
                                                   minTariff: {$lte: search},
                                                   maxTariff: {$gte: search}})
-                                        .sort('gstPercentage')                                
-                                        .select('_id minTariff maxTariff gstPercentage')
+                                        .sort("gstPercentage")                                
+                                        .select("_id minTariff maxTariff gstPercentage")
                                         .exec();
             if (!filterData) return res.status(404).send();
 
@@ -23,7 +23,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 async function search(tariff) {
     try {
@@ -43,7 +43,7 @@ async function search(tariff) {
     } catch(e) {
         throw e;
     }
-}
+};
 
 
 //handel detail gst
@@ -58,7 +58,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel add gst
@@ -82,7 +82,7 @@ const handelCreate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }        
-}
+};
 
 
 //handel update gst
@@ -111,7 +111,7 @@ const handelUpdate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel delete gst
@@ -129,14 +129,14 @@ const handelRemove = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
-module.exports = {
+module.exports =  {
     handelSearch,
     search,
     handelDetail,
     handelCreate,
     handelUpdate,
     handelRemove
-}
+};

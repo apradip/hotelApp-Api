@@ -14,24 +14,23 @@ const bookingAgentSchema = new mongoose.Schema({
     }, 
     description: {
         type: String,
-        minLength: [3, 'Invalid description!'],
+        // minLength: [3, 'Invalid description!'],
         maxLength: [1020, 'Invalid description!'],
-        validate(value) {
-            if (value ===  "" || value ===  null) {
-                throw new Error("Name require!");
-            }
-       }
+    //     validate(value) {
+    //         if (value ===  "" || value ===  null) {
+    //             throw new Error("Name require!");
+    //         }
+    //    }
     }, 
-    updatedDate: { 
-        type: Date, 
-        default: Date.now 
-    },
+    // updatedDate: { 
+    //     type: Date, 
+    //     default: Date.now 
+    // },
     isEnable: {
         type: Boolean,
         default: true
     }
 });
 
-const BookingAgent = new mongoose.model('BookingAgent', bookingAgentSchema);
-
+const BookingAgent = new mongoose.model("BookingAgent", bookingAgentSchema);
 module.exports = BookingAgent;

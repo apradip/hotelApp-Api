@@ -7,13 +7,13 @@ const handelSearch = async (req, res) => {
     try {
         const _id = req.params._id;
         const search = req.query.search;
-        const data = await Guest.find({_id, isEnable: true })
+        const data = await Hotel.find({_id, isEnable: true })
                                         .sort("name")                                
                                         .select("_id name address city state pin phone email webSiteUrl logoUrl gstNo fincialDecimalPlace serviceChargePercentage foodGstPercentage").exec();
         if (!data) return res.status(404).send();
 
         if (search) {
-            const filterData = await Guest.find({isEnable: true, 
+            const filterData = await Hotel.find({isEnable: true, 
                                                  $or: [{name: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
                                                  {address: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
                                                  {city: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
@@ -35,7 +35,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 //handel detail hotel
 //query string : _Id
@@ -49,7 +49,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 //handel add hotel
 //body detail: {"name" : "", "address" : "", "city" : "", "state" : "",
@@ -84,7 +84,7 @@ const handelCreate = async (req, res) => {
     }
     
     return res.status(404).send();
-}
+};
 
 //handel update hotel
 //query string : _Id
@@ -100,7 +100,7 @@ const handelUpdate = async (req, res) => {
         const data = await Hotel.findOne({_id, isEnable: true}).exec();
         if (!data) return res.status(404).send();
 
-        const resUpdate = await Guest.findByIdAndUpdate(_id, 
+        const resUpdate = await Hotel.findByIdAndUpdate(_id, 
             {name: name.trim().toUpperCase(), 
                 name,
                 address,
@@ -123,7 +123,7 @@ const handelUpdate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel delete hotel
@@ -141,7 +141,7 @@ const handelRemove = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 async function detail (id) {    
@@ -153,7 +153,7 @@ async function detail (id) {
     } catch(e) {
         throw e;
     }
-}
+};
 
 async function getLastBillNo (id) {    
     try {   
@@ -165,17 +165,17 @@ async function getLastBillNo (id) {
     } catch(e) {
         throw e;
     }
-}
+};
 
 async function setLastBillNo (id, no) {    
     try {   
-        const data = await Hotel.findByIdAndUpdate(id, {lastBillNo: no})
+        const data = await Hotel.findByIdAndUpdate(mongoose.Types.ObjectId(id), {lastBillNo: no})
     } catch(e) {
         throw e
     }
 
     return true
-}
+};
 
 
 module.exports = {
@@ -187,4 +187,4 @@ module.exports = {
     detail,
     getLastBillNo,
     setLastBillNo
-}
+};

@@ -3,7 +3,7 @@ const EMAIL_SETTINGS = require("../config/emailOptions");
 
 async function sendOtpEmail(to, otp) {
   try {
-    let transporter = nodemailer.createTransport(EMAIL_SETTINGS.EMAIL_SETTINGS);
+    let transporter = createTransport(EMAIL_SETTINGS.EMAIL_SETTINGS);
 
     // send mail with defined transport object
     let info = await transporter.sendMail({
@@ -20,10 +20,10 @@ async function sendOtpEmail(to, otp) {
               </div>`
     });
     
-    // console.log("Message sent: %s", info.messageId);
+    console.log("Message sent: %s", info.messageId);
     return true;
   } catch (e) {
-    // console.error(e);
+    console.error(e);
     return false;
   }
 };

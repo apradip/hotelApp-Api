@@ -6,6 +6,6 @@ const EMAIL_SETTINGS = {
       user: process.env.EMAIL_ADDRESS,
       pass: process.env.EMAIL_PASSWORD
     }
-}
+};
 
-module.exports = {EMAIL_SETTINGS}
+module.exports = {EMAIL_SETTINGS};

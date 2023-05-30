@@ -1,5 +1,4 @@
-const Service = require('../models/services');
-
+const Service = require("../models/services");
 
 //handel search service
 //query string : hotel Id?search= name
@@ -9,14 +8,14 @@ const handelSearch = async (req, res) => {
         const search = req.query.search;
         
         const data = await Service.find({hotelId, isEnable: true})
-                                        .sort('name')                                
-                                        .select('hotelId _id name price description').exec();
+                                        .sort("name")                                
+                                        .select("hotelId _id name price description");
         if (!data) return res.status(404).send();
 
         if (search) {
             const filterData = await Service.find({hotelId, isEnable: true, name: {$regex: '.*' + search.trim().toUpperCase() + '.*'}})
-                                                .sort('name')                                
-                                                .select('hotelId _id name price description').exec();
+                                                .sort("name")                                
+                                                .select("hotelId _id name price description");
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -26,7 +25,7 @@ const handelSearch = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel detail service
@@ -34,7 +33,7 @@ const handelSearch = async (req, res) => {
 const handelDetail = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Service.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Service.findOne({hotelId, isEnable: true, _id});
 
         if (!data) return res.status(404).send();
 
@@ -42,7 +41,7 @@ const handelDetail = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel add service
@@ -57,10 +56,10 @@ const handelCreate = async (req, res) => {
             hotelId,
             name: name.trim().toUpperCase(),
             price: price,
-            description: description.trim(), 
+            description: description.length > 0 ? description.trim() : "", 
         });
 
-        const duplicate = await Service.find({hotelId, isEnable: true, name: data.name}).exec();
+        const duplicate = await Service.find({hotelId, isEnable: true, name: data.name});
         if (duplicate.length !== 0) return res.status(409).send("Service already exists!");
 
         const resAdd = await data.save();
@@ -70,7 +69,7 @@ const handelCreate = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e);
     }        
-}
+};
 
 
 //handel update service
@@ -80,10 +79,10 @@ const handelUpdate = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
         const {name, price, description} =  req.body;
-        const data = await Service.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Service.findOne({hotelId, isEnable: true, _id});
         if (!data) return res.status(404).send();
 
-        const duplicate = await Service.find({hotelId, isEnable: true, name: name.trim().toUpperCase()}).exec();
+        const duplicate = await Service.find({hotelId, isEnable: true, name: name.trim().toUpperCase()});
         if (duplicate.length > 0) {
             duplicate.map((item) => {
                 if (item._id.toString() !== _id) {
@@ -95,14 +94,14 @@ const handelUpdate = async (req, res) => {
         const resUpdate = await Service.findByIdAndUpdate(_id, {
                                                                 name: name.trim().toUpperCase(),
                                                                 price: price, 
-                                                                description: description.trim()}).exec();
+                                                                description: description.length > 0 ? description.trim() : ""});
         if (!resUpdate) return res.status(400).send(resUpdate);
 
         return res.status(200).send(resUpdate);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 //handel delete service
@@ -110,18 +109,18 @@ const handelUpdate = async (req, res) => {
 const handelRemove = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const data = await Service.findOne({hotelId, isEnable: true, _id}).exec();
+        const data = await Service.findOne({hotelId, isEnable: true, _id});
 
         if (!data) return res.status(404).send();
 
-        const resDelete = await Service.findByIdAndUpdate(_id, {isEnable: false}).exec();
+        const resDelete = await Service.findByIdAndUpdate(_id, {isEnable: false});
         if (!resDelete) return res.status(400).send(resDelete);
 
         return res.status(200).send(resDelete);
     } catch(e) {
         return res.status(500).send(e);
     }
-}
+};
 
 
 module.exports = {
@@ -130,4 +129,4 @@ module.exports = {
     handelCreate,
     handelUpdate,
     handelRemove
-}
+};

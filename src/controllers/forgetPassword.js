@@ -46,6 +46,6 @@ const handelSendOtp = async (req, res) => {
         console.log(e);
         return res.status(400).send(e);
     }
-}
+};
 
 module.exports = {handelSendOtp};
