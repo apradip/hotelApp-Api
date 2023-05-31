@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const Hotel = require("./hotels");
 const Guest = require("../models/guests");
 const Services = require("../models/services");
+const GuestServiceTransaction = require("../models/guestServicesTransaction");
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const date = require("date-and-time");
 
@@ -94,7 +95,7 @@ const handelSearch = async (req, res) => {
 
         } else {
             const pipeline = [filter1, filter2, filter3];
-            const data = await aggregate(pipeline); 
+            const data = await Guest.aggregate(pipeline); 
             if (!data) return res.status(404).send();
 
             await Promise.all(data.map(async (element) => {
@@ -170,7 +171,7 @@ const handelDetail = async (req, res) => {
             const pipeline = [filter1, filter2, filter3, filter4, filter5];
             foundGuestServiceList = await Guest.aggregate(pipeline)  ;
 
-        } else if (option === 'A') {
+        } else if (option === "A") {
             const filter1 = {
                 $match: {
                     _id: mongoose.Types.ObjectId(guestId),         
@@ -511,7 +512,7 @@ const handelGenerateBill = async (req, res) => {
         // insert into expense if the transaction is not present
         for (const sum of resServices) {
             // get hotel last bill no
-            let billNo = await getLastBillNo(hotelId);
+            let billNo = await Hotel.getLastBillNo(hotelId);
             billNo += 1; 
 
             const resExpenseUpdate = await Guest.updateOne(
@@ -559,7 +560,7 @@ const handelGenerateBill = async (req, res) => {
             }
 
             // set hotel last bill no
-            await setLastBillNo(hotelId, billNo);
+            await Hotel.setLastBillNo(hotelId, billNo);
 
             // update balance
             const resUpdateBalance = await Guest.findByIdAndUpdate(
@@ -709,7 +710,7 @@ async function totalExpense(detail) {
     let total = 0;
 
     for (const exp of detail) {
-        exp.type !== 'P' ? total += exp.expenseAmount : total += 0;
+        exp.type !== "P" ? total += exp.expenseAmount : total += 0;
     }
 
     return total;
