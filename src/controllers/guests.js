@@ -1,4 +1,21 @@
+const mongoose = require("mongoose");
 const Guest = require("../models/guests");
+const Table = require("../models/tables");
+const date = require("date-and-time");
+
+class tableType {
+    constructor(id, no) {
+      this.id = id;
+      this.no = no;
+    }
+};
+
+class foodTransactionType {
+    constructor(tables, foods) {    
+        this.tables = tables;
+        this.foods = foods;
+    }
+};
 
 //handel search guest
 //query string : hotel Id?search= guest name, father name, mobile, address, city, police station, state, pin 
@@ -70,7 +87,7 @@ const handelCreate = async (req, res) => {
     const {option} = req.body
 
     try {
-        if (option.trim().toUpperCase() === 'D') {
+        if (option.trim().toUpperCase() === "R") {  //For room
             const {idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, 
                 pin, phone, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
                 dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} = req.body
@@ -105,16 +122,110 @@ const handelCreate = async (req, res) => {
     
             return res.status(200).send(data)
                             
-        } else if (option.trim().toUpperCase() === 'S') {
+        } else if (option.trim().toUpperCase() === "T") {   //for table
+            const {name, mobile, guestCount, 
+                corporateName, corporateAddress, gstNo, tables} = req.body
+
+            const data = new Guest({
+                hotelId,
+                name: name ? name.trim().toUpperCase() : "", 
+                mobile,
+                guestCount,
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
+                gstNo,
+                option});
+                
+            const resAdd = await data.save();
+            if (!resAdd) return res.status(400).send();
+
+            const guestId = data._id;    
+
+            // const transaction = new foodTransactionType(
+            //     [], [], 
+            //     checkInDate, 
+            //     checkInTime);
+        
+            const transaction = new foodTransactionType([], []);
+
+            for(const table of tables) {
+                // check if the table is empty
+                const filter = {
+                    _id: mongoose.Types.ObjectId(table.id), 
+                    hotelId: hotelId, 
+                    isOccupied: false, 
+                    isEnable: true
+                };
+                const foundTable = await Table.findOne(filter);
+    
+                if (foundTable) {
+                    transaction.tables.push(new tableType(
+                        table.id, 
+                        foundTable.no
+                    ));
+                }
+    
+                const update = {
+                    guestId: guestId, 
+                    isOccupied: true
+                };
+                const resTableUpdate = await Table.updateOne(filter, update);
+                if (!resTableUpdate) return res.status(404).send();
+            }
+    
+            const filterGuest = {_id: guestId};
+            const updateGuest = {$push: {tablesDetail: transaction}};
+            const resGuestUpdate = await Guest.updateOne(filterGuest, updateGuest);  
+            if (!resGuestUpdate) return res.status(404).send();
+
+            return res.status(200).send(data)
+
+        } else if (option.trim().toUpperCase() === "S") {   //For service
             const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body
 
             const data = new Guest({
                 hotelId,
-                name: name ? name.trim().toUpperCase() : '', 
+                name: name ? name.trim().toUpperCase() : "", 
                 mobile,
                 guestCount,
-                corporateName: corporateName ? corporateName.trim().toUpperCase() : '',
-                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : '', 
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
+                gstNo,
+                option})
+
+            const resAdd = await data.save()
+            if (!resAdd) return res.status(400).send()
+    
+            return res.status(200).send(data)
+
+        } else if (option.trim().toUpperCase() === "M") {   //For miscellaneous
+            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body
+
+            const data = new Guest({
+                hotelId,
+                name: name ? name.trim().toUpperCase() : "", 
+                mobile,
+                guestCount,
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
+                gstNo,
+                option})
+
+            const resAdd = await data.save()
+            if (!resAdd) return res.status(400).send()
+    
+            return res.status(200).send(data)
+
+        } else if (option.trim().toUpperCase() === "A") {   //For advance
+            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body
+
+            const data = new Guest({
+                hotelId,
+                name: name ? name.trim().toUpperCase() : "", 
+                mobile,
+                guestCount,
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
                 gstNo,
                 option})
 
@@ -229,6 +340,44 @@ const handelRemove = async (req, res) => {
     try {
         const data = await Guest.findOne({hotelId, isEnable: true, _id});
         if (!data) return res.status(404).send()
+
+        if (data.option == "T") {
+            //get last transaction id
+            //get all tables id of that transaction
+            const filter1 = {
+                $match: {
+                    _id: mongoose.Types.ObjectId(_id),         
+                    hotelId,
+                    isEnable: true
+                }
+            };
+            const filter2 = {
+                $project: {
+                    _id: 0,
+                    tablesDetail: {
+                        $slice: ["$tablesDetail", -1] 
+                    }
+                }
+            };
+
+            const pipeline = [filter1, filter2];
+            const foundTableDetails = await Guest.aggregate(pipeline);  
+
+            //update all tables guestid it null & occupied status is false
+            foundTableDetails.forEach(async (item) => {
+                item.tablesDetail.forEach(async (tableDetail) => {
+                    tableDetail.tables.forEach(async (table) => {
+                        const tableId = table.id;
+                        const resRelese = await Table.findByIdAndUpdate(
+                                                mongoose.Types.ObjectId(tableId), 
+                                                {$set: {isOccupied: false,
+                                                        guestId: ""}}                                        
+                                                );  
+                        if (!resRelese) return res.status(404).send();                                            
+                    });
+                });
+            });
+        }
 
         const resDelete = await Guest.findByIdAndUpdate(_id, {isEnable: false});
         if (!resDelete) return res.status(400).send(resDelete)

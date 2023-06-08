@@ -1,4 +1,4 @@
-const Table = require('../models/tables');
+const Table = require("../models/tables");
 
 
 //handel search table
@@ -6,17 +6,26 @@ const Table = require('../models/tables');
 const handelSearch = async (req, res) => {
     try {
         const hotelId = req.params.hotelId;
+        const option = req.query.option;
         const search = req.query.search;
-        
-        const data = await Table.find({hotelId, isEnable: true})
-                                        .sort('no')                                
-                                        .select('hotelId _id no description isOccupied');
+        let data = [];
+
+        if (option === "E") {
+            data = await Table.find({hotelId, isEnable: true, isOccupied: false})
+                                     .sort("no")                                
+                                     .select("hotelId _id no description isOccupied");
+        } else {
+            data = await Table.find({hotelId, isEnable: true})
+                                     .sort("no")                                
+                                     .select("hotelId _id no description isOccupied");
+        }
+
         if (!data) return res.status(404).send();
 
         if (search) {
-            const filterData = await Table.find({hotelId, isEnable: true, no: {$regex: '.*' + search.trim().toUpperCase() + '.*'}})
-                                                .sort('no')                                
-                                                .select('hotelId _id no description isOccupied');
+            const filterData = await Table.find({hotelId, isEnable: true, no: {$regex: ".*" + search.trim().toUpperCase() + ".*"}})
+                                                .sort("no")                                
+                                                .select("hotelId _id no description isOccupied");
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        

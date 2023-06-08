@@ -53,8 +53,8 @@ class expenseTransactionType {
 //body : {"tables": [{"id": ""}]}
 const handelTableBooking = async (req, res) => {
     try {
-        const { hotelId, guestId } = req.params;
-        const { tables } = req.body;
+        const {hotelId, guestId} = req.params;
+        const {tables} = req.body;
 
         const transaction = new foodTransactionType(
             [], [], 
@@ -457,7 +457,7 @@ const handelDelivery = async (req, res) => {
 //query string : hotel Id / guest Id / transaction Id
 const handelCheckout = async (req, res) => {
     try {
-        const { hotelId, guestId, transactionId } = req.params;
+        const {hotelId, guestId, transactionId} = req.params;
 
         // calculate and update miscellaneous total
         const filter1 = {
@@ -469,11 +469,11 @@ const handelCheckout = async (req, res) => {
             }
         };
         const filter2 = {
-            $unwind: '$tablesDetail'
+            $unwind: "$tablesDetail"
         };
         const filter3 = {
             $match: {
-                'tablesDetail._id': mongoose.Types.ObjectId(transactionId)
+                "tablesDetail._id": mongoose.Types.ObjectId(transactionId)
             }
         };
         const filter4 = {
@@ -486,7 +486,7 @@ const handelCheckout = async (req, res) => {
             }
         };
         const filter5 = { 
-            $unwind: '$tablesDetail.foods' 
+            $unwind: "$tablesDetail.foods"
         };  
         const filter6 = {
             $group: {
@@ -534,7 +534,7 @@ const handelCheckout = async (req, res) => {
         const resExpenseUpdate = await updateOne(
             {
                 _id: mongoose.Types.ObjectId(guestId),
-                'expensesPaymentsDetail': {
+                "expensesPaymentsDetail": {
                     $not: {
                         $elemMatch: {
                             expenseId: transactionId
@@ -544,7 +544,7 @@ const handelCheckout = async (req, res) => {
             },
             {
                 $push: {
-                    'expensesPaymentsDetail': new expenseTransactionType(transactionId, resFoods[0].total)
+                    "expensesPaymentsDetail": new expenseTransactionType(transactionId, resFoods[0].total)
                 }
             }
         );    

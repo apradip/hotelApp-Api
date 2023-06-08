@@ -50,8 +50,9 @@ const handelSearch = async (req, res) => {
                 hotelId: hotelId,
                 isActive: true,
                 isEnable: true,
-                outDate: { $exists:false },
-                outTime: { $exists:false }
+                outDate: {$exists:false},
+                outTime: {$exists:false},
+                $or: [{option: "R"}, {option: "M"}]
             }
         };
         const filter2 = {

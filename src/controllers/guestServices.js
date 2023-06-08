@@ -53,7 +53,8 @@ const handelSearch = async (req, res) => {
                 isActive: true,
                 isEnable: true,
                 outDate: {$exists:false},
-                outTime: {$exists:false}
+                outTime: {$exists:false},
+                $or: [{option: "R"}, {option: "S"}]
             }
         };
         const filter2 = {
@@ -417,9 +418,9 @@ const handelDelivery = async (req, res) => {
                 }
             },
             { 
-                arrayFilters: [{ 
-                    "ele._id": mongoose.Types.ObjectId(transactionId)
-                }]           
+                arrayFilters: [ 
+                    {"ele._id": mongoose.Types.ObjectId(transactionId)}
+                ]           
             }
         );  
         if (!resDelivery) return res.status(404).send(resDelivery);

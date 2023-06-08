@@ -20,12 +20,6 @@ router.route("/:hotelId/:guestId")
         ROLE_LIST.OFFICE_STAFF,
         ROLE_LIST.RECEPTIONIST,
         ROLE_LIST.RESTAURANT_MANAGER), handelDetail)
-    .post(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-        ROLE_LIST.HOTEL_ADMIN, 
-        ROLE_LIST.KITCHEN_ADMIN,
-        ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelOrder)
     .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
@@ -46,6 +40,12 @@ router.route("/:hotelId/:guestId/:transactionId")
         ROLE_LIST.OFFICE_STAFF,
         ROLE_LIST.RECEPTIONIST,
         ROLE_LIST.RESTAURANT_MANAGER), handelBillDetail)
+    .post(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+        ROLE_LIST.HOTEL_ADMIN, 
+        ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.OFFICE_STAFF,
+        ROLE_LIST.RECEPTIONIST,
+        ROLE_LIST.RESTAURANT_MANAGER), handelOrder)
     .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
