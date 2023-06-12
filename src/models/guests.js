@@ -1,93 +1,92 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 const date = require("date-and-time");
 
 const roomTransactionSchema = new mongoose.Schema({
     id: { 
         type:String,
-        required: [true, 'Table id require!'],   
+        required: [true, "Table id require!"]
     },
     no: { 
         type:String,
-        required: [true, 'Table no require!'],   
+        required: [true, "Table no require!"]
     },
     tariff: {
         type: Number,
-        min: [1, 'Invalid tariff!'],
+        min: [1, "Invalid tariff!"],
         default: function() {
-            return this.tariff ? (this.tariff).toFixed(2) : 0
+            return this.tariff ? (this.tariff).toFixed(0) : 0
         }        
     },
     extraBedCount: {
         type: Number,
         default: 0,
-        min: [0, 'Invalid extra bed count!']
+        min: [0, "Invalid extra bed count!"]
     },
     extraBedTariff: {
         type: Number,
-        min: [0, 'Invalid extra bed charge!'],
+        min: [0, "Invalid extra bed charge!"],
         default: function() {
-            return this.extraBedTariff ? (this.extraBedTariff).toFixed(2) : 0
+            return this.extraBedTariff ? this.extraBedTariff.toFixed(0) : 0
         }        
     },
     extraPersonCount: {
         type: Number,
         default: 0,
-        min: [0, 'Invalid extra person count!'],
+        min: [0, "Invalid extra person count!"]
     },
     extraPersonTariff: {
         type: Number,
-        min: [0, 'Invalid extra person charge!'],
+        min: [0, "Invalid extra person charge!"],
         default: function() {
-            return this.extraPersonTariff ? (this.extraPersonTariff).toFixed(2) : 0
+            return this.extraPersonTariff ? this.extraPersonTariff.toFixed(0) : 0
         }        
     },
     discount: {
         type: Number,
-        min: [0, 'Invalid discount!'],
+        min: [0, "Invalid discount!"],
         default: function() {
-            return this.discount ? (this.discount).toFixed(2) : 0
+            return this.discount ? this.discount.toFixed(0) : 0
         }        
     },
     maxDiscount: {
         type: Number,
-        min: [0, 'Invalid max. discount!'],
+        min: [0, "Invalid max. discount!"],
         default: function() {
-            return this.maxDiscount ? (this.maxDiscount).toFixed(2) : 0
+            return this.maxDiscount ? this.maxDiscount.toFixed(0) : 0
         }        
     },
     gstPercentage: {
         type: Number,
-        min: [0, 'Invalid gst percentage!'],
+        min: [0, "Invalid gst percentage!"],
         default: function() {
-            return this.gstPercentage ? (this.gstPercentage).toFixed(2) : 0
+            return this.gstPercentage ? this.gstPercentage.toFixed(2) : 0
         }        
     },
     gstCharge: {
         type: Number,
-        min: [0, 'Invalid gst!'],
+        min: [0, "Invalid gst!"],
         default: function() {
-            return this.gstCharge ? (this.gstCharge).toFixed(2) : 0
+            return this.gstCharge ? this.gstCharge.toFixed(2) : 0
         }        
     },
     totalPrice: {
         type: Number,
-        min: [0, 'Invalid price!'],
+        min: [0, "Invalid price!"],
         default: function() {
-            return this.totalPrice ? (this.totalPrice).toFixed(2) : 0
+            return this.totalPrice ? this.totalPrice.toFixed(0) : 0
         }        
     },
     occupancyDate: {
-        type: String, 
+        type: String
     }
 });
 
 const tableSchema = new mongoose.Schema({
     id: { 
-        type:String,
+        type:String
     },
     no: { 
-        type:String,
+        type:String
     }
 });
 
@@ -98,64 +97,54 @@ const foodSchema = new mongoose.Schema({
     name: {
         type: String
     },
+    unitPrice: {
+        type: Number
+    },
+    quantity: {
+        type: Number
+    },
     serviceChargePercentage: {
-        type: Number,
-        default: function() {
-            return this.serviceChargePercentage ? (this.serviceChargePercentage).toFixed(2) : 0
-        }        
+        type: Number
+    },
+    gstPercentage: {
+        type: Number
     },
     serviceCharge: {
         type: Number,
         default: function() {
-            return (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)
-          }        
-    },
-    gstPercentage: {
-        type: Number,
-        default: function() {
-            return this.gstPercentage ? (this.gstPercentage).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(0);
         }        
     },
     gstCharge: {
         type: Number,
         default: function() {
-            let gst = (this.unitPrice * this.quantity) * (this.gstPercentage / 100)
-            return this.gst ? (this.gst).toFixed(2) : 0
-          }        
-    },
-    unitPrice: {
-        type: Number,
-        default: function() {
-            return this.unitPrice ? (this.unitPrice).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(0);
         }        
-    },
-    quantity: {
-        type: Number,
-        default: 0
     },
     totalPrice: {
         type: Number,
         default: function() {
-            let total = (this.unitPrice * this.quantity) + this.gstCharge + this.serviceCharge
-            return total ? (total).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) + this.serviceCharge + this.gstCharge).toFixed(0);
         }        
     },
     orderDate: { 
-        type: String
+        type: String,
+        default: function() {
+            return date.format(new Date(), "YYYY-MM-DD");
+        }
     },
     orderTime: { 
-        type: String
+        type: String,
+        default: function() {
+            return date.format(new Date(), "HH:mm");
+        }
     },
     despatchDate: { 
         type: String
     },
     despatchTime: { 
         type: String 
-    },
-    // isPostedToExpense: {
-    //     type: Boolean,
-    //     default: false
-    // }
+    }
 });
 
 const tableTransactionSchema = new mongoose.Schema({
@@ -173,7 +162,7 @@ const miscellaneousSchema = new mongoose.Schema({
     unitPrice: {
         type: Number,
         default: function() {
-            return this.unitPrice ? (this.unitPrice).toFixed(2) : 0
+            return this.unitPrice ? this.unitPrice.toFixed(2) : 0
         }        
     },
     quantity: {
@@ -182,14 +171,13 @@ const miscellaneousSchema = new mongoose.Schema({
     serviceChargePercentage: {
         type: Number,
         default: function() {
-            return this.serviceChargePercentage ? (this.serviceChargePercentage).toFixed(2) : 0
+            return this.serviceChargePercentage ? this.serviceChargePercentage.toFixed(2) : 0
         }        
     },
     serviceCharge: {
         type: Number,
         default: function() {
-            let service = (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100);
-            return service ? (service).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(0)
         }        
     },
     gstPercentage: {
@@ -201,15 +189,13 @@ const miscellaneousSchema = new mongoose.Schema({
     gstCharge: {
         type: Number,
         default: function() {
-            let gst = (this.unitPrice * this.quantity) * (this.gstPercentage / 100);
-            return gst ? gst.toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(0)
         }        
     },
     totalPrice: {
         type: Number,
         default: function() {
-            let price = (this.unitPrice * this.quantity) + (this.gstCharge + this.serviceCharge);
-            return price ? price.toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) + (this.gstCharge + this.serviceCharge)).toFixed(0)
         }        
     }
 });
@@ -250,33 +236,31 @@ const serviceSchema = new mongoose.Schema({
     serviceChargePercentage: {
         type: Number,
         default: function() {
-            return this.serviceChargePercentage ? (this.serviceChargePercentage).toFixed(2) : 0
+            return this.serviceChargePercentage ? this.serviceChargePercentage.toFixed(2) : 0
         }        
     },
     serviceCharge: {
         type: Number,
         default: function() {
-            let service = (this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100);
-            return service ? (service).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(0)
         }        
     },
     gstPercentage: {
         type: Number,
         default: function() {
-            return this.gstPercentage ? (this.gstPercentage).toFixed(2) : 0
+            return this.gstPercentage ? this.gstPercentage.toFixed(2) : 0
         }        
     },
     gstCharge: {
         type: Number,
         default: function() {
-            let gst = (this.unitPrice * this.quantity) * (this.gstPercentage / 100);
-            return gst ? (gst).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(0)
         }        
     },
     unitPrice: {
         type: Number,
         default: function() {
-            return this.unitPrice ? (this.unitPrice).toFixed(2) : 0
+            return this.unitPrice ? this.unitPrice.toFixed(2) : 0
         }        
     },
     quantity: {
@@ -285,8 +269,7 @@ const serviceSchema = new mongoose.Schema({
     totalPrice: {
         type: Number,
         default: function() {
-            let total = (this.unitPrice * this.quantity) + (this.gstCharge + this.serviceCharge);
-            return total ? (total).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) + (this.gstCharge + this.serviceCharge)).toFixed(0)
         }        
     }
 });
@@ -319,7 +302,7 @@ const serviceTransactionSchema = new mongoose.Schema({
 
 const expensesPaymentsTransactionSchema = new mongoose.Schema({
     billNo: {
-        type: Number,
+        type: Number
     },
     type: {
         type: String
@@ -330,13 +313,13 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
     expenseAmount: {
         type: Number,
         default: function() {
-            return this.expenseAmount ? (this.expenseAmount).toFixed(2) : 0
+            return this.expenseAmount ? this.expenseAmount.toFixed(0) : 0
         }        
     },
     paymentAmount: {
         type: Number,
         default: function() {
-            return this.paymentAmount ? (this.paymentAmount).toFixed(2) : 0
+            return this.paymentAmount ? this.paymentAmount.toFixed(0) : 0
         }        
     },
     narration: {
@@ -360,20 +343,20 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
 const guestSchema = new mongoose.Schema({
     hotelId: {
         type: String,
-        required: [true, 'Invalid hotel!']
+        required: [true, "Invalid hotel!"]
     },
     idDocumentId: {
         type: String
     },
     idNo: {
         type: String,
-        minLength: [6, 'Invalid id no!'],
-        maxLength: [100, 'Invalid id no!']
+        minLength: [6, "Invalid id no!"],
+        maxLength: [100, "Invalid id no!"]
     }, 
     name: {
         type: String,
-        minLength: [3, 'Invalid name!'],
-        maxLength: [100, 'Invalid name!'],
+        minLength: [3, "Invalid name!"],
+        maxLength: [100, "Invalid name!"],
         validate(value) {
             if (value === "" || value === null) {
                 throw new Error("Name require!");
@@ -385,41 +368,41 @@ const guestSchema = new mongoose.Schema({
     },
     fatherName: {
         type: String,
-        minLength: [3, 'Invalid name!'],
-        maxLength: [100, 'Invalid name!']
+        minLength: [3, "Invalid name!"],
+        maxLength: [100, "Invalid name!"]
     }, 
     address: {
         type: String,
-        minLength: [3, 'Invalid address!'],
-        maxLength: [1020, 'Invalid address!']
+        minLength: [3, "Invalid address!"],
+        maxLength: [1020, "Invalid address!"]
     }, 
     city: {
         type: String,
-        minLength: [3, 'Invalid city!'],
-        maxLength: [100, 'Invalid city!']
+        minLength: [3, "Invalid city!"],
+        maxLength: [100, "Invalid city!"]
     },
     policeStation: {
         type: String,
-        minLength: [3, 'Invalid p.s!'],
-        maxLength: [100, 'Invalid p.s!']
+        minLength: [3, "Invalid p.s!"],
+        maxLength: [100, "Invalid p.s!"]
     },
     state: {
         type: String,
-        minLength: [3, 'Invalid state!'],
-        maxLength: [100, 'Invalid state!']
+        minLength: [3, "Invalid state!"],
+        maxLength: [100, "Invalid state!"]
     },
     pin: {
         type: String,
-        minLength: [6, 'Invalid pin!'],
-        maxLength: [10, 'Invalid pin!']
+        minLength: [6, "Invalid pin!"],
+        maxLength: [10, "Invalid pin!"]
     },
     phone: {
         type: String
     },
     mobile: {
         type: String,
-        minLength: [10, 'Invalid mobile no!'],
-        maxLength: [10, 'Invalid mobile no!'],
+        minLength: [10, "Invalid mobile no!"],
+        maxLength: [10, "Invalid mobile no!"],
         validate(value) {
             if (value ===  "" || value ===  null) {
                 throw new Error("Mobile no. require!");
@@ -428,37 +411,29 @@ const guestSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        minLength: [6, 'Invalid email!'],
-        maxLength: [160, 'Invalid email!'],
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Invalid email!']
+        minLength: [6, "Invalid email!"],
+        maxLength: [160, "Invalid email!"],
+        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "Invalid email!"]
     },
     guestCount: {
         type: Number,
         default: 0,
-        min: [1, 'Invalid no. of guest!']
+        min: [1, "Invalid no. of guest!"]
     },
     guestMaleCount: {
-        type: Number,
-        // default: 0
+        type: Number
     },
     guestFemaleCount: {
-        type: Number,
-        // default: 0
+        type: Number
     },
     corporateName: {
-        type: String,
-        // minLength: [3, 'Invalid corporate name!'],
-        // maxLength: [100, 'Invalid corporate name!'],
+        type: String
     }, 
     corporateAddress: {
-        type: String,
-        // minLength: [3, 'Invalid corporate address!'],
-        // maxLength: [1020, 'Invalid corporate address!'],
+        type: String
     },
     gstNo: {
-        type: String,
-        // minLength: [15, 'Invalid GST no.!'],
-        // maxLength: [15, 'Invalid GST no.!'],
+        type: String
     },
     bookingAgentId: {
         type: String
@@ -474,7 +449,7 @@ const guestSchema = new mongoose.Schema({
     balance: {
         type: Number,
         default: function() {
-            return this.balance ? (this.balance).toFixed(2) : 0
+            return this.balance ? this.balance.toFixed(0) : 0
         }        
     },
     inDate: {
@@ -498,7 +473,7 @@ const guestSchema = new mongoose.Schema({
     option: {
         type: String,
         default: "S",
-        required: [true, 'option require!']
+        required: [true, "option require!"]
     },
     isActive: {
         type: Boolean,

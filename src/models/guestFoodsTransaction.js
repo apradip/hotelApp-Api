@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
 
 const guestFoodTransactionSchema = new mongoose.Schema({
     hotelId: {
@@ -14,22 +13,22 @@ const guestFoodTransactionSchema = new mongoose.Schema({
     name: {
         type: String
     },
-    serviceChargePercentage: {
+    unitPrice: {
         type: Number
     },
-    serviceCharge: {
+    quantity: {
+        type: Number
+    },
+    serviceChargePercentage: {
         type: Number
     },
     gstPercentage: {
         type: Number
     },
+    serviceCharge: {
+        type: Number
+    },
     gstCharge: {
-        type: Number
-    },
-    unitPrice: {
-        type: Number
-    },
-    quantity: {
         type: Number
     },
     totalPrice: {
