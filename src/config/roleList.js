@@ -5,6 +5,7 @@ const ROLE_LIST = {
     "HR_ADMIN": "63d111e6fccb2dc4148fee00",
     "OFFICE_STAFF": "63d4bd606db7869905faf6ef",
     "RECEPTIONIST": "63be8a9884c665ede33342c6",
+    "SERVICE_ADMIN": "63d4f1eb87f7dc718324ec34",
     "ROOM_SERVICE": "63c7784dbecbeb16e2d1b373",
     "HOUSEKEEPING": "63c77ba8becbeb16e2d1b3b1",
     "SERVICE_BOY": "63cdfe975eb2975c2b84005e",

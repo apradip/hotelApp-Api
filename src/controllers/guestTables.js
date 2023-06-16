@@ -9,7 +9,7 @@ const date = require("date-and-time");
 
 class foodType {
     constructor(id, name, unitPrice, quantity, serviceChargePercentage, gstPercentage) {
-      this.foodId = id;
+      this.id = id;
       this.name = name;
       this.unitPrice = unitPrice;
       this.quantity = quantity;
@@ -32,9 +32,10 @@ class expenseType {
 //handel search guest
 //query string : hotel Id?search= guest name, mobile, corporate name, corporate address
 const handelSearch = async (req, res) => {
-    let returnList = [];
     const hotelId = req.params.hotelId;
     const search = req.query.search;
+
+    let returnList = [];
 
     try {
         const filter1 = {
@@ -128,10 +129,10 @@ const handelSearch = async (req, res) => {
 //query string : hotel Id / guest Id 
 //query string : option = option: [non delivery / all]
 const handelDetail = async (req, res) => {
-    let foodList = [];
-
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
+
+    let foodList = [];
 
     try {
         let foundGuestFoodList = null;
@@ -201,14 +202,15 @@ const handelDetail = async (req, res) => {
 
         if (!foundGuestFoodList) return res.status(404).send();
 
-        foundGuestFoodList.forEach(async tablesDetail => {
+        // foundGuestFoodList.forEach(async tablesDetail => {
+        await Promise.all(foundGuestFoodList.map(async (tablesDetail) => {
             const transactionId = tablesDetail.tablesDetail._id;
             const food = tablesDetail.tablesDetail.foods;
             
             const dataOrder = {
                 transactionId: transactionId,
                 foodTransactionId: food._id,
-                foodId: food.foodId,
+                id: food.id,
                 name: food.name,
                 quantity: food.quantity,
                 unitPrice: food.unitPrice,
@@ -224,7 +226,7 @@ const handelDetail = async (req, res) => {
             };
 
             foodList.push(dataOrder);
-        });
+        }));
     } catch(e) {
         return res.status(500).send(e);
     }        
@@ -278,7 +280,8 @@ const handelOrder = async (req, res) => {
             
             foodsDb = resFoodsDetail[0].tablesDetail.foods;
 
-            for (const food of foods) {        
+            // for (const food of foods) {        
+            await Promise.all(foods.map(async (food) => {
                 if (food) {
                     if (((food.operation) === "M") || ((food.operation) === "R")) {
                         const keyToFind = "id";
@@ -286,11 +289,11 @@ const handelOrder = async (req, res) => {
                         foodsDb = foodsDb.filter(obj => obj[keyToFind] !== valueToFind);
                     }
                 }
-            }
+            }));
 
-            for (const food of foods) {       
+            // for (const food of foods) {       
+            await Promise.all(foods.map(async (food) => {
                 if (((food.operation) === "A") || ((food.operation) === "M")) {
-                    
                     // check for item existance
                     const foundFood = await Food.findOne(
                         {
@@ -311,7 +314,7 @@ const handelOrder = async (req, res) => {
                         ));
                     }
                 }
-            }
+            }));
 
             const resFoodUpdate = await Guest.updateOne(
                 {
@@ -348,7 +351,8 @@ const handelDelivery = async (req, res) => {
         const {hotelId, guestId, transactionId} = req.params;
         const {foods} = req.body;
 
-        for (const item of foods) {    
+        // for (const item of foods) {    
+        await Promise.all(foods.map(async (item) => {
             if (item) {
                 // update all delivery date & time
                 const resDelivery = await Guest.updateOne(
@@ -384,7 +388,6 @@ const handelDelivery = async (req, res) => {
                         isEnable: true
                     }
                 };
-        
                 const filter2 = {
                     $project: {
                         _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
@@ -394,21 +397,17 @@ const handelDelivery = async (req, res) => {
                         option: 0, isActive: 0, isEnable: 0, 'tablesDetail.tables': 0
                     }
                 };
-
                 const filter3 = {
                     $unwind: "$tablesDetail"
                 };
-        
                 const filter4 = {
                     $match: {
                         "tablesDetail._id": mongoose.Types.ObjectId(transactionId)
                     }
                 };
-
                 const filter5 = { 
                     $unwind: "$tablesDetail.foods" 
                 };  
-        
                 const filter6 = {
                     $match: {
                         "tablesDetail.foods._id": mongoose.Types.ObjectId(item.foodTransactionId)
@@ -421,15 +420,15 @@ const handelDelivery = async (req, res) => {
         
 
                 //append the current product to transaction document
-                for (const item of resFood) {
-                    //const balance = item.balance;
+                // for (const item of resFood) {
+                await Promise.all(resFood.map(async (item) => {
                     const food = item.tablesDetail.foods;
 
                     if (food) {
                         const data = new GuestFoodTransaction({
-                            hotelId ,
+                            hotelId,
                             guestId,
-                            foodId: food.foodId,
+                            foodId: food.id,
                             name: food.name,
                             serviceChargePercentage: food.serviceChargePercentage,
                             serviceCharge: food.serviceCharge,
@@ -465,9 +464,9 @@ const handelDelivery = async (req, res) => {
                         );  
                         if (!resBalance) return res.status(404).send(resBalance);
                     }
-                }   
+                }));   
             }
-        }
+        }));
 
         return res.status(200).send();
     } catch(e) {
@@ -714,7 +713,8 @@ const handelCheckout = async (req, res) => {
 
 
         //update all tables guestid it null & occupied status is false
-        foundTableDetails.forEach(async (item) => {
+        // foundTableDetails.forEach(async (item) => {
+        await Promise.all(foundTableDetails.map(async (item) => {
             item.tablesDetail.forEach(async (tableDetail) => {
                 tableDetail.tables.forEach(async (table) => {
                     const tableId = table.id;
@@ -726,7 +726,7 @@ const handelCheckout = async (req, res) => {
                     if (!resRelese) return res.status(404).send();                                            
                 });
             });
-        });
+        }));
 
     
         // update out date & time
@@ -750,9 +750,10 @@ const handelCheckout = async (req, res) => {
 async function totalExpense(detail) {
     let total = 0;
 
-    for (const exp of detail) {
+    // for (const exp of detail) {
+    await Promise.all(detail.map(async (exp) => {
         exp.type !== "P" ? total += exp.expenseAmount : total += 0;
-    }
+    }));
 
     return total.toFixed(0);
 };

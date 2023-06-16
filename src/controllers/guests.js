@@ -140,12 +140,6 @@ const handelCreate = async (req, res) => {
             if (!resAdd) return res.status(400).send();
 
             const guestId = data._id;    
-
-            // const transaction = new foodTransactionType(
-            //     [], [], 
-            //     checkInDate, 
-            //     checkInTime);
-        
             const transaction = new foodTransactionType([], []);
 
             for(const table of tables) {

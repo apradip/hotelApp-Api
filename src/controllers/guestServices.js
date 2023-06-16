@@ -13,19 +13,15 @@ class serviceType {
       this.unitPrice = unitPrice;
       this.quantity = quantity;
       this.serviceChargePercentage = serviceChargePercentage;
-      this.serviceCharge = (unitPrice * quantity) * (serviceChargePercentage / 100)
       this.gstPercentage = gstPercentage;
-      this.gstCharge = (unitPrice * quantity) * (gstPercentage / 100)
-      this.totalPrice = parseInt(unitPrice * quantity) + parseInt(this.serviceCharge) + parseInt(this.gstPercentage)
     }
 };
 
 class serviceTransactionType {
-    constructor(services, orderDate, orderTime) {
-        this.services = services,
-        this.orderDate = orderDate;
-        this.orderTime = orderTime;
-    }
+    constructor(services) {
+        this.services = services
+        this.isCheckedout = false
+    };
 };
 
 class expenseType {
@@ -42,9 +38,11 @@ class expenseType {
 //handel search guest
 //query string : hotel Id?search= guest name, mobile, corporate name, corporate address
 const handelSearch = async (req, res) => {
-    let returnList = [];
     const hotelId = req.params.hotelId;
     const search = req.query.search;
+
+    let pipeline = [];
+    let returnList = [];
 
     try {
         const filter1 = {
@@ -67,57 +65,35 @@ const handelSearch = async (req, res) => {
         };
         const filter3 = {
             $project: {
-                roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0
+                roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0, expensesPaymentsDetail: 0,
+                option: 0, isActive: 0, isEnable: 0
             }
         };
 
         if (!search) {
-            const pipeline = [filter1, filter3];
-            const data = await Guest.aggregate(pipeline);
-            if (!data) return res.status(404).send();
-
-            await Promise.all(data.map(async (element) => {
-                const item = {
-                    id: element._id,
-                    name: element.name,
-                    mobile: element.mobile,
-                    guestCount: element.guestCount,
-                    corporateName: element.corporateName,
-                    corporateAddress: element.corporateAddress,
-                    gstNo: element.gstNo,
-                    inDate: element.inDate,
-                    inTime: element.inTime,
-                    totalExpense: await totalExpense(element.expensesPaymentsDetail),
-                    totalBalance: element.balance
-                };
-                
-                returnList.push(item);
-            }));
-
+            pipeline = [filter1, filter3];
         } else {
-            const pipeline = [filter1, filter2, filter3];
-            const data = await Guest.aggregate(pipeline); 
-            if (!data) return res.status(404).send();
-
-            await Promise.all(data.map(async (element) => {
-                const item = {
-                    id: element._id,
-                    name: element.name,
-                    mobile: element.mobile,
-                    guestCount: element.guestCount,
-                    corporateName: element.corporateName,
-                    corporateAddress: element.corporateAddress,
-                    gstNo: element.gstNo,
-                    inDate: element.inDate,
-                    inTime: element.inTime,
-                    totalExpense: await totalExpense(element.expensesPaymentsDetail),
-                    totalBalance: element.balance
-                };
-
-                returnList.push(item);
-            }));
+            pipeline = [filter1, filter2, filter3];
         }
 
+        const data = await Guest.aggregate(pipeline); 
+        await Promise.all(data.map(async (element) => {
+            const item = {
+                id: element._id,
+                name: element.name,
+                mobile: element.mobile,
+                guestCount: element.guestCount,
+                corporateName: element.corporateName,
+                corporateAddress: element.corporateAddress,
+                gstNo: element.gstNo,
+                inDate: element.inDate,
+                inTime: element.inTime,
+                totalBalance: element.balance,
+                transactionId: await getActiveService(element.servicesDetail) 
+            };
+            
+            returnList.push(item);
+        }));
     } catch(e) {
         return res.status(500).send(e);
     }
@@ -130,10 +106,10 @@ const handelSearch = async (req, res) => {
 //query string : hotel Id / guest Id 
 //query string : option = option: [non delivery / all]
 const handelDetail = async (req, res) => {
-    let serviceList = [];
-
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
+
+    let serviceList = [];
 
     try {
         let foundGuestServiceList = null;
@@ -151,12 +127,6 @@ const handelDetail = async (req, res) => {
                 $unwind: "$servicesDetail"
             };
             const filter3 = {
-                $match: {
-                    "servicesDetail.despatchDate": {$exists: false},
-                    "servicesDetail.despatchTime": {$exists: false}
-                }
-            };
-            const filter4 = {
                 $project: {
                     _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                     corporateName: 0, corporateAddress: 0, gstNo: 0,
@@ -165,12 +135,18 @@ const handelDetail = async (req, res) => {
                     option: 0, isActive: 0, isEnable: 0    
                 }
             };
-            const filter5 = { 
-                $unwind: "$servicesDetail.services" 
+            const filter4 = { 
+                $unwind: "$servicesDetail.services"
+            };
+            const filter5 = {
+                $match: {
+                    "servicesDetail.services.despatchDate": {$exists: false},
+                    "servicesDetail.services.despatchTime": {$exists: false}
+                }
             };
 
             const pipeline = [filter1, filter2, filter3, filter4, filter5];
-            foundGuestServiceList = await Guest.aggregate(pipeline)  ;
+            foundGuestServiceList = await Guest.aggregate(pipeline);
 
         } else if (option === "A") {
             const filter1 = {
@@ -190,7 +166,6 @@ const handelDetail = async (req, res) => {
                     roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0,
                     expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
                     option: 0, isActive: 0, isEnable: 0
-    
                 }
             };
             const filter4 = { 
@@ -201,15 +176,16 @@ const handelDetail = async (req, res) => {
             foundGuestServiceList = await Guest.aggregate(pipeline);  
         } 
 
-        if (!foundGuestServiceList) return res.status(404).send();
+        // if (!foundGuestServiceList) return res.status(404).send();
 
-        foundGuestServiceList.forEach(async servicesDetail => {
+        await Promise.all(foundGuestServiceList.map(async (servicesDetail) => {    
             const transactionId = servicesDetail.servicesDetail._id;
             const service = servicesDetail.servicesDetail.services;
             
             const dataOrder = {
                 transactionId: transactionId,
-                serviceId: service.serviceId,
+                serviceTransactionId: service._id,
+                id: service.id,
                 name: service.name,
                 quantity: service.quantity,
                 unitPrice: service.unitPrice,
@@ -225,7 +201,7 @@ const handelDetail = async (req, res) => {
             };
 
             serviceList.push(dataOrder);
-        });
+        }));
     } catch(e) {
         return res.status(500).send(e);
     }        
@@ -235,19 +211,19 @@ const handelDetail = async (req, res) => {
 
 
 // handel order
-//query string : hotel Id / guest Id
+//query string : hotel Id / guest Id / transaction Id
 //body : {"transactionId": "", "services": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
 const handelOrder = async (req, res) => {
-    try {
-        const {hotelId, guestId} = req.params;
-        const {transactionId, services} = req.body;
+    const {hotelId, guestId, transactionId} = req.params;
+    const {services} = req.body;
 
-        let servicesDb = undefined;
-        
+    let servicesDb = undefined;
+
+    try {
         // get hotel tax details    
         const hotel = await Hotel.detail(hotelId);
 
-        if (transactionId !== undefined) {
+        if (transactionId !== "undefined") {
             if (transactionId) {
                 const filter1 = {
                     $match: {
@@ -280,19 +256,19 @@ const handelOrder = async (req, res) => {
                 
                 servicesDb = resServicesDetail[0].servicesDetail.services;
 
-                for (const service of services) {        
+                await Promise.all(services.map(async (service) => {    
                     if (((service.operation) === "M") || ((service.operation) === "R")) {
                         const keyToFind = "id";
                         const valueToFind = service.id;
                         servicesDb = servicesDb.filter(obj => obj[keyToFind] !== valueToFind);
                     }
-                }
+                }));
 
-                for (const service of services) {       
+                await Promise.all(services.map(async (service) => {    
                     if (((service.operation) === "A") || ((service.operation) === "M")) {
                         
                         // check for item existance
-                        const foundService = await Services.findOne(
+                        const serviceMaster = await Services.findOne(
                             {
                                 _id: mongoose.Types.ObjectId(service.id), 
                                 hotelId: hotel._id, 
@@ -300,18 +276,18 @@ const handelOrder = async (req, res) => {
                             }
                         );    
         
-                        if (foundService) {
+                        if (serviceMaster) {
                             servicesDb.push(new serviceType(
-                                foundService._id, 
-                                foundService.name, 
-                                parseInt(foundService.price).toFixed(hotel.fincialDecimalPlace),
-                                parseInt(service.quantity),
-                                parseInt(hotel.serviceChargePercentage).toFixed(hotel.fincialDecimalPlace),
-                                parseInt(hotel.foodGstPercentage).toFixed(hotel.fincialDecimalPlace)
+                                serviceMaster._id, 
+                                serviceMaster.name, 
+                                serviceMaster.price,
+                                service.quantity,
+                                hotel.serviceChargePercentage,
+                                hotel.foodGstPercentage
                             ));
                         }
                     }
-                }
+                }));
 
                 const resServiceUpdate = await Guest.updateOne(
                     {
@@ -331,7 +307,6 @@ const handelOrder = async (req, res) => {
                         }]           
                     }
                 );  
-                if (!resServiceUpdate) return res.status(404).send();
             }
         } else {
             servicesDb = await newServiceValues(hotel, services);
@@ -349,8 +324,6 @@ const handelOrder = async (req, res) => {
                     }
                 },
             );  
-            if (!resServiceUpdate) return res.status(404).send();
-
         }
 
         return res.status(200).send();
@@ -361,18 +334,14 @@ const handelOrder = async (req, res) => {
 
 async function newServiceValues(hotel, services) {
     // insert all add / modify operation items
-    const transaction = new serviceTransactionType(
-        [], 
-        date.format(new Date(), "YYYY-MM-DD"), 
-        date.format(new Date(), "HH:mm"));
+    const transaction = new serviceTransactionType([]);
 
-    for (const service of services) {       
-            
+    await Promise.all(services.map(async (service) => {         
         // delete all remove / modify operation service    
         if ((service.operation) === "A") {
             
             // check for item existance
-            const foundService = await Services.findOne(
+            const serviceMaster = await Services.findOne(
                 {
                     _id: mongoose.Types.ObjectId(service.id), 
                     hotelId: hotel._id, 
@@ -380,18 +349,18 @@ async function newServiceValues(hotel, services) {
                 }
             );    
 
-            if (foundService) {
+            if (serviceMaster) {
                 transaction.services.push(new serviceType(
-                    service.id, 
-                    foundService.name, 
-                    parseInt(foundService.price).toFixed(hotel.fincialDecimalPlace),
-                    parseInt(service.quantity),
-                    parseInt(hotel.serviceChargePercentage).toFixed(hotel.fincialDecimalPlace),
-                    parseInt(hotel.foodGstPercentage).toFixed(hotel.fincialDecimalPlace)
+                    serviceMaster._id, 
+                    serviceMaster.name, 
+                    serviceMaster.price,
+                    service.quantity,
+                    hotel.serviceChargePercentage,
+                    hotel.foodGstPercentage
                 ));
             }
         }
-    }
+    }));
 
     return transaction;
 }
@@ -400,32 +369,126 @@ async function newServiceValues(hotel, services) {
 // handel delivery
 //query string : hotel Id / guest Id / transaction Id
 const handelDelivery = async (req, res) => {
+    const {hotelId, guestId, transactionId} = req.params;
+    const {services} = req.body;
+
     try {
-        const { hotelId, guestId, transactionId } = req.params;
+        await Promise.all(services.map(async (item) => {         
+            if (item) {
+                // update all delivery date & time
+                const resDelivery = await Guest.updateOne(
+                    {
+                        _id: mongoose.Types.ObjectId(guestId), 
+                        hotelId: hotelId,
+                        isActive: true,
+                        isEnable: true
+                    },
+                    {
+                        $set: {
+                            "servicesDetail.$[ele].services.$[sele].despatchDate": date.format(new Date(), "YYYY-MM-DD"), 
+                            "servicesDetail.$[ele].services.$[sele].despatchTime": date.format(new Date(), "HH:mm")
+                        }
+                    },
+                    { 
+                        arrayFilters: [ 
+                            {"ele._id": mongoose.Types.ObjectId(transactionId)},
+                            {"sele._id": mongoose.Types.ObjectId(item.serviceTransactionId)}
+                        ]           
+                    }
+                );  
+                if (!resDelivery) return res.status(404).send(resDelivery);
 
-        // update all delivery date & time
-        const resDelivery = await Guest.updateOne(
-            {
-                hotelId: hotelId,
-                _id: mongoose.Types.ObjectId(guestId), 
-                isActive: true,
-                isEnable: true
-            },
-            {
-                $set: {
-                    "servicesDetail.$[ele].despatchDate": date.format(new Date(), "YYYY-MM-DD"), 
-                    "servicesDetail.$[ele].despatchTime": date.format(new Date(), "HH:mm")
-                }
-            },
-            { 
-                arrayFilters: [ 
-                    {"ele._id": mongoose.Types.ObjectId(transactionId)}
-                ]           
+
+                //append to transaction document
+                //read current product detail from guest
+                const filter1 = {
+                    $match: {
+                        _id: mongoose.Types.ObjectId(guestId),         
+                        hotelId: hotelId,
+                        isActive: true,
+                        isEnable: true
+                    }
+                };
+                const filter2 = {
+                    $unwind: "$servicesDetail"
+                };
+                const filter3 = {
+                    $match: {
+                        "servicesDetail._id": mongoose.Types.ObjectId(transactionId)
+                    }
+                };
+                const filter4 = { 
+                    $unwind: "$servicesDetail.services" 
+                };  
+                const filter5 = {
+                    $match: {
+                        "servicesDetail.services._id": mongoose.Types.ObjectId(item.serviceTransactionId)
+                    }
+                };
+                const filter6 = {
+                    $project: {
+                        _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
+                        corporateName: 0, corporateAddress: 0, gstNo: 0, 
+                        roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0,
+                        expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
+                        option: 0, isActive: 0, isEnable: 0                    }
+                };
+                
+                const pipelineService = [filter1, filter2, filter3, filter4, filter5, filter6];
+                const resService = await Guest.aggregate(pipelineService);
+                if (!resService) return res.status(404).send();
+        
+
+                //append the current product to transaction document
+                // for (const item of resService) {
+                await Promise.all(resService.map(async (serviceItem) => {         
+                    const service = serviceItem.servicesDetail.services;
+
+                    if (service) {
+                        const data = new GuestServiceTransaction({
+                            hotelId,
+                            guestId,
+                            serviceId: service.id,
+                            name: service.name,
+                            serviceChargePercentage: service.serviceChargePercentage,
+                            serviceCharge: service.serviceCharge,
+                            gstPercentage: service.gstPercentage,
+                            gstCharge: service.gstCharge,
+                            unitPrice: service.unitPrice,
+                            quantity: service.quantity,
+                            totalPrice: service.totalPrice,
+                            orderDate: service.orderDate,
+                            orderTime: service.orderTime,
+                            despatchDate: service.despatchDate,
+                            despatchTime: service.despatchTime
+                        });
+                
+                        const resAddTransaction = await data.save();
+                        if (!resAddTransaction) return res.status(400).send();
+
+
+                        //update banalce
+                        //increase balance with product total
+                        const resBalance = await Guest.updateOne(
+                            {
+                                _id: mongoose.Types.ObjectId(guestId), 
+                                hotelId: hotelId,
+                                isActive: true,
+                                isEnable: true
+                            },
+                            {
+                                $inc: {
+                                    balance: (service.totalPrice.toFixed(0) * -1)
+                                }
+                            }
+                        );  
+                        if (!resBalance) return res.status(404).send(resBalance);
+                    }
+                }));   
             }
-        );  
-        if (!resDelivery) return res.status(404).send(resDelivery);
+        }));
 
-        return res.status(200).send(resDelivery);
+        return res.status(200).send();
     } catch(e) {
         return res.status(500).send(e);
     }
@@ -434,289 +497,265 @@ const handelDelivery = async (req, res) => {
 
 
 // handle guest bill summery
-//query string : hotel Id / guest Id
+//query string : hotel Id / guest Id / transaction Id
 const handelGenerateBill = async (req, res) => {
-    const {hotelId, guestId} = req.params;
+    const {hotelId, guestId, transactionId} = req.params;
+   
+    let total = 0;
 
     try {
-        // calculate and update miscellaneous total
-        const filter1 = {
+        // Start :: calculate food total
+        const filterSum1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
-                hotelId: hotelId,
+                hotelId,
                 isActive: true,
                 isEnable: true
             }
         };
-        const filter2 = {
+        const filterSum2 = {
             $unwind: "$servicesDetail"
         };
-        const filter3 = {
+        const filterSum3 = {
             $match: {
-                "servicesDetail.isPostedToExpense": false
+                "servicesDetail._id": mongoose.Types.ObjectId(transactionId)
             }
         };
-        const filter4 = {
-            $project: {
-                _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0,
-                expensesPaymentsDetail: 0, balance: 0, inDate: 0, inTime: 0,
-                option: 0, isActive: 0, isEnable: 0
-            }
-        };
-        const filter5 = { 
-            $unwind: "$servicesDetail.services"
+        const filterSum4 = { 
+            $unwind: "$servicesDetail.services" 
         };  
-        const filter6 = {
+        const filterSum5 = {
             $group: {
                 _id: "$servicesDetail._id",
-              total: {$sum: "$servicesDetail.services.totalPrice"}
+                total: {$sum: "$servicesDetail.services.totalPrice"}
             }
         };
 
-        const pipelineSum = [filter1, filter2, filter3, filter4, filter5, filter6];
-        const resServices = await Guest.aggregate(pipelineSum);
-        if (!resServices) return res.status(404).send();
+        const pipelineSum = [filterSum1, filterSum2, filterSum3, filterSum4, filterSum5];
+        const resSum = await Guest.aggregate(pipelineSum);
+        // End :: calculate food total
 
-        // insert services to guest services transaction
-        const pipelineItems = [filter1, filter2, filter3, filter4, filter5];
-        const resItems = await Guest.aggregate(pipelineItems);
-        if (!resItems) return res.status(404).send();
 
-        for (const itemDetail of resItems) {    
-            if (itemDetail) {
-                const serv = itemDetail.servicesDetail.services;
-                const data = new GuestServiceTransaction({
-                    hotelId,
-                    guestId,
-                    serviceId: serv.serviceId,
-                    name: serv.name,
-                    serviceChargePercentage: serv.serviceChargePercentage,
-                    serviceCharge: serv.serviceCharge,
-                    gstPercentage: serv.gstPercentage,
-                    gstCharge: serv.gstCharge,
-                    unitPrice: serv.unitPrice,
-                    quantity: serv.quantity,
-                    totalPrice: serv.totalPrice,
-                    orderDate: itemDetail.servicesDetail.orderDate,
-                    orderTime: itemDetail.servicesDetail.orderTime,
-                    despatchDate: itemDetail.servicesDetail.despatchDate,
-                    despatchTime: itemDetail.servicesDetail.despatchTime
-                });
-        
-                const resAdd = await data.save();
-                if (!resAdd) return res.status(400).send();
-            }
-        }
+        // Start :: insert into expense if the transaction is not in guest 
+        if (resSum.length > 0) {
+            total = resSum[0].total;
 
-        // insert into expense if the transaction is not present
-        for (const sum of resServices) {
-            // get hotel last bill no
-            let billNo = await Hotel.getLastBillNo(hotelId);
-            billNo += 1; 
-
+            // Start :: update expense in guest
             const resExpenseUpdate = await Guest.updateOne(
                 {
                     _id: mongoose.Types.ObjectId(guestId),
-                    "expensesPaymentsDetail": {
-                        $not: {
-                            $elemMatch: {
-                                _id: mongoose.Types.ObjectId(sum._id)
-                            }
+                    expensesPaymentsDetail: {
+                        $elemMatch: {
+                            expenseId: transactionId
                         }
                     }
                 },
                 {
-                    $push: {
-                        "expensesPaymentsDetail": new expenseType(sum._id, billNo, sum.total)
+                    $set: {
+                        "expensesPaymentsDetail.$.expenseAmount": total
                     }
                 }
             );
+            // End :: update expense in guest
 
-            if (!resExpenseUpdate) return res.status(400).send();
 
-            //add into expense payment transaction
-            const foundExpense = await GuestExpensesPaymentsTransaction.findOne(
-                {
-                    hotelId, 
-                    isEnable: true,
-                    expenseId: sum._id
-                }
-            );    
-
-            if (!foundExpense) {
+            if (resExpenseUpdate.matchedCount === 0) {
+                // get hotel last bill no
+                let billNo = await Hotel.getLastBillNo(hotelId);
+                billNo += 1; 
+    
+                // set hotel last bill no
+                await Hotel.setLastBillNo(hotelId, billNo);
+    
+                // Start :: insert expense into guest
+                const resExpenseInsert = await Guest.updateOne(
+                    {
+                        _id: mongoose.Types.ObjectId(guestId),
+                        hotelId: hotelId,
+                        isActive: true,
+                        isEnable: true
+                    },
+                    {
+                        $push: {
+                            "expensesPaymentsDetail": new expenseType(transactionId, billNo, total)
+                        }
+                    }
+                );
+                // End :: insert expense into guest
+    
+                // Start :: insert expense into expense transaction
                 const data = new GuestExpensesPaymentsTransaction({
                     hotelId,
                     guestId,
                     billNo: billNo,
                     type: "S",
-                    expenseId: sum._id,
-                    expenseAmount: sum.total,
+                    expenseId: transactionId,
+                    expenseAmount: total,
                     narration: "Expense for the service items."
                 });
-    
+        
                 const resAdd = await data.save();
-                if (!resAdd) return res.status(400).send();
-            }
-
-            // set hotel last bill no
-            await Hotel.setLastBillNo(hotelId, billNo);
-
-            // update balance
-            const resUpdateBalance = await Guest.findByIdAndUpdate(
-                mongoose.Types.ObjectId(guestId), 
-                {$inc: {balance: (sum.total * -1)}}
-            );
-
-            if (!resUpdateBalance) return res.status(404).send();
-
-            // update isPostedToExpense status
-            const resUpdateExpenseStatus = await Guest.updateOne(
-                {
-                    _id: mongoose.Types.ObjectId(guestId)
-                },
-                {
-                    $set: {
-                        "servicesDetail.$[ex].isPostedToExpense": true
+                // End :: insert expense into expense transaction
+            } else {
+                // Start :: update expense payment transaction
+                const resExpense = await GuestExpensesPaymentsTransaction.updateOne(
+                    {
+                        hotelId, 
+                        isEnable: true,
+                        expenseId: transactionId
+                    },
+                    {
+                        $set: {
+                            expenseAmount: total
+                        }
                     }
-                },
-                { 
-                    arrayFilters: [{
-                        "ex._id": mongoose.Types.ObjectId(sum._id)
-                    }]           
-                }
-            );
-
-            if (!resUpdateExpenseStatus) return res.status(404).send();
+                );   
+                // End :: update expense payment transaction
+            }
+   
         }
 
 
-        // get all misc item 
-        const billFilter1 = {
+        // calculate and update food total
+        const filterBill1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
-                hotelId: hotelId,
+                hotelId,
                 isActive: true,
                 isEnable: true
             }
         };
-        const billFilter2 = {
-            $unwind: "$expensesPaymentsDetail"
-        };
-        const billFilter3 = {
-            $match: {
-                "expensesPaymentsDetail.type": "S"
-            }
-        };
-        const billFilter4 = {
-            $project: {
-                _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0, servicesDetail: 0,
-                balance: 0, inDate: 0, inTime: 0,
-                option: 0, isActive: 0, isEnable: 0
-            }
-        };
-        const billFilter5 = {
-             $sort: {"expensesPaymentsDetail.billNo": -1} 
-        };
-
-        const pipelineBill = [billFilter1, billFilter2, billFilter3, billFilter4, billFilter5];
-        const resBill = await Guest.aggregate(pipelineBill);  
-        if (!resBill) return res.status(404).send();
-        
-        return res.status(200).send(resBill);
-
-    } catch(e) {
-        return res.status(500).send(e);
-    }
-};
-
-
-// handle guest bill summery
-//query string : hotel Id / guest Id / transaction Id
-const handelBillDetail = async (req, res) => {
-    const {hotelId, guestId, transactionId} = req.params;
-
-    try {
-        // calculate and update miscellaneous total
-        const filter1 = {
-            $match: {
-                _id: mongoose.Types.ObjectId(guestId),         
-                hotelId: hotelId,
-                isActive: true,
-                isEnable: true
-            }
-        };
-        const filter2 = {
+        const filterBill2 = {
             $unwind: "$servicesDetail"
         };
-        const filter3 = {
+        const filterBill3 = {
+            $unwind: "$expensesPaymentsDetail"
+        };
+        const filterBill4 = {
             $match: {
-                "servicesDetail.isPostedToExpense": true,
-                "servicesDetail._id": mongoose.Types.ObjectId(transactionId)
+                "servicesDetail._id": mongoose.Types.ObjectId(transactionId),
+                "expensesPaymentsDetail.expenseId": transactionId
             }
         };
-        const filter4 = {
+        const filterBill5 = {
             $project: {
                 _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                 corporateName: 0, corporateAddress: 0, gstNo: 0, 
                 roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0,
-                expensesPaymentsDetail: 0, balance: 0, inDate: 0, inTime: 0,
-                option: 0, isActive: 0, isEnable: 0
+                balance: 0, inDate: 0, inTime: 0, option: 0, isActive: 0, 
+                isEnable: 0, __v: 0,
+                "servicesDetail.isCheckedout": 0, "servicesDetail._id": 0, 
             }
         };
-        const filter5 = { 
-            $unwind: "$servicesDetail.services"
-        };  
 
-        const pipelineBill = [filter1, filter2, filter3, filter4, filter5];
+        const pipelineBill = [filterBill1, filterBill2, filterBill3, filterBill4, filterBill5];
         const resBill = await Guest.aggregate(pipelineBill);
         if (!resBill) return res.status(404).send();
 
-        return res.status(200).send(resBill);
-
+        return res.status(200).send(resBill);        
     } catch(e) {
         return res.status(500).send(e);
     }
 };
+
+
+// // handle guest bill summery
+// //query string : hotel Id / guest Id / transaction Id / option [v = view / p = print]
+// const handelBillDetail = async (req, res) => {
+//     const {hotelId, guestId, transactionId, option} = req.params;
+
+//     try {
+//         // calculate and update food total
+//         const filter1 = {
+//             $match: {
+//                 _id: mongoose.Types.ObjectId(guestId),         
+//                 hotelId: hotelId,
+//                 isActive: true,
+//                 isEnable: true
+//             }
+//         };
+//         const filter2 = {
+//             $unwind: '$servicesDetail'
+//         };
+//         const filter3 = {
+//             $match: {
+//                 'servicesDetail._id': mongoose.Types.ObjectId(transactionId)
+                
+//             }
+//         };
+//         const filter4 = {
+//             $project: {
+//                 _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
+//                 corporateName: 0, corporateAddress: 0, gstNo: 0, 
+//                 roomsDetail: 0, tablesDetail: 0, miscellaneousesDetail: 0,
+//                 expensesPaymentsDetail: 0, balance: 0, inDate: 0, inTime: 0,
+//                 option: 0, isActive: 0, isEnable: 0
+//             }
+//         };
+//         const filter5 = { 
+//             $unwind: '$servicesDetail.services' 
+//         };  
+
+//         const pipelineBill = [filter1, filter2, filter3, filter4, filter5];
+//         const resBill = await Guest.aggregate(pipelineBill);
+//         if (!resBill) return res.status(404).send();
+
+//         return res.status(200).send(resBill);
+//     } catch(e) {
+//         return res.status(500).send(e);
+//     }
+// };
 
 
 // handle guest checkout 
-//query string : hotel Id / guest Id
+//query string : hotel Id / guest Id / transaction Id
 const handelCheckout = async (req, res) => {
-    const {hotelId, guestId} = req.params;
+    const {hotelId, guestId, transactionId} = req.params;
 
     try {
         // update out date & time
-        const resUpdateOut = await Guest.findByIdAndUpdate(
-            mongoose.Types.ObjectId(guestId), 
-            {$set: {isActive: false,
-                      outDate: date.format(new Date(), "YYYY-MM-DD"), 
-                      outTime: date.format(new Date(), "HH:mm")}}
-        );  
+        const resUpdateOut = await Guest.updateOne(
+            {
+                _id: mongoose.Types.ObjectId(guestId),
+                hotelId: hotelId,
+                isActive: true,
+                isEnable: true,
+                servicesDetail: {
+                    $elemMatch: {
+                        _id: mongoose.Types.ObjectId(transactionId)
+                    }
+                }
+            },
+            {
+                $set: {
+                    "servicesDetail.$.isCheckedout": true,
+                    outDate: date.format(new Date(), "YYYY-MM-DD"), 
+                    outTime: date.format(new Date(), "HH:mm"),
+                    isActive: false
+                }
+            }
+        );
 
         if (!resUpdateOut) return res.status(404).send();
-
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(200).send();
+    return res.status(200).send();    
 };
 
 
-async function totalExpense(detail) {
-    let total = 0;
+async function getActiveService(detail) {
+    let transactionId = "undefined";
 
-    for (const exp of detail) {
-        exp.type !== "P" ? total += exp.expenseAmount : total += 0;
-    }
+     await Promise.all(detail.map(async (item) => {         
+        if ((!item.isCheckedout) && (transactionId === "undefined")) {
+            transactionId = item._id.toHexString();
+        }
+    }));
 
-    return total;
-};
-
+    return transactionId;
+}
 
 module.exports = {
     handelSearch,
@@ -724,6 +763,6 @@ module.exports = {
     handelOrder,
     handelDelivery,
     handelGenerateBill,
-    handelBillDetail,
+    // handelBillDetail,
     handelCheckout
 }
