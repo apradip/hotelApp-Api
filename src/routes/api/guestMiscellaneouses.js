@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const {handelSearch, handelDetail, handelOrder, handelGenerateBill, handelCheckout, handelBillDetail, handelDelivery} = require("../../controllers/guestMiscellaneouses");
+const {handelSearch, handelDetail, handelOrder, handelDelivery, 
+        handelGenerateBill, handelCheckout} = require("../../controllers/guestMiscellaneouses");
 const ROLE_LIST = require("../../config/roleList");
 const verifyRoles = require("../../middlewares/verifyRoles");
 
@@ -9,48 +10,60 @@ router.route("/:hotelId")
     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.SERVICE_ADMIN,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.SERVICE_MANAGER,
+        ROLE_LIST.RESTAURANT_MANAGER,
         ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelSearch);
+        ROLE_LIST.RECEPTIONIST), handelSearch);     // search all active guests who are taking miscellaneous (for the search options)
 
 router.route("/:hotelId/:guestId")
     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.SERVICE_ADMIN,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.SERVICE_MANAGER,
+        ROLE_LIST.RESTAURANT_MANAGER,
         ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelDetail)
-    .post(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-        ROLE_LIST.HOTEL_ADMIN, 
-        ROLE_LIST.KITCHEN_ADMIN,
-        ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelOrder)
-    .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-        ROLE_LIST.HOTEL_ADMIN, 
-        ROLE_LIST.KITCHEN_ADMIN,
-        ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelGenerateBill)
-    .delete(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-        ROLE_LIST.HOTEL_ADMIN, 
-        ROLE_LIST.KITCHEN_ADMIN,
-        ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelCheckout);
-            
+        ROLE_LIST.RECEPTIONIST), handelDetail);       //display all miscellaneous items ordered by the guest
+
 router.route("/:hotelId/:guestId/:transactionId")
     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.SERVICE_ADMIN,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.SERVICE_MANAGER,
+        ROLE_LIST.RESTAURANT_MANAGER,
         ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelBillDetail)
+        ROLE_LIST.RECEPTIONIST), handelGenerateBill)      // generate bill 
+    .post(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+        ROLE_LIST.HOTEL_ADMIN, 
+        ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.SERVICE_ADMIN,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.SERVICE_MANAGER,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.OFFICE_STAFF,
+        ROLE_LIST.RECEPTIONIST), handelOrder)     // order items
     .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.SERVICE_ADMIN,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.SERVICE_MANAGER,
+        ROLE_LIST.RESTAURANT_MANAGER,
         ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
-        ROLE_LIST.RESTAURANT_MANAGER), handelDelivery);
+        ROLE_LIST.RECEPTIONIST), handelDelivery)      // delivery items for the previous order
+    .delete(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+        ROLE_LIST.HOTEL_ADMIN, 
+        ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.SERVICE_ADMIN,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.SERVICE_MANAGER,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.OFFICE_STAFF,
+        ROLE_LIST.RECEPTIONIST), handelCheckout);     // checkout the guest
                                             
 module.exports = router;

@@ -126,51 +126,60 @@ const serviceSchema = new mongoose.Schema({
 });
 
 const miscellaneousSchema = new mongoose.Schema({
-    miscellaneousId: {
+    id: {
         type: String
     },
     name: {
         type: String
     },
     unitPrice: {
-        type: Number,
-        default: function() {
-            return this.unitPrice ? this.unitPrice.toFixed(2) : 0
-        }        
+        type: Number
     },
     quantity: {
         type: Number,
     },
     serviceChargePercentage: {
-        type: Number,
-        default: function() {
-            return this.serviceChargePercentage ? this.serviceChargePercentage.toFixed(2) : 0
-        }        
+        type: Number
+    },
+    gstPercentage: {
+        type: Number
     },
     serviceCharge: {
         type: Number,
         default: function() {
-            return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(0)
-        }        
-    },
-    gstPercentage: {
-        type: Number,
-        default: function() {
-            return this.gstPercentage ? (this.gstPercentage).toFixed(2) : 0
+            return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(0);
         }        
     },
     gstCharge: {
         type: Number,
         default: function() {
-            return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(0)
+            return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(0);
         }        
     },
     totalPrice: {
         type: Number,
         default: function() {
-            return ((this.unitPrice * this.quantity) + (this.gstCharge + this.serviceCharge)).toFixed(0)
+            return ((this.unitPrice * this.quantity) + this.serviceCharge + this.gstCharge).toFixed(0);
         }        
-    }
+    },
+    orderDate: { 
+        type: String,
+        default: function() {
+            return date.format(new Date(), "YYYY-MM-DD");
+        }
+    },
+    orderTime: { 
+        type: String,
+        default: function() {
+            return date.format(new Date(), "HH:mm");
+        }
+    },
+    despatchDate: { 
+        type: String
+    },
+    despatchTime: { 
+        type: String 
+    }    
 });
 
 
@@ -266,29 +275,8 @@ const serviceTransactionSchema = new mongoose.Schema({
 });
 
 const miscellaneousTransactionSchema = new mongoose.Schema({
-    miscellaneouses: [miscellaneousSchema],
-    orderDate: { 
-        type: String, 
-        default: function() {
-            return date.format(new Date(), "YYYY-MM-DD")
-        }        
-    },
-    orderTime: { 
-        type: String, 
-        default: function() {
-            return date.format(new Date(), "HH:mm")
-        }        
-    },
-    despatchDate: { 
-        type: String
-    },
-    despatchTime: { 
-        type: String 
-    },
-    isPostedToExpense: {
-        type: Boolean,
-        default: false
-    },
+    miscellanea: [miscellaneousSchema],
+    isCheckedout: false
 });
 
 const expensesPaymentsTransactionSchema = new mongoose.Schema({
@@ -434,7 +422,7 @@ const guestSchema = new mongoose.Schema({
     },
     roomsDetail: [roomTransactionSchema],
     tablesDetail: [tableTransactionSchema],
-    miscellaneousesDetail: [miscellaneousTransactionSchema],
+    miscellaneaDetail: [miscellaneousTransactionSchema],
     servicesDetail: [serviceTransactionSchema],
     expensesPaymentsDetail: [expensesPaymentsTransactionSchema],
     balance: {
@@ -463,7 +451,6 @@ const guestSchema = new mongoose.Schema({
     },
     option: {
         type: String,
-        default: "S",
         required: [true, "option require!"]
     },
     isActive: {

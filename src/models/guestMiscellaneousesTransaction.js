@@ -7,7 +7,7 @@ const guestMiscellaneousTransactionSchema = new mongoose.Schema({
     guestId: {
         type: String
     },
-    miscellaneousId: {
+    id: {
         type: String
     },
     name: {

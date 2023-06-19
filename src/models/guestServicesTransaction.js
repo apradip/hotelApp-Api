@@ -8,7 +8,7 @@ const guestServiceTransactionSchema = new mongoose.Schema({
     guestId: {
         type: String 
     },
-    serviceId: {
+    id: {
         type: String 
     },
     name: {
