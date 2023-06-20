@@ -110,9 +110,10 @@ const handelDetail = async (req, res) => {
     const option = req.query.option;
 
     let itemList = [];
-
+    let pipeline = [];
+    
     try {
-        let dbItems = null;
+        
 
         if (option === "N") {
             const filter1 = {
@@ -145,10 +146,10 @@ const handelDetail = async (req, res) => {
                 }
             };
 
-            const pipeline = [filter1, filter2, filter3, filter4, filter5];
-            dbItems = await Guest.aggregate(pipeline);
+            pipeline = [filter1, filter2, filter3, filter4, filter5];
 
         } else if (option === "A") {
+            
             const filter1 = {
                 $match: {
                     _id: mongoose.Types.ObjectId(guestId),         
@@ -172,10 +173,11 @@ const handelDetail = async (req, res) => {
                 $unwind: "$miscellaneaDetail.miscellanea"
             }; 
 
-            const pipeline = [filter1, filter2, filter3, filter4];
-            dbItems = await Guest.aggregate(pipeline);  
+            pipeline = [filter1, filter2, filter3, filter4];
         } 
 
+        const dbItems = await Guest.aggregate(pipeline);  
+        
         await Promise.all(dbItems.map(async (detail) => {    
             const transactionId = detail.miscellaneaDetail._id;
             const item = detail.miscellaneaDetail.miscellanea;
@@ -248,70 +250,72 @@ const handelOrder = async (req, res) => {
                         option: 0, isActive: 0, isEnable: 0, updatedDate: 0
                     }
                 };
-                const pipeline = [filter1, filter2, filter3, filter4];
-                const dbItems = await Guest.aggregate(pipeline);  
                 
-                orderDb = dbItems[0].miscellaneaDetail.miscellanea;
+                const dbItems = await Guest.aggregate([filter1, filter2, filter3, filter4]);  
+                
+                if (dbItems) {
+                    orderDb = dbItems[0].miscellaneaDetail.miscellanea;
 
-                await Promise.all(orders.map(async (order) => {    
-                    if (((order.operation) === "M") || ((order.operation) === "R")) {
-                        const keyToFind = "id";
-                        const valueToFind = order.id;
-                        orderDb = orderDb.filter(obj => obj[keyToFind] !== valueToFind);
-                    }
-                }));
+                    await Promise.all(orders.map(async (order) => {    
+                        if (((order.operation) === "M") || ((order.operation) === "R")) {
+                            const keyToFind = "id";
+                            const valueToFind = order.id;
+                            orderDb = orderDb.filter(obj => obj[keyToFind] !== valueToFind);
+                        }
+                    }));
 
-                await Promise.all(orders.map(async (order) => {    
-                    if (((order.operation) === "A") || ((order.operation) === "M")) {
-                        
-                        // check for item existance
-                        const master = await Miscellaneous.findOne(
-                            {
-                                _id: mongoose.Types.ObjectId(order.id), 
-                                hotelId: hotel._id, 
-                                isEnable: true
+                    await Promise.all(orders.map(async (order) => {    
+                        if (((order.operation) === "A") || ((order.operation) === "M")) {
+                            
+                            // check for item existance
+                            const master = await Miscellaneous.findOne(
+                                {
+                                    hotelId, 
+                                    _id: mongoose.Types.ObjectId(order.id), 
+                                    isEnable: true
+                                }
+                            );    
+            
+                            if (master) {
+                                orderDb.push(new miscellaneousType(
+                                    master._id, 
+                                    master.name, 
+                                    master.price,
+                                    order.quantity,
+                                    hotel.serviceChargePercentage,
+                                    hotel.foodGstPercentage
+                                ));
                             }
-                        );    
-        
-                        if (master) {
-                            orderDb.push(new miscellaneousType(
-                                master._id, 
-                                master.name, 
-                                master.price,
-                                order.quantity,
-                                hotel.serviceChargePercentage,
-                                hotel.foodGstPercentage
-                            ));
                         }
-                    }
-                }));
+                    }));
 
-                await Guest.updateOne(
-                    {
-                        _id: mongoose.Types.ObjectId(guestId), 
-                        hotelId,
-                        isActive: true,
-                        isEnable: true
-                    },
-                    {
-                        $set: {
-                            "miscellaneaDetail.$[ed].miscellanea": orderDb
+                    await Guest.updateOne(
+                        {
+                            hotelId,
+                            _id: mongoose.Types.ObjectId(guestId), 
+                            isActive: true,
+                            isEnable: true
+                        },
+                        {
+                            $set: {
+                                "miscellaneaDetail.$[ed].miscellanea": orderDb
+                            }
+                        },
+                        { 
+                            arrayFilters: [{
+                                "ed._id": mongoose.Types.ObjectId(transactionId)
+                            }]           
                         }
-                    },
-                    { 
-                        arrayFilters: [{
-                            "ed._id": mongoose.Types.ObjectId(transactionId)
-                        }]           
-                    }
-                );  
+                    );  
+                }
             }
         } else {
             orderDb = await newItemValues(hotel, orders);
 
             await Guest.updateOne(
                 {
-                    _id: mongoose.Types.ObjectId(guestId), 
                     hotelId,
+                    _id: mongoose.Types.ObjectId(guestId), 
                     isActive: true,
                     isEnable: true
                 },
@@ -431,8 +435,7 @@ const handelDelivery = async (req, res) => {
                     }
                 };
                 
-                const pipeline = [filter1, filter2, filter3, filter4, filter5, filter6];
-                const dbItems = await Guest.aggregate(pipeline);
+                const dbItems = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5, filter6]);
 
                 //append the current product to transaction document
                 await Promise.all(dbItems.map(async (item) => {         
@@ -478,11 +481,11 @@ const handelDelivery = async (req, res) => {
                 }));   
             }
         }));
-
-        return res.status(200).send();
     } catch(e) {
         return res.status(500).send(e);
     }
+
+    return res.status(200).send();
 };
 
 
@@ -521,8 +524,7 @@ const handelGenerateBill = async (req, res) => {
             }
         };
 
-        const pipelineSum = [filterSum1, filterSum2, filterSum3, filterSum4, filterSum5];
-        const sums = await Guest.aggregate(pipelineSum);
+        const sums = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5]);
         // End :: calculate food total
 
 
@@ -555,7 +557,7 @@ const handelGenerateBill = async (req, res) => {
                 billNo += 1; 
     
                 // Start :: insert expense into guest
-                const insert = await Guest.updateOne(
+                await Guest.updateOne(
                     {
                         _id: mongoose.Types.ObjectId(guestId),
                         hotelId: hotelId,
@@ -581,7 +583,7 @@ const handelGenerateBill = async (req, res) => {
                     narration: "Expense for the miscellaneous items."
                 });
         
-                const add = await data.save();
+                await data.save();
                 // End :: insert expense into expense transaction
 
                 // set hotel last bill no
@@ -589,7 +591,7 @@ const handelGenerateBill = async (req, res) => {
 
             } else {
                 // Start :: update expense payment transaction
-                const update = await GuestExpensesPaymentsTransaction.updateOne(
+                await GuestExpensesPaymentsTransaction.updateOne(
                     {
                         hotelId, 
                         isEnable: true,
@@ -639,9 +641,7 @@ const handelGenerateBill = async (req, res) => {
             }
         };
 
-        const pipelineBill = [filterBill1, filterBill2, filterBill3, filterBill4, filterBill5];
-        const bills = await Guest.aggregate(pipelineBill);
-        if (!bills) return res.status(404).send();
+        const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5]);
 
         return res.status(200).send(bills);        
     } catch(e) {
@@ -657,7 +657,7 @@ const handelCheckout = async (req, res) => {
 
     try {
         // update out date & time
-        const update = await Guest.updateOne(
+        await Guest.updateOne(
             {
                 _id: mongoose.Types.ObjectId(guestId),
                 hotelId: hotelId,
@@ -678,8 +678,6 @@ const handelCheckout = async (req, res) => {
                 }
             }
         );
-
-        if (!update) return res.status(404).send();
     } catch(e) {
         return res.status(500).send(e);
     }

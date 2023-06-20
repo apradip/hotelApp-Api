@@ -14,6 +14,7 @@ class foodTransactionType {
     constructor(tables, foods) {    
         this.tables = tables;
         this.foods = foods;
+        this.isCheckedout = false;
     }
 };
 
@@ -124,7 +125,8 @@ const handelCreate = async (req, res) => {
                             
         } else if (option.trim().toUpperCase() === "T") {   //for table
             const {name, mobile, guestCount, 
-                corporateName, corporateAddress, gstNo, tables} = req.body
+                corporateName, corporateAddress, gstNo, 
+                tables} = req.body
 
             const data = new Guest({
                 hotelId,

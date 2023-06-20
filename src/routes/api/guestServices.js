@@ -52,13 +52,4 @@ router.route("/:hotelId/:guestId/:transactionId")
         ROLE_LIST.RECEPTIONIST,
         ROLE_LIST.SERVICE_MANAGER), handelCheckout);    // checkout the guest
 
-// router.route("/:hotelId/:guestId/:transactionId/option")     
-//     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-//         ROLE_LIST.HOTEL_ADMIN, 
-//         ROLE_LIST.SERVICE_ADMIN,
-//         ROLE_LIST.OFFICE_STAFF,
-//         ROLE_LIST.RECEPTIONIST,
-//         ROLE_LIST.SERVICE_MANAGER,
-//         ROLE_LIST.SERVICE_BOY), handelBillDetail);     // bill details
-
 module.exports = router;

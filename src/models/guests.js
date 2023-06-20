@@ -183,7 +183,6 @@ const miscellaneousSchema = new mongoose.Schema({
 });
 
 
-
 const roomTransactionSchema = new mongoose.Schema({
     id: { 
         type:String,
@@ -266,7 +265,8 @@ const roomTransactionSchema = new mongoose.Schema({
 
 const tableTransactionSchema = new mongoose.Schema({
     tables: [tableSchema],
-    foods: [foodSchema]
+    foods: [foodSchema],
+    isCheckedout: false
 });
 
 const serviceTransactionSchema = new mongoose.Schema({

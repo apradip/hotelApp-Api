@@ -7,7 +7,7 @@ const guestFoodTransactionSchema = new mongoose.Schema({
     guestId: {
         type: String
     },
-    foodId: {
+    id: {
         type: String 
     },
     name: {
