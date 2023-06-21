@@ -65,7 +65,7 @@ const handelSearch = async (req, res) => {
         };
         const filter3 = {
             $project: {
-                roomsDetail: 0, tablesDetail: 0, servicesesDetail: 0, expensesPaymentsDetail: 0,
+                roomsDetail: 0, tablesDetail: 0, servicesDetail: 0, expensesPaymentsDetail: 0,
                 option: 0, isActive: 0, isEnable: 0
             }
         };
@@ -113,8 +113,6 @@ const handelDetail = async (req, res) => {
     let pipeline = [];
     
     try {
-        
-
         if (option === "N") {
             const filter1 = {
                 $match: {
@@ -131,7 +129,7 @@ const handelDetail = async (req, res) => {
                 $project: {
                     _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                     corporateName: 0, corporateAddress: 0, gstNo: 0,
-                    roomsDetail: 0, tablesDetail: 0, servicesesDetail: 0,
+                    roomsDetail: 0, tablesDetail: 0, servicesDetail: 0,
                     expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
                     option: 0, isActive: 0, isEnable: 0    
                 }
@@ -245,7 +243,7 @@ const handelOrder = async (req, res) => {
                     $project: {
                         _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                         corporateName: 0, corporateAddress: 0, gstNo: 0,
-                        roomsDetail: 0, tablesDetail: 0, servicesesDetail: 0,
+                        roomsDetail: 0, tablesDetail: 0, servicesDetail: 0,
                         expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
                         option: 0, isActive: 0, isEnable: 0, updatedDate: 0
                     }
@@ -422,14 +420,16 @@ const handelDelivery = async (req, res) => {
                 };  
                 const filter5 = {
                     $match: {
-                        "miscellaneaDetail.miscellanea._id": mongoose.Types.ObjectId(delivery.itemTransactionId)
+                        "miscellaneaDetail.miscellanea._id": mongoose.Types.ObjectId(delivery.itemTransactionId),
+                        "miscellaneaDetail.miscellanea.despatchDate": {$exists:true},
+                        "miscellaneaDetail.miscellanea.despatchTime": {$exists:true}
                     }
                 };
                 const filter6 = {
                     $project: {
                         _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                         corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                        roomsDetail: 0, tablesDetail: 0, servicesesDetail: 0,
+                        roomsDetail: 0, tablesDetail: 0, servicesDetail: 0,
                         expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
                         option: 0, isActive: 0, isEnable: 0
                     }
@@ -518,13 +518,19 @@ const handelGenerateBill = async (req, res) => {
             $unwind: "$miscellaneaDetail.miscellanea" 
         };  
         const filterSum5 = {
+            $match: {
+                "miscellaneaDetail.miscellanea.despatchDate": {$exists:true},
+                "miscellaneaDetail.miscellanea.despatchTime": {$exists:true}
+            }
+        };
+        const filterSum6 = {
             $group: {
                 _id: "$miscellaneaDetail._id",
                 total: {$sum: "$miscellaneaDetail.miscellanea.totalPrice"}
             }
         };
 
-        const sums = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5]);
+        const sums = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5, filterSum6]);
         // End :: calculate food total
 
 
@@ -605,11 +611,10 @@ const handelGenerateBill = async (req, res) => {
                 );   
                 // End :: update expense payment transaction
             }
-   
         }
 
 
-        // calculate and update food total
+        // show the list of bill & all bill items 
         const filterBill1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
@@ -621,27 +626,29 @@ const handelGenerateBill = async (req, res) => {
         const filterBill2 = {
             $unwind: "$miscellaneaDetail"
         };
-        const filterBill3 = {
+        const filterBill3 = { 
+            $unwind: "$miscellaneaDetail.miscellanea" 
+        };  
+        const filterBill4 = {
             $unwind: "$expensesPaymentsDetail"
         };
-        const filterBill4 = {
+        const filterBill5 = {
             $match: {
                 "miscellaneaDetail._id": mongoose.Types.ObjectId(transactionId),
-                "expensesPaymentsDetail.expenseId": transactionId
+                "expensesPaymentsDetail.expenseId": transactionId,
+                "miscellaneaDetail.miscellanea.despatchDate": {$exists:true},
+                "miscellaneaDetail.miscellanea.despatchTime": {$exists:true}
             }
         };
-        const filterBill5 = {
-            $project: {
-                _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                roomsDetail: 0, tablesDetail: 0, servicesesDetail: 0,
-                balance: 0, inDate: 0, inTime: 0, option: 0, isActive: 0, 
-                isEnable: 0, __v: 0,
-                "miscellaneaDetail.isCheckedout": 0, "miscellaneaDetail._id": 0, 
+        const filterBill6 = {
+            $group: {
+                _id: "$miscellaneaDetail._id",
+                miscellanea: {$push: "$miscellaneaDetail.miscellanea"},
+                expensesPaymentsDetail: {$push: "$expensesPaymentsDetail"}
             }
         };
 
-        const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5]);
+        const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5, filterBill6]);
 
         return res.status(200).send(bills);        
     } catch(e) {

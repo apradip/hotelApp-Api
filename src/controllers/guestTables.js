@@ -560,35 +560,6 @@ const handelGenerateBill = async (req, res) => {
             }
 
             // Start :: get all food items 
-            // const billFilter1 = {
-            //     $match: {
-            //         hotelId,
-            //         _id: mongoose.Types.ObjectId(guestId),         
-            //         isActive: true,
-            //         isEnable: true
-            //     }
-            // };
-            // const billFilter2 = {
-            //     $unwind: "$expensesPaymentsDetail"
-            // };
-            // const billFilter3 = {
-            //     $match: {
-            //         "expensesPaymentsDetail.expenseId": transactionId
-            //     }
-            // };
-            // const billFilter4 = {
-            //     $sort: {"expensesPaymentsDetail.billNo": -1} 
-            // };
-            // const billFilter5 = {
-            //     $project: {
-            //         _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-            //         corporateName: 0, corporateAddress: 0, gstNo: 0, 
-            //         roomsDetail: 0, tablesDetail: 0, miscellaneaDetail: 0, servicesDetail: 0,
-            //         balance: 0, inDate: 0, inTime: 0,
-            //         option: 0, isActive: 0, isEnable: 0
-            //     }
-            // };
-
             const filterBill1 = {
                 $match: {
                     hotelId,
@@ -631,55 +602,6 @@ const handelGenerateBill = async (req, res) => {
 
     return res.status(500).send();
 };
-
-
-// // handle guest bill summery
-// //query string : hotel Id / guest Id / transaction Id
-// const handelBillDetail = async (req, res) => {
-//     const {hotelId, guestId, transactionId} = req.params;
-
-//     try {
-//         // calculate and update food total
-//         const filter1 = {
-//             $match: {
-//                 _id: mongoose.Types.ObjectId(guestId),         
-//                 hotelId: hotelId,
-//                 isActive: true,
-//                 isEnable: true
-//             }
-//         };
-//         const filter2 = {
-//             $unwind: '$tablesDetail'
-//         };
-//         const filter3 = {
-//             $match: {
-//                 'tablesDetail._id': mongoose.Types.ObjectId(transactionId)
-                
-//             }
-//         };
-//         const filter4 = {
-//             $project: {
-//                 _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-//                 corporateName: 0, corporateAddress: 0, gstNo: 0, 
-//                 roomsDetail: 0, servicesDetail: 0, miscellaneousesDetail: 0,
-//                 expensesPaymentsDetail: 0, balance: 0, inDate: 0, inTime: 0,
-//                 option: 0, isActive: 0, isEnable: 0
-//             }
-//         };
-//         const filter5 = { 
-//             $unwind: '$tablesDetail.foods' 
-//         };  
-
-//         const pipelineBill = [filter1, filter2, filter3, filter4, filter5];
-//         const resBill = await Guest.aggregate(pipelineBill);
-//         if (!resBill) return res.status(404).send();
-
-//         return res.status(200).send(resBill);
-
-//     } catch(e) {
-//         return res.status(500).send(e);
-//     }
-// };
 
 
 // handle guest checkout 
