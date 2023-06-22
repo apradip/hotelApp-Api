@@ -35,8 +35,9 @@ class expenseType {
 };
 
 
-//handel search guest
-//query string : hotel Id?search= guest name, mobile, corporate name, corporate address
+// handel search guest
+// url : hotel Id 
+// query string : ?search= guest name, mobile, corporate name, corporate address
 const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
@@ -102,9 +103,9 @@ const handelSearch = async (req, res) => {
 };
 
 
-// handel show all orders
-//query string : hotel Id / guest Id 
-//query string : option = option: [non delivery / all]
+// handel show all miscellanea items
+// url : hotel Id / guest Id 
+// query string : ?option = option: [non delivery / all]
 const handelDetail = async (req, res) => {
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
@@ -209,8 +210,8 @@ const handelDetail = async (req, res) => {
 
 
 // handel order
-//query string : hotel Id / guest Id / transaction Id
-//body : {"orders": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
+// url : hotel Id / guest Id / transaction Id
+// body : {"orders": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
 const handelOrder = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
     const {orders} = req.body;
@@ -324,50 +325,17 @@ const handelOrder = async (req, res) => {
                 },
             );  
         }
-
-        return res.status(200).send();
     } catch(e) {
         return res.status(500).send(e);
     }
-};
 
-async function newItemValues(hotel, orders) {
-    // insert all add / modify operation items
-    const transaction = new miscellaneousTransactionType([]);
-
-    await Promise.all(orders.map(async (order) => {         
-        // delete all remove / modify operation service    
-        if ((order.operation) === "A") {
-            
-            // check for item existance
-            const master = await Miscellaneous.findOne(
-                {
-                    _id: mongoose.Types.ObjectId(order.id), 
-                    hotelId: hotel._id, 
-                    isEnable: true
-                }
-            );    
-
-            if (master) {
-                transaction.miscellanea.push(new miscellaneousType(
-                    master._id, 
-                    master.name, 
-                    master.price,
-                    order.quantity,
-                    hotel.serviceChargePercentage,
-                    hotel.foodGstPercentage
-                ));
-            }
-        }
-    }));
-
-    return transaction;
+    return res.status(200).send();
 };
 
 
 // handel delivery
-//query string : hotel Id / guest Id / transaction Id
-//body : {"deliveries": [{"id": ""}]}
+// url : hotel Id / guest Id / transaction Id
+// body : {"deliveries": [{"id": ""}]}
 const handelDelivery = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
     const {deliveries} = req.body;
@@ -461,22 +429,6 @@ const handelDelivery = async (req, res) => {
                         });
                 
                         await data.save();
-
-                        // //update banalce
-                        // //increase balance with product total
-                        // await Guest.updateOne(
-                        //     {
-                        //         _id: mongoose.Types.ObjectId(guestId), 
-                        //         hotelId: hotelId,
-                        //         isActive: true,
-                        //         isEnable: true
-                        //     },
-                        //     {
-                        //         $inc: {
-                        //             balance: (currentItem.totalPrice.toFixed(0) * -1)
-                        //         }
-                        //     }
-                        // );  
                     }
                 }));   
             }
@@ -489,15 +441,15 @@ const handelDelivery = async (req, res) => {
 };
 
 
-// handle guest bill summery
-//query string : hotel Id / guest Id / transaction Id
+// handle generate bill & display detail
+// url : hotel Id / guest Id / transaction Id
 const handelGenerateBill = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
    
     let total = 0;
 
     try {
-        // Start :: calculate food total
+        // Start :: calculate miscellanea item price total
         const filterSum1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
@@ -531,7 +483,7 @@ const handelGenerateBill = async (req, res) => {
         };
 
         const sums = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5, filterSum6]);
-        // End :: calculate food total
+        // End :: calculate miscellanea item price total
 
 
         // Start :: insert into expense if the transaction is not in guest 
@@ -654,7 +606,7 @@ const handelGenerateBill = async (req, res) => {
         // End :: calculate & update balance
 
 
-        // show the list of bill & all bill items 
+        // Start :: show all bill items 
         const filterBill1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
@@ -690,7 +642,8 @@ const handelGenerateBill = async (req, res) => {
 
         const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5, filterBill6]);
 
-        return res.status(200).send(bills);        
+        return res.status(200).send(bills);    
+        // End :: show all bill items     
     } catch(e) {
         return res.status(500).send(e);
     }
@@ -698,7 +651,7 @@ const handelGenerateBill = async (req, res) => {
 
 
 // handle guest checkout 
-//query string : hotel Id / guest Id / transaction Id
+// url : hotel Id / guest Id / transaction Id
 const handelCheckout = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
 
@@ -733,6 +686,38 @@ const handelCheckout = async (req, res) => {
 };
 
 
+async function newItemValues(hotel, orders) {
+    // insert all add / modify operation items
+    const transaction = new miscellaneousTransactionType([]);
+
+    await Promise.all(orders.map(async (order) => {         
+        // delete all remove / modify operation service    
+        if ((order.operation) === "A") {
+            
+            // check for item existance
+            const master = await Miscellaneous.findOne(
+                {
+                    _id: mongoose.Types.ObjectId(order.id), 
+                    hotelId: hotel._id, 
+                    isEnable: true
+                }
+            );    
+
+            if (master) {
+                transaction.miscellanea.push(new miscellaneousType(
+                    master._id, 
+                    master.name, 
+                    master.price,
+                    order.quantity,
+                    hotel.serviceChargePercentage,
+                    hotel.foodGstPercentage
+                ));
+            }
+        }
+    }));
+
+    return transaction;
+};
 
 async function getActiveItem(detail) {
     let transactionId = "undefined";

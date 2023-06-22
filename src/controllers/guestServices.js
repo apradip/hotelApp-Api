@@ -35,8 +35,9 @@ class expenseType {
 };
 
 
-//handel search guest
-//query string : hotel Id?search= guest name, mobile, corporate name, corporate address
+// handel search guest
+// url : hotel Id 
+// query string : ?search= guest name, mobile, corporate name, corporate address
 const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
@@ -102,9 +103,9 @@ const handelSearch = async (req, res) => {
 };
 
 
-// handel show all orders
-//query string : hotel Id / guest Id 
-//query string : option = option: [non delivery / all]
+// handel show all service items
+// url : hotel Id / guest Id 
+// query string : ?option = option: [non delivery / all]
 const handelDetail = async (req, res) => {
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
@@ -211,8 +212,8 @@ const handelDetail = async (req, res) => {
 
 
 // handel order
-//query string : hotel Id / guest Id / transaction Id
-//body : {"orders": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
+// url : hotel Id / guest Id / transaction Id
+// body : {"orders": [{"id": "", "quantity": 0, "operation": "A/M/R"}] [A=ADD, M=MOD, R=REMOVE]}
 const handelOrder = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
     const {orders} = req.body;
@@ -331,43 +332,10 @@ const handelOrder = async (req, res) => {
     return res.status(200).send();
 }
 
-async function newItemValues(hotel, orders) {
-    // insert all add / modify operation items
-    const transaction = new serviceTransactionType([]);
-
-    await Promise.all(orders.map(async (order) => {         
-        // delete all remove / modify operation service    
-        if ((order.operation) === "A") {
-            
-            // check for item existance
-            const master = await Services.findOne(
-                {
-                    _id: mongoose.Types.ObjectId(order.id), 
-                    hotelId: hotel._id, 
-                    isEnable: true
-                }
-            );    
-
-            if (master) {
-                transaction.services.push(new serviceType(
-                    master._id, 
-                    master.name, 
-                    master.price,
-                    order.quantity,
-                    hotel.serviceChargePercentage,
-                    hotel.foodGstPercentage
-                ));
-            }
-        }
-    }));
-
-    return transaction;
-}
-
 
 // handel delivery
-//query string : hotel Id / guest Id / transaction Id
-//body : {"deliveries": [{"id": ""}]}
+// url : hotel Id / guest Id / transaction Id
+// body : {"deliveries": [{"id": ""}]}
 const handelDelivery = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
     const {deliveries} = req.body;
@@ -472,8 +440,8 @@ const handelDelivery = async (req, res) => {
 }
 
 
-// handle guest bill summery
-//query string : hotel Id / guest Id / transaction Id
+// handle generate bill & display detail
+// query string : hotel Id / guest Id / transaction Id
 const handelGenerateBill = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
    
@@ -680,7 +648,7 @@ const handelGenerateBill = async (req, res) => {
 
 
 // handle guest checkout 
-//query string : hotel Id / guest Id / transaction Id
+// query string : hotel Id / guest Id / transaction Id
 const handelCheckout = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
 
@@ -714,6 +682,39 @@ const handelCheckout = async (req, res) => {
     return res.status(200).send();    
 };
 
+
+async function newItemValues(hotel, orders) {
+    // insert all add / modify operation items
+    const transaction = new serviceTransactionType([]);
+
+    await Promise.all(orders.map(async (order) => {         
+        // delete all remove / modify operation service    
+        if ((order.operation) === "A") {
+            
+            // check for item existance
+            const master = await Services.findOne(
+                {
+                    _id: mongoose.Types.ObjectId(order.id), 
+                    hotelId: hotel._id, 
+                    isEnable: true
+                }
+            );    
+
+            if (master) {
+                transaction.services.push(new serviceType(
+                    master._id, 
+                    master.name, 
+                    master.price,
+                    order.quantity,
+                    hotel.serviceChargePercentage,
+                    hotel.foodGstPercentage
+                ));
+            }
+        }
+    }));
+
+    return transaction;
+}
 
 async function getActiveItem(detail) {
     let transactionId = "undefined";
