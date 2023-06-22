@@ -324,11 +324,11 @@ const handelOrder = async (req, res) => {
                 },
             );  
         }
-
-        return res.status(200).send();
     } catch(e) {
         return res.status(500).send(e);
     }
+
+    return res.status(200).send();
 }
 
 async function newItemValues(hotel, orders) {
@@ -429,9 +429,8 @@ const handelDelivery = async (req, res) => {
                     $project: {
                         _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                         corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                        roomsDetail: 0, tablesDetail: 0, miscellaneaDetail: 0,
-                        expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
-                        option: 0, isActive: 0, isEnable: 0
+                        roomsDetail: 0, tablesDetail: 0, miscellaneaDetail: 0, expensesPaymentsDetail: 0, 
+                        inDate: 0, inTime: 0, option: 0, isActive: 0, isEnable: 0
                     }
                 };
                 

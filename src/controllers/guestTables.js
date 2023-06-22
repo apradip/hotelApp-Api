@@ -365,28 +365,29 @@ const handelDelivery = async (req, res) => {
                     }
                 };
                 const filter2 = {
-                    $project: {
-                        _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                        corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                        roomsDetail: 0, servicesDetail: 0, miscellaneaDetail: 0,
-                        expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
-                        option: 0, isActive: 0, isEnable: 0, "tablesDetail.tables": 0
-                    }
-                };
-                const filter3 = {
                     $unwind: "$tablesDetail"
                 };
-                const filter4 = {
+                const filter3 = {
                     $match: {
                         "tablesDetail._id": mongoose.Types.ObjectId(transactionId)
                     }
                 };
-                const filter5 = { 
+                const filter4 = { 
                     $unwind: "$tablesDetail.foods" 
                 };  
-                const filter6 = {
+                const filter5 = {
                     $match: {
-                        "tablesDetail.foods._id": mongoose.Types.ObjectId(delivery.itemTransactionId)
+                        "tablesDetail.foods._id": mongoose.Types.ObjectId(delivery.itemTransactionId),
+                        "tablesDetail.foods.despatchDate": {$exists:true},
+                        "tablesDetail.foods.despatchTime": {$exists:true}
+                    }
+                };
+                const filter6 = {
+                    $project: {
+                        _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
+                        corporateName: 0, corporateAddress: 0, gstNo: 0, 
+                        roomsDetail: 0, servicesDetail: 0, miscellaneaDetail: 0, expensesPaymentsDetail: 0, 
+                        inDate: 0, inTime: 0, option: 0, isActive: 0, isEnable: 0, "tablesDetail.tables": 0
                     }
                 };
                 
@@ -473,13 +474,19 @@ const handelGenerateBill = async (req, res) => {
             $unwind: "$tablesDetail.foods" 
         };  
         const filterSum5 = {
+            $match: {
+                "tablesDetail.foods.despatchDate": {$exists:true},
+                "tablesDetail.foods.despatchTime": {$exists:true}
+            }
+        };
+        const filterSum6 = {
             $group: {
                 _id: "$tablesDetail._id",
                 total: {$sum: "$tablesDetail.foods.totalPrice"}
             }
         };
 
-        const sums = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5]);
+        const sums = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5, filterSum6]);
         // End :: calculate food total
 
         // Start :: insert into expense if the transaction is not in guest 
@@ -571,27 +578,29 @@ const handelGenerateBill = async (req, res) => {
             const filterBill2 = {
                 $unwind: "$tablesDetail"
             };
-            const filterBill3 = {
+            const filterBill3 = { 
+                $unwind: "$tablesDetail.foods" 
+            };  
+            const filterBill4 = {
                 $unwind: "$expensesPaymentsDetail"
             };
-            const filterBill4 = {
+            const filterBill5 = {
                 $match: {
                     "tablesDetail._id": mongoose.Types.ObjectId(transactionId),
-                    "expensesPaymentsDetail.expenseId": transactionId
+                    "expensesPaymentsDetail.expenseId": transactionId,
+                    "tablesDetail.foods.despatchDate": {$exists:true},
+                    "tablesDetail.foods.despatchTime": {$exists:true}
                 }
             };
-            const filterBill5 = {
-                $project: {
-                    _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                    corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                    roomsDetail: 0, servicesDetail: 0, miscellaneaDetail: 0,
-                    balance: 0, inDate: 0, inTime: 0, option: 0, isActive: 0, 
-                    isEnable: 0, __v: 0,
-                    "tablesDetail.isCheckedout": 0, "tablesDetail._id": 0
+            const filterBill6 = {
+                $group: {
+                    _id: "$tablesDetail._id",
+                    foods: {$push: "$tablesDetail.foods"},
+                    expensesPaymentsDetail: {$push: "$expensesPaymentsDetail"}
                 }
             };
     
-            const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5]);  
+            const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5, filterBill6]);  
         
             return res.status(200).send(bills);
             // End :: get all food items 
