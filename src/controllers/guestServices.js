@@ -460,22 +460,6 @@ const handelDelivery = async (req, res) => {
                         });
                 
                         await data.save();
-
-                        //update banalce
-                        //increase balance with product total
-                        await Guest.updateOne(
-                            {
-                                _id: mongoose.Types.ObjectId(guestId), 
-                                hotelId: hotelId,
-                                isActive: true,
-                                isEnable: true
-                            },
-                            {
-                                $inc: {
-                                    balance: (currentItem.totalPrice.toFixed(0) * -1)
-                                }
-                            }
-                        );  
                     }
                 }));   
             }
@@ -610,6 +594,46 @@ const handelGenerateBill = async (req, res) => {
                 // End :: update expense payment transaction
             }
         }
+
+
+        // Start :: calculate & update balance
+        const filterBalance1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId: hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filterBalance2 = {
+            $unwind: "$expensesPaymentsDetail"
+        };
+        const filterBalance3 = {
+            $group: {
+                _id: "$tablesDetail._id",
+                totalExpense: {$sum: "$expensesPaymentsDetail.expenseAmount"},
+                totalPayment: {$sum: "$expensesPaymentsDetail.paymentAmount"}                        
+            }
+        };
+
+        const balances = await Guest.aggregate([filterBalance1, filterBalance2, filterBalance3]);
+        const balance = balances[0].totalExpense + balances[0].totalPayment
+
+        //update banalce
+        await Guest.updateOne(
+            {
+                hotelId,
+                _id: mongoose.Types.ObjectId(guestId), 
+                isActive: true,
+                isEnable: true
+            },
+            {
+                $inc: {
+                    balance: balance.toFixed(0)
+                }
+            }
+        );  
+        // End :: calculate & update balance
 
 
         // calculate and update food total

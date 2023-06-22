@@ -387,7 +387,8 @@ const handelDelivery = async (req, res) => {
                         _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                         corporateName: 0, corporateAddress: 0, gstNo: 0, 
                         roomsDetail: 0, servicesDetail: 0, miscellaneaDetail: 0, expensesPaymentsDetail: 0, 
-                        inDate: 0, inTime: 0, option: 0, isActive: 0, isEnable: 0, "tablesDetail.tables": 0
+                        inDate: 0, inTime: 0, option: 0, isActive: 0, isEnable: 0, 
+                        "tablesDetail.tables": 0
                     }
                 };
                 
@@ -417,22 +418,6 @@ const handelDelivery = async (req, res) => {
                         });
                 
                         await data.save();
-
-                        //update banalce
-                        //increase balance with product total
-                        await Guest.updateOne(
-                            {
-                                hotelId,
-                                _id: mongoose.Types.ObjectId(guestId), 
-                                isActive: true,
-                                isEnable: true
-                            },
-                            {
-                                $inc: {
-                                    balance: (currentItem.totalPrice.toFixed(0) * -1)
-                                }
-                            }
-                        );  
                     }
                 }));   
             }
@@ -491,7 +476,7 @@ const handelGenerateBill = async (req, res) => {
 
         // Start :: insert into expense if the transaction is not in guest 
         if (sums) {
-            total = sums[0].total;
+            total = (sums[0].total.toFixed(0) * -1);
 
             // Start :: update expense in guest
             const update = await Guest.updateOne(
@@ -565,51 +550,93 @@ const handelGenerateBill = async (req, res) => {
                 );   
                 // End :: update expense payment transaction
             }
-
-            // Start :: get all food items 
-            const filterBill1 = {
-                $match: {
-                    hotelId,
-                    _id: mongoose.Types.ObjectId(guestId),         
-                    isActive: true,
-                    isEnable: true
-                }
-            };
-            const filterBill2 = {
-                $unwind: "$tablesDetail"
-            };
-            const filterBill3 = { 
-                $unwind: "$tablesDetail.foods" 
-            };  
-            const filterBill4 = {
-                $unwind: "$expensesPaymentsDetail"
-            };
-            const filterBill5 = {
-                $match: {
-                    "tablesDetail._id": mongoose.Types.ObjectId(transactionId),
-                    "expensesPaymentsDetail.expenseId": transactionId,
-                    "tablesDetail.foods.despatchDate": {$exists:true},
-                    "tablesDetail.foods.despatchTime": {$exists:true}
-                }
-            };
-            const filterBill6 = {
-                $group: {
-                    _id: "$tablesDetail._id",
-                    foods: {$push: "$tablesDetail.foods"},
-                    expensesPaymentsDetail: {$push: "$expensesPaymentsDetail"}
-                }
-            };
-    
-            const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5, filterBill6]);  
-        
-            return res.status(200).send(bills);
-            // End :: get all food items 
         }
+
+
+        // Start :: calculate & update balance
+        const filterBalance1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId: hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filterBalance2 = {
+            $unwind: "$expensesPaymentsDetail"
+        };
+        const filterBalance3 = {
+            $group: {
+                _id: "$tablesDetail._id",
+                totalExpense: {$sum: "$expensesPaymentsDetail.expenseAmount"},
+                totalPayment: {$sum: "$expensesPaymentsDetail.paymentAmount"}                        
+            }
+        };
+
+        const balances = await Guest.aggregate([filterBalance1, filterBalance2, filterBalance3]);
+        const balance = balances[0].totalExpense + balances[0].totalPayment
+
+        // Start :: update balance
+        await Guest.updateOne(
+            {
+                hotelId,
+                _id: mongoose.Types.ObjectId(guestId), 
+                isActive: true,
+                isEnable: true
+            },
+            {
+                $inc: {
+                    balance: balance.toFixed(0)
+                }
+            }
+        );  
+        // End :: update balance
+        // End :: calculate & update balance
+
+
+        // Start :: get all food items 
+        const filterBill1 = {
+            $match: {
+                hotelId,
+                _id: mongoose.Types.ObjectId(guestId),         
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filterBill2 = {
+            $unwind: "$tablesDetail"
+        };
+        const filterBill3 = { 
+            $unwind: "$tablesDetail.foods" 
+        };  
+        const filterBill4 = {
+            $unwind: "$expensesPaymentsDetail"
+        };
+        const filterBill5 = {
+            $match: {
+                "tablesDetail._id": mongoose.Types.ObjectId(transactionId),
+                "expensesPaymentsDetail.expenseId": transactionId,
+                "tablesDetail.foods.despatchDate": {$exists:true},
+                "tablesDetail.foods.despatchTime": {$exists:true}
+            }
+        };
+        const filterBill6 = {
+            $group: {
+                _id: "$tablesDetail._id",
+                foods: {$push: "$tablesDetail.foods"},
+                expensesPaymentsDetail: {$push: "$expensesPaymentsDetail"}
+            }
+        };
+    
+        const bills = await Guest.aggregate([filterBill1, filterBill2, filterBill3, filterBill4, filterBill5, filterBill6]);  
+    
+        return res.status(200).send(bills);
+        // End :: get all food items 
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(500).send();
+    // return res.status(500).send();
 };
 
 
