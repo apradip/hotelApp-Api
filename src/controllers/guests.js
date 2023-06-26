@@ -147,8 +147,8 @@ const handelCreate = async (req, res) => {
             for(const table of tables) {
                 // check if the table is empty
                 const filter = {
+                    hotelId, 
                     _id: mongoose.Types.ObjectId(table.id), 
-                    hotelId: hotelId, 
                     isOccupied: false, 
                     isEnable: true
                 };

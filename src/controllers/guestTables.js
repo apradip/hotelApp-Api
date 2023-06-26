@@ -36,13 +36,13 @@ const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
 
+    let guestList = [];
     let pipeline = [];
-    let searchList = [];
-
+    
     try {
         const filter1 = {
             $match: {
-                hotelId: hotelId,
+                hotelId,
                 isActive: true,
                 isEnable: true,
                 outDate: {$exists:false},
@@ -58,54 +58,48 @@ const handelSearch = async (req, res) => {
                 {corporateAddress: {$regex: ".*" + search.trim().toUpperCase() + ".*"}}]
             }
         };
-        const filter3 = {
-            $project: {
-                roomsDetail: 0, servicesDetail: 0, miscellaneousesDetail: 0, expensesPaymentsDetail: 0,
-                option: 0, isActive: 0, isEnable: 0
-            }
-        };
 
         if (!search) {
-            pipeline = [filter1, filter3];
+            pipeline = [filter1];
         } else {
-            pipeline = [filter1, filter2, filter3];
+            pipeline = [filter1, filter2];
         }
 
-        const searchData = await Guest.aggregate(pipeline); 
+        const guests = await Guest.aggregate(pipeline); 
 
-        await Promise.all(searchData.map(async (element) => {
+        await Promise.all(guests.map(async (guest) => {
             let tables = "";
 
             if (!search) {
-                tables = element.tablesDetail[element.tablesDetail.length - 1].tables;
+                tables = guest.tablesDetail[guest.tablesDetail.length - 1].tables;
             } else {
-                element.tablesDetail[element.tablesDetail.length - 1].tables.map(async (table) => {
+                guest.tablesDetail[guest.tablesDetail.length - 1].tables.map(async (table) => {
                     tables.length > 0 ?  tables = tables + ", " + table.no : tables = table.no;
                 });
             }
 
             const object = {
-                id: element._id,
-                name: element.name,
-                mobile: element.mobile,
-                guestCount: element.guestCount,
-                corporateName: element.corporateName,
-                corporateAddress: element.corporateAddress,
-                gstNo: element.gstNo,
+                id: guest._id,
+                name: guest.name,
+                mobile: guest.mobile,
+                guestCount: guest.guestCount,
+                corporateName: guest.corporateName,
+                corporateAddress: guest.corporateAddress,
+                gstNo: guest.gstNo,
                 tables: tables,
-                inDate: element.inDate,
-                inTime: element.inTime,
-                totalBalance: element.balance,
-                transactionId: element.tablesDetail[element.tablesDetail.length - 1]._id            
+                inDate: guest.inDate,
+                inTime: guest.inTime,
+                totalBalance: guest.balance,
+                transactionId: guest.tablesDetail[guest.tablesDetail.length - 1]._id            
             };
             
-            searchList.push(object);
+            guestList.push(object);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(200).send(searchList);
+    return res.status(200).send(guestList);
 };
 
 
@@ -116,76 +110,42 @@ const handelDetail = async (req, res) => {
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
 
-    let itemList = [];
+    let guestList = [];
     let pipeline = [];
 
     try {
+        const filter1 = {
+            $match: {
+                hotelId,
+                _id: mongoose.Types.ObjectId(guestId),         
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$tablesDetail"
+        };
+        const filter3 = { 
+            $unwind: "$tablesDetail.foods"
+        };
+        const filter4 = {
+            $match: {
+                "tablesDetail.foods.despatchDate": {$exists: false},
+                "tablesDetail.foods.despatchTime": {$exists: false}
+            }
+        };
+
         if (option === "N") {
-            const filter1 = {
-                $match: {
-                    hotelId,
-                    _id: mongoose.Types.ObjectId(guestId),         
-                    isActive: true,
-                    isEnable: true
-                }
-            };
-            const filter2 = {
-                $unwind: "$tablesDetail"
-            };
-            const filter3 = { 
-                $unwind: "$tablesDetail.foods"
-            };
-            const filter4 = {
-                $match: {
-                    "tablesDetail.foods.despatchDate": {$exists: false},
-                    "tablesDetail.foods.despatchTime": {$exists: false}
-                }
-            };
-            const filter5 = {
-                $project: {
-                    _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                    corporateName: 0, corporateAddress: 0, gstNo: 0,
-                    roomsDetail: 0, servicesDetail: 0, miscellaneaDetail: 0,
-                    expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
-                    option: 0, isActive: 0, isEnable: 0    
-                }
-            };
-
-            pipeline = [filter1, filter2, filter3, filter4, filter5];
-
-        } else if (option === "A") {
-
-            const filter1 = {
-                $match: {
-                    _id: mongoose.Types.ObjectId(guestId),         
-                    hotelId,
-                    isEnable: true
-                }
-            };
-            const filter2 = {
-                $unwind: "$tablesDetail"
-            };
-            const filter3 = { 
-                $unwind: "$tablesDetail.foods"
-            }; 
-            const filter4 = {
-                $project: {
-                    _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                    corporateName: 0, corporateAddress: 0, gstNo: 0,
-                    roomsDetail: 0, servicesDetail: 0, miscellaneaDetail: 0,
-                    expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
-                    option: 0, isActive: 0, isEnable: 0
-                }
-            };
-
             pipeline = [filter1, filter2, filter3, filter4];
+        } else if (option === "A") {
+            pipeline = [filter1, filter2, filter3];
         } 
 
-        const dbItems = await Guest.aggregate(pipeline);
+        const guests = await Guest.aggregate(pipeline);
 
-        await Promise.all(dbItems.map(async (detail) => {
-            const transactionId = detail.tablesDetail._id;
-            const item = detail.tablesDetail.foods;
+        await Promise.all(guests.map(async (guest) => {
+            const transactionId = guest.tablesDetail._id;
+            const item = guest.tablesDetail.foods;
             
             const dataOrder = {
                 transactionId: transactionId,
@@ -205,13 +165,13 @@ const handelDetail = async (req, res) => {
                 despatchTime: item.despatchTime
             };
 
-            itemList.push(dataOrder);
+            guestList.push(dataOrder);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }        
 
-    return res.status(200).send(itemList);
+    return res.status(200).send(guestList);
 };
 
 
@@ -231,8 +191,8 @@ const handelOrder = async (req, res) => {
         if (transactionId) {
             const filter1 = {
                 $match: {
+                    hotelId,
                     _id: mongoose.Types.ObjectId(guestId),         
-                    hotelId: hotelId,
                     isActive: true,
                     isEnable: true
                 }
@@ -245,76 +205,71 @@ const handelOrder = async (req, res) => {
                     "tablesDetail._id": mongoose.Types.ObjectId(transactionId)
                 }
             };
-            const filter4 = {
-                $project: {
-                    _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                    corporateName: 0, corporateAddress: 0, gstNo: 0,
-                    roomsDetail: 0, miscellaneaDetail: 0, servicesDetail: 0,
-                    expensesPaymentsDetail: 0, inDate: 0, inTime: 0,
-                    option: 0, isActive: 0, isEnable: 0, updatedDate: 0
+
+            const guests = await Guest.aggregate([filter1, filter2, filter3]);  
+
+            if (!guests) return;
+
+            orderDb = guests[0].tablesDetail.foods;
+
+            await Promise.all(orders.map(async (order, idx) => {
+                if (order.quantity <= 0) {
+                    orders[idx].operation = "R";
+                }   
+
+                if (((order.operation) === "M") || ((order.operation) === "R")) {
+                    const keyToFind = "id";
+                    const valueToFind = order.id;
+                    orderDb = orderDb.filter(object => object[keyToFind] !== valueToFind);
                 }
-            };
+            }));
 
-            const dbItems = await Guest.aggregate([filter1, filter2, filter3, filter4]);  
-
-            if (dbItems) {
-                orderDb = dbItems[0].tablesDetail.foods;
-
-                await Promise.all(orders.map(async (order) => {
-                    if (order) {
-                        if (((order.operation) === "M") || ((order.operation) === "R")) {
-                            const keyToFind = "id";
-                            const valueToFind = order.id;
-                            orderDb = orderDb.filter(object => object[keyToFind] !== valueToFind);
+            await Promise.all(orders.map(async (order) => {
+                if (((order.operation) === "A") || ((order.operation) === "M")) {
+                    // check for item existance
+                    const master = await Food.findOne(
+                        {
+                            hotelId, 
+                            _id: mongoose.Types.ObjectId(order.id), 
+                            isEnable: true
                         }
-                    }
-                }));
+                    );    
+    
+                    if (!master) return;
 
-                await Promise.all(orders.map(async (order) => {
-                    if (((order.operation) === "A") || ((order.operation) === "M")) {
-                        // check for item existance
-                        const master = await Food.findOne(
-                            {
-                                hotelId, 
-                                _id: mongoose.Types.ObjectId(order.id), 
-                                isEnable: true
-                            }
-                        );    
-        
-                        if (master) {
-                            orderDb.push(new foodType(
-                                master._id, 
-                                master.name, 
-                                master.price,
-                                order.quantity,
-                                hotel.serviceChargePercentage,
-                                hotel.foodGstPercentage
-                            ));
-                        }
-                    }
-                }));
+                    orderDb.push(new foodType(
+                        master._id, 
+                        master.name, 
+                        master.price,
+                        order.quantity,
+                        hotel.serviceChargePercentage,
+                        hotel.foodGstPercentage
+                    ));
+                }
+            }));
 
-                await Guest.updateOne(
-                    {
-                        hotelId,
-                        _id: mongoose.Types.ObjectId(guestId), 
-                        isActive: true,
-                        isEnable: true
-                    },
-                    {
-                        $set: {
-                            "tablesDetail.$[ed].foods": orderDb
-                        }
-                    },
-                    { 
-                        arrayFilters: [{
-                            "ed._id": mongoose.Types.ObjectId(transactionId)
-                        }]           
+            await Guest.updateOne(
+                {
+                    hotelId,
+                    _id: mongoose.Types.ObjectId(guestId), 
+                    isActive: true,
+                    isEnable: true
+                },
+                {
+                    $set: {
+                        "tablesDetail.$[ed].foods": orderDb
                     }
-                );  
-            } else {
-                return res.status(500).send();
-            }
+                },
+                { 
+                    arrayFilters: [{
+                        "ed._id": mongoose.Types.ObjectId(transactionId)
+                    }]           
+                }
+            );  
+
+            // } else {
+            //     return res.status(500).send();
+            // }
         }
     } catch(e) {
         return res.status(500).send(e);
@@ -384,43 +339,33 @@ const handelDelivery = async (req, res) => {
                         "tablesDetail.foods.despatchTime": {$exists:true}
                     }
                 };
-                const filter6 = {
-                    $project: {
-                        _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
-                        corporateName: 0, corporateAddress: 0, gstNo: 0, 
-                        roomsDetail: 0, servicesDetail: 0, miscellaneaDetail: 0, expensesPaymentsDetail: 0, 
-                        inDate: 0, inTime: 0, option: 0, isActive: 0, isEnable: 0, 
-                        "tablesDetail.tables": 0
-                    }
-                };
                 
-                const dbItems = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5, filter6]);
+                const guests = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]);
        
                 //append the current product to transaction document
-                await Promise.all(dbItems.map(async (item) => {
-                    const currentItem = item.tablesDetail.foods;
+                await Promise.all(guests.map(async (guest) => {
+                    const item = guest.tablesDetail.foods;
 
-                    if (currentItem) {
-                        const data = new GuestFoodTransaction({
-                            hotelId,
-                            guestId,
-                            foodId: currentItem.id,
-                            name: currentItem.name,
-                            serviceChargePercentage: currentItem.serviceChargePercentage,
-                            serviceCharge: currentItem.serviceCharge,
-                            gstPercentage: currentItem.gstPercentage,
-                            gstCharge: currentItem.gstCharge,
-                            unitPrice: currentItem.unitPrice,
-                            quantity: currentItem.quantity,
-                            totalPrice: currentItem.totalPrice,
-                            orderDate: currentItem.orderDate,
-                            orderTime: currentItem.orderTime,
-                            despatchDate: currentItem.despatchDate,
-                            despatchTime: currentItem.despatchTime
-                        });
-                
-                        await data.save();
-                    }
+                    if (!item) return;
+                    const data = new GuestFoodTransaction({
+                        hotelId,
+                        guestId,
+                        foodId: item.id,
+                        name: item.name,
+                        serviceChargePercentage: item.serviceChargePercentage,
+                        serviceCharge: item.serviceCharge,
+                        gstPercentage: item.gstPercentage,
+                        gstCharge: item.gstCharge,
+                        unitPrice: item.unitPrice,
+                        quantity: item.quantity,
+                        totalPrice: item.totalPrice,
+                        orderDate: item.orderDate,
+                        orderTime: item.orderTime,
+                        despatchDate: item.despatchDate,
+                        despatchTime: item.despatchTime
+                    });
+            
+                    await data.save();
                 }));   
             }
         }));
@@ -443,8 +388,8 @@ const handelGenerateBill = async (req, res) => {
         // Start :: calculate food total
         const filterSum1 = {
             $match: {
+                hotelId,
                 _id: mongoose.Types.ObjectId(guestId),         
-                hotelId: hotelId,
                 isActive: true,
                 isEnable: true
             }
@@ -473,12 +418,12 @@ const handelGenerateBill = async (req, res) => {
             }
         };
 
-        const sums = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5, filterSum6]);
+        const despatchSum = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5, filterSum6]);
         // End :: calculate food total
 
         // Start :: insert into expense if the transaction is not in guest 
-        if (sums) {
-            total = (sums[0].total.toFixed(0) * -1);
+        if (despatchSum) {
+            total = (despatchSum[0].total.toFixed(0) * -1);
 
             // Start :: update expense in guest
             const update = await Guest.updateOne(
@@ -506,8 +451,8 @@ const handelGenerateBill = async (req, res) => {
                 // Start :: insert expense into guest
                 await Guest.updateOne(
                     {
+                        hotelId,
                         _id: mongoose.Types.ObjectId(guestId),
-                        hotelId: hotelId,
                         isActive: true,
                         isEnable: true
                     },
@@ -558,8 +503,8 @@ const handelGenerateBill = async (req, res) => {
         // Start :: calculate & update balance
         const filterBalance1 = {
             $match: {
+                hotelId,
                 _id: mongoose.Types.ObjectId(guestId),         
-                hotelId: hotelId,
                 isActive: true,
                 isEnable: true
             }
@@ -569,7 +514,7 @@ const handelGenerateBill = async (req, res) => {
         };
         const filterBalance3 = {
             $group: {
-                _id: "$tablesDetail._id",
+                _id: "$expensesPaymentsDetail._id",
                 totalExpense: {$sum: "$expensesPaymentsDetail.expenseAmount"},
                 totalPayment: {$sum: "$expensesPaymentsDetail.paymentAmount"}                        
             }
@@ -587,7 +532,7 @@ const handelGenerateBill = async (req, res) => {
                 isEnable: true
             },
             {
-                $inc: {
+                $set: {
                     balance: balance.toFixed(0)
                 }
             }
@@ -680,8 +625,8 @@ const handelCheckout = async (req, res) => {
         // update out date & time
         await Guest.updateOne(
             {
+                hotelId,
                 _id: mongoose.Types.ObjectId(guestId),
-                hotelId: hotelId,
                 isActive: true,
                 isEnable: true,
                 tablesDetail: {

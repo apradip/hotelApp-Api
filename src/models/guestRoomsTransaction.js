@@ -8,7 +8,7 @@ const guestRoomTransactionSchema = new mongoose.Schema({
     guestId: {
         type: String
     },
-    roomId: {
+    id: {
         type: String
     },
     no: {
@@ -17,19 +17,10 @@ const guestRoomTransactionSchema = new mongoose.Schema({
     tariff: {
         type: Number
     },
-    extraBedCount: {
-        type: Number
-    },
-    extraBedTariff: {
-        type: Number
-    },
-    extraPersonCount: {
-        type: Number
-    },
     extraPersonTariff: {
         type: Number
     },
-    discount: {
+    extraBedTariff: {
         type: Number
     },
     maxDiscount: {
@@ -38,7 +29,16 @@ const guestRoomTransactionSchema = new mongoose.Schema({
     gstPercentage: {
         type: Number
     },
-    gstAmount: {
+    extraPersonCount: {
+        type: Number
+    },
+    extraBedCount: {
+        type: Number
+    },
+    discount: {
+        type: Number
+    },
+    gstCharge: {
         type: Number
     },
     totalPrice: {

@@ -2,6 +2,61 @@ const mongoose = require("mongoose");
 const date = require("date-and-time");
 
 
+const roomSchema = new mongoose.Schema({
+    id: { 
+        type:String
+    },
+    no: { 
+        type:String
+    },
+    tariff: {
+        type: Number
+    },
+    extraPersonTariff: {
+        type: Number
+    },
+    extraBedTariff: {
+        type: Number
+    },
+    maxDiscount: {
+        type: Number
+    },
+    gstPercentage: {
+        type: Number
+    },
+    extraBedCount: {
+        type: Number,
+        default: 0
+    },
+    extraPersonCount: {
+        type: Number,
+        default: 0
+    },
+    discount: {
+        type: Number
+    },
+    gstCharge: {
+        type: Number,
+        default: function() {
+            return (((this.extraPersonCount * this.extraPersonTariff) + 
+                    (this.extraBedCount * this.extraBedTariff) + 
+                    (this.tariff - this.discount)) * (this.gstPercentage / 100)).toFixed(0);
+        }        
+    },
+    totalPrice: {
+        type: Number,
+        default: function() {
+            return ((this.extraPersonCount * this.extraPersonTariff) + 
+                    (this.extraBedCount * this.extraBedTariff) + 
+                    (this.tariff - this.discount) +
+                    this.gstCharge).toFixed(0);
+        }        
+    },
+    occupancyDate: { 
+        type: String
+    },
+});
+
 const tableSchema = new mongoose.Schema({
     id: { 
         type:String
@@ -184,83 +239,8 @@ const miscellaneousSchema = new mongoose.Schema({
 
 
 const roomTransactionSchema = new mongoose.Schema({
-    id: { 
-        type:String,
-        required: [true, "Table id require!"]
-    },
-    no: { 
-        type:String,
-        required: [true, "Table no require!"]
-    },
-    tariff: {
-        type: Number,
-        min: [1, "Invalid tariff!"],
-        default: function() {
-            return this.tariff ? (this.tariff).toFixed(0) : 0
-        }        
-    },
-    extraBedCount: {
-        type: Number,
-        default: 0,
-        min: [0, "Invalid extra bed count!"]
-    },
-    extraBedTariff: {
-        type: Number,
-        min: [0, "Invalid extra bed charge!"],
-        default: function() {
-            return this.extraBedTariff ? this.extraBedTariff.toFixed(0) : 0
-        }        
-    },
-    extraPersonCount: {
-        type: Number,
-        default: 0,
-        min: [0, "Invalid extra person count!"]
-    },
-    extraPersonTariff: {
-        type: Number,
-        min: [0, "Invalid extra person charge!"],
-        default: function() {
-            return this.extraPersonTariff ? this.extraPersonTariff.toFixed(0) : 0
-        }        
-    },
-    discount: {
-        type: Number,
-        min: [0, "Invalid discount!"],
-        default: function() {
-            return this.discount ? this.discount.toFixed(0) : 0
-        }        
-    },
-    maxDiscount: {
-        type: Number,
-        min: [0, "Invalid max. discount!"],
-        default: function() {
-            return this.maxDiscount ? this.maxDiscount.toFixed(0) : 0
-        }        
-    },
-    gstPercentage: {
-        type: Number,
-        min: [0, "Invalid gst percentage!"],
-        default: function() {
-            return this.gstPercentage ? this.gstPercentage.toFixed(2) : 0
-        }        
-    },
-    gstCharge: {
-        type: Number,
-        min: [0, "Invalid gst!"],
-        default: function() {
-            return this.gstCharge ? this.gstCharge.toFixed(2) : 0
-        }        
-    },
-    totalPrice: {
-        type: Number,
-        min: [0, "Invalid price!"],
-        default: function() {
-            return this.totalPrice ? this.totalPrice.toFixed(0) : 0
-        }        
-    },
-    occupancyDate: {
-        type: String
-    }
+    rooms: [roomSchema],
+    isCheckedout: false
 });
 
 const tableTransactionSchema = new mongoose.Schema({
