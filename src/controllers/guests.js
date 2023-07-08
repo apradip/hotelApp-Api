@@ -80,7 +80,7 @@ const handelDetail = async (req, res) => {
 //query string : hotel Id
 //body detail: {option [D = detail / S = small],
 //        "idDocumentId" : "", "idNo" : "", "name" : "", "age" : 0, "fatherName" : "", "address" : "", "city" : "", "policeStation" : "", "state" : "",
-//        "pin" : "", "phone" : "", "mobile" : "", "email" : "", "guestCount" : 0, "guestMaleCount" : 0, "guestFemaleCount" : 0,
+//        "pin" : "", "mobile" : "", "email" : "", "guestCount" : 0, "guestMaleCount" : 0, "guestFemaleCount" : 0,
 //        "dayCount" : 0, "bookingAgentId" : "", "planId" : "", "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 //body small: {"name" : "", "mobile" : "", "guestCount" : 0, "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 const handelCreate = async (req, res) => {
@@ -89,24 +89,24 @@ const handelCreate = async (req, res) => {
 
     try {
         if (option.trim().toUpperCase() === "R") {  //For room
-            const {idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, 
-                pin, phone, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
-                dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} = req.body
+            const {idDocumentId, idNo, name, age, fatherName, address, city, 
+                policeStation, state, pin, mobile, email, guestCount, 
+                guestMaleCount, guestFemaleCount, dayCount, bookingAgentId, 
+                planId, corporateName, corporateAddress, gstNo} = req.body
 
                 const data = new Guest({hotelId,
                     idDocumentId,
-                    idNo: idNo.trim().toUpperCase(), 
-                    name: name.trim().toUpperCase(), 
+                    idNo: idNo ? idNo.trim().toUpperCase() : "", 
+                    name: name ? name.trim().toUpperCase() : "", 
                     age,
-                    fatherName: fatherName.trim().toUpperCase(),
-                    address: address.trim().toUpperCase(),
-                    city: city.trim().toUpperCase(),
-                    policeStation: policeStation.trim().toUpperCase(),
-                    state: state.trim().toUpperCase(),
-                    pin: pin.trim(),
-                    phone,
+                    fatherName: fatherName ? fatherName.trim().toUpperCase() : "",
+                    address: address ? address.trim().toUpperCase() : "",
+                    city: city ? city.trim().toUpperCase() : "",
+                    policeStation: policeStation ? policeStation.trim().toUpperCase() : "",
+                    state: state ? state.trim().toUpperCase() : "",
+                    pin: pin ? pin.trim() : "",
                     mobile,
-                    email,
+                    email: email ? email.trim().toLowerCase() : "",
                     guestCount,
                     guestMaleCount,
                     guestFemaleCount,

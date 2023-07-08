@@ -8,6 +8,7 @@ const verifyRoles = require("../../middlewares/verifyRoles");
 router.route("/:hotelId")
     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
+        ROLE_LIST.OFFICE_STAFF,
         ROLE_LIST.RECEPTIONIST), handelSearch);
 
 router.route("/:hotelId/:guestId")

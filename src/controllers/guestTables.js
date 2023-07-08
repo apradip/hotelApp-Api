@@ -36,7 +36,7 @@ const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
 
-    let guestList = [];
+    let itemList = [];
     let pipeline = [];
     
     try {
@@ -47,7 +47,8 @@ const handelSearch = async (req, res) => {
                 isEnable: true,
                 outDate: {$exists:false},
                 outTime: {$exists:false},
-                $or: [{option: "R"}, {option: "T"}]
+                option: "T"
+                // $or: [{option: "R"}, {option: "T"}]
             }
         };
         const filter2 = {
@@ -70,12 +71,14 @@ const handelSearch = async (req, res) => {
         await Promise.all(guests.map(async (guest) => {
             let tables = "";
 
-            if (!search) {
-                tables = guest.tablesDetail[guest.tablesDetail.length - 1].tables;
-            } else {
-                guest.tablesDetail[guest.tablesDetail.length - 1].tables.map(async (table) => {
-                    tables.length > 0 ?  tables = tables + ", " + table.no : tables = table.no;
-                });
+            if (guest.tablesDetail.length > 0) {
+                if (!search) {
+                    tables = guest.tablesDetail[guest.tablesDetail.length - 1].tables;
+                } else {
+                    guest.tablesDetail[guest.tablesDetail.length - 1].tables.map(async (table) => {
+                        tables.length > 0 ?  tables = tables + ", " + table.no : tables = table.no;
+                    });
+                }
             }
 
             const object = {
@@ -90,16 +93,16 @@ const handelSearch = async (req, res) => {
                 inDate: guest.inDate,
                 inTime: guest.inTime,
                 totalBalance: guest.balance,
-                transactionId: guest.tablesDetail[guest.tablesDetail.length - 1]._id            
+                transactionId: guest.tablesDetail.length > 0 ? guest.tablesDetail[guest.tablesDetail.length - 1]._id : ""
             };
             
-            guestList.push(object);
+            itemList.push(object);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(200).send(guestList);
+    return res.status(200).send(itemList);
 };
 
 
@@ -110,7 +113,7 @@ const handelDetail = async (req, res) => {
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
 
-    let guestList = [];
+    let itemList = [];
     let pipeline = [];
 
     try {
@@ -165,13 +168,13 @@ const handelDetail = async (req, res) => {
                 despatchTime: item.despatchTime
             };
 
-            guestList.push(dataOrder);
+            itemList.push(dataOrder);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }        
 
-    return res.status(200).send(guestList);
+    return res.status(200).send(itemList);
 };
 
 
@@ -266,10 +269,6 @@ const handelOrder = async (req, res) => {
                     }]           
                 }
             );  
-
-            // } else {
-            //     return res.status(500).send();
-            // }
         }
     } catch(e) {
         return res.status(500).send(e);

@@ -42,7 +42,7 @@ const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
 
-    let guestList = [];
+    let itemList = [];
     let pipeline = [];
     
     try {
@@ -87,13 +87,13 @@ const handelSearch = async (req, res) => {
                 transactionId: await getActiveItem(guest.servicesDetail) 
             };
             
-            guestList.push(object);
+            itemList.push(object);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(200).send(guestList);
+    return res.status(200).send(itemList);
 };
 
 
@@ -104,7 +104,7 @@ const handelDetail = async (req, res) => {
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
 
-    let guestList = [];
+    let itemList = [];
     let pipeline = [];
 
     try {
@@ -159,13 +159,13 @@ const handelDetail = async (req, res) => {
                 despatchTime: item.despatchTime
             };
 
-            guestList.push(object);
+            itemList.push(object);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }        
 
-    return res.status(200).send(guestList);
+    return res.status(200).send(itemList);
 };
 
 
@@ -628,10 +628,8 @@ async function newItemValues(hotel, orders) {
     const transaction = new serviceTransactionType([]);
 
     await Promise.all(orders.map(async (order) => {         
-        if ((order.operation) !== "A") {
-            return;
-        }
-            
+        if ((order.operation) !== "A") return;
+                
         // check for item existance
         const master = await Services.findOne(
             {
@@ -641,9 +639,7 @@ async function newItemValues(hotel, orders) {
             }
         );    
 
-        if (!master) {
-            return;
-        }
+        if (!master) return;
 
         transaction.services.push(new serviceType(
             master._id, 
@@ -653,9 +649,6 @@ async function newItemValues(hotel, orders) {
             hotel.serviceChargePercentage,
             hotel.foodGstPercentage
         ));
-
-        // }
-        // }
     }));
 
     return transaction;

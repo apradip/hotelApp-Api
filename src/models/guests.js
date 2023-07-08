@@ -355,9 +355,6 @@ const guestSchema = new mongoose.Schema({
         minLength: [6, "Invalid pin!"],
         maxLength: [10, "Invalid pin!"]
     },
-    phone: {
-        type: String
-    },
     mobile: {
         type: String,
         minLength: [10, "Invalid mobile no!"],
@@ -393,6 +390,11 @@ const guestSchema = new mongoose.Schema({
     },
     gstNo: {
         type: String
+    },
+    dayCount: {
+        type: Number,
+        default: 1,
+        min: [1, "Invalid no. of day!"]
     },
     bookingAgentId: {
         type: String

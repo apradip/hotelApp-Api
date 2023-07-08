@@ -42,7 +42,7 @@ const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
 
-    let guestList = [];
+    let itemList = [];
     let pipeline = [];
     
     try {
@@ -87,13 +87,13 @@ const handelSearch = async (req, res) => {
                 transactionId: await getActiveItem(guest.miscellaneaDetail) 
             };
             
-            guestList.push(object);
+            itemList.push(object);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }
 
-    return res.status(200).send(guestList);
+    return res.status(200).send(itemList);
 };
 
 
@@ -104,9 +104,9 @@ const handelDetail = async (req, res) => {
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
     
+    let itemList = [];
     let pipeline = [];
-    let guestList = [];
-
+    
     try {
         const filter1 = {
             $match: {
@@ -159,13 +159,13 @@ const handelDetail = async (req, res) => {
                 despatchTime: item.despatchTime
             };
 
-            guestList.push(object);
+            itemList.push(object);
         }));
     } catch(e) {
         return res.status(500).send(e);
     }        
 
-    return res.status(200).send(guestList);
+    return res.status(200).send(itemList);
 };
 
 
@@ -634,9 +634,7 @@ async function newItemValues(hotel, orders) {
     const transaction = new miscellaneousTransactionType([]);
 
     await Promise.all(orders.map(async (order) => {         
-        if ((order.operation) !== "A") {
-            return;
-        }
+        if ((order.operation) !== "A") return;
 
         // check for item existance
         const master = await Miscellaneous.findOne(
@@ -647,9 +645,7 @@ async function newItemValues(hotel, orders) {
             }
         );    
 
-        if (!master) {
-            return;
-        }
+        if (!master) return;
                 
         transaction.miscellanea.push(new miscellaneousType(
             master._id, 

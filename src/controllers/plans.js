@@ -119,10 +119,25 @@ const handelRemove = async (req, res) => {
 };
 
 
+//handel detail plan
+//query string : hotel Id / plan Id
+async function getName(hotelId, id){
+    try {
+        const data = await Plan.findOne({hotelId, _id: id, isEnable: true});
+        if (!data) return null;
+
+        return data.name;
+    } catch(e) {
+        return null;
+    }
+};
+
+
 module.exports = {
     handelSearch,
     handelDetail,
     handelCreate,
     handelUpdate,
-    handelRemove
+    handelRemove,
+    getName
 };

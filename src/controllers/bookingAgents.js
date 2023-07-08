@@ -115,10 +115,22 @@ const handelRemove = async (req, res) => {
 };
 
 
+async function getName (id) {
+    try{
+        const data = await BookingAgent.findOne({_id: id, isEnable: true});
+        if (!data) return null;
+
+        return data.name;
+    } catch(e) {
+        return null;
+    }
+};
+
 module.exports = {
     handelSearch,
     handelDetail,
     handelCreate,
     handelUpdate,
-    handelRemove
+    handelRemove,
+    getName
 };
