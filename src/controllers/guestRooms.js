@@ -22,16 +22,16 @@ class roomType {
 
         this.id = id,
         this.no = no,
-        this.tariff = tariff.toFixed(2),
-        this.extraPersonTariff = extraPersonTariff.toFixed(2),
-        this.extraBedTariff = extraBedTariff.toFixed(2),
-        this.maxDiscount = maxDiscount.toFixed(2),
-        this.gstPercentage = gstPercentage.toFixed(2),
+        this.tariff = tariff.toFixed(0),
+        this.extraPersonTariff = extraPersonTariff.toFixed(0),
+        this.extraBedTariff = extraBedTariff.toFixed(0),
+        this.maxDiscount = maxDiscount.toFixed(0),
+        this.gstPercentage = gstPercentage.toFixed(0),
         this.extraPersonCount = extraPersonCount,
         this.extraBedCount = extraBedCount,
-        this.discount = discount.toFixed(2),
-        this.gstCharge = gstCharge.toFixed(2),
-        this.totalPrice = totalPrice.toFixed(2),
+        this.discount = discount.toFixed(0),
+        this.gstCharge = gstCharge.toFixed(0),
+        this.totalPrice = totalPrice.toFixed(0),
         this.occupancyDate = date.format(new Date(occupancyDate), "YYYY-MM-DD")
     }
 };
@@ -48,7 +48,7 @@ class expenseType {
         this.billNo = billNo,
         this.type = "R",
         this.expenseId = expenseId,
-        this.expenseAmount = expenseAmount,
+        this.expenseAmount = expenseAmount.toFixed(0),
         this.narration = "Expense for the rooms."
     };
 };
@@ -379,7 +379,7 @@ const handelGenerateBill = async (req, res) => {
     let total = 0;
 
     try {
-        // Start :: calculate miscellanea item price total
+        // Start :: calculate rooms price total
         const filterSum1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
@@ -413,7 +413,7 @@ const handelGenerateBill = async (req, res) => {
         };
 
         const despatchSum = await Guest.aggregate([filterSum1, filterSum2, filterSum3, filterSum4, filterSum5, filterSum6]);
-        // End :: calculate miscellanea item price total
+        // End :: calculate rooms price total
 
 
         // Start :: insert into expense if the transaction is not in guest 
@@ -565,7 +565,7 @@ const handelGenerateBill = async (req, res) => {
         const filterBill6 = {
             $group: {
                 _id: "$roomsDetail._id",
-                miscellanea: {$push: "$roomsDetail.rooms"},
+                rooms: {$push: "$roomsDetail.rooms"},
                 expensesPaymentsDetail: {$push: "$expensesPaymentsDetail"}
             }
         };
@@ -643,13 +643,13 @@ async function newRoomValues(hotel, bookings) {
                 master.extraPersonTariff,
                 master.extraBedTariff,
                 master.maxDiscount,
-                booking.extraPersonCount,
-                booking.extraBedCount,
+                booking.extraPerson,
+                booking.extraBed,
                 booking.discount,
                 booking.occupancyDate,
                 await GST.search((master.tariff - booking.discount) + 
-                (master.extraPersonTariff * booking.extraPersonCount) +
-                (master.extraBedTariff * booking.extraBedCount))
+                (master.extraPersonTariff * booking.extraPerson) +
+                (master.extraBedTariff * booking.extraBed))
         ));
     }));
 

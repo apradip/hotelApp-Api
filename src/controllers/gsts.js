@@ -26,6 +26,8 @@ const handelSearch = async (req, res) => {
 };
 
 async function search(tariff) {
+    let percentage = 0;
+
     try {
         if (tariff > 0) {
             const data = await GST.findOne({
@@ -35,14 +37,15 @@ async function search(tariff) {
 
             if (!data) return 0;
             
-            const percentage = data.gstPercentage;
-            return percentage;        
+            percentage = data.gstPercentage;
         } else {
             return 0;
         }
     } catch(e) {
         throw e;
     }
+
+    return percentage;
 };
 
 
