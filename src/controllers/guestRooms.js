@@ -17,20 +17,22 @@ class roomType {
                           (extraBedCount * extraBedTariff) + 
                           (extraPersonCount * extraPersonTariff) -
                           discount;
+        const gstCharge = unitPrice * (gstPercentage / 100);                          
+        const totalPrice = unitPrice + gstCharge;            
 
-        this.id = id;
-        this.no = no;
-        this.tariff = tariff;
-        this.extraPersonTariff = extraPersonTariff;
-        this.extraBedTariff = extraBedTariff;
-        this.maxDiscount = maxDiscount;
-        this.gstPercentage = gstPercentage;
-        this.extraPersonCount = extraPersonCount;
-        this.extraBedCount = extraBedCount;
-        this.discount = discount;
-        this.gstCharge = unitPrice * (gstPercentage / 100);
-        this.totalPrice = unitPrice + this.gstCharge;
-        this.occupancyDate = occupancyDate;
+        this.id = id,
+        this.no = no,
+        this.tariff = tariff.toFixed(2),
+        this.extraPersonTariff = extraPersonTariff.toFixed(2),
+        this.extraBedTariff = extraBedTariff.toFixed(2),
+        this.maxDiscount = maxDiscount.toFixed(2),
+        this.gstPercentage = gstPercentage.toFixed(2),
+        this.extraPersonCount = extraPersonCount,
+        this.extraBedCount = extraBedCount,
+        this.discount = discount.toFixed(2),
+        this.gstCharge = gstCharge.toFixed(2),
+        this.totalPrice = totalPrice.toFixed(2),
+        this.occupancyDate = date.format(new Date(occupancyDate), "YYYY-MM-DD")
     }
 };
 
@@ -340,30 +342,26 @@ const handelBooking = async (req, res) => {
 
         //append the current product to transaction document
         await Promise.all(bookingDb.map(async (item) => {         
-            const currentItem = item;
-
-            // if (currentItem) {
-                const data = new GuestRoomTransaction({
-                    hotelId,
-                    guestId,
-                    id: currentItem.id,
-                    no: currentItem.no,
-                    tariff: currentItem.tariff,
-                    extraPersonTariff: currentItem.extraPersonTariff,
-                    extraBedTariff: currentItem.extraBedTariff,
-                    maxDiscount: currentItem.maxDiscount,
-                    gstPercentage: currentItem.gstPercentage,
-                    extraPersonCount: currentItem.extraPersonCount,
-                    extraBedCount: currentItem.extraBedCount,
-                    discount: currentItem.discount,
-                    gstCharge: currentItem.gstCharge,
-                    totalPrice: currentItem.totalPrice,
-                    occupancyDate: currentItem.occupancyDate,
-                    // occupancyTime: currentItem.occupancyTime
-                });
-        
-                await data.save();
-            // }
+            const data = new GuestRoomTransaction({
+                hotelId,
+                guestId,
+                id: item.id,
+                no: item.no,
+                tariff: item.tariff,
+                extraPersonTariff: item.extraPersonTariff,
+                extraBedTariff: item.extraBedTariff,
+                maxDiscount: item.maxDiscount,
+                gstPercentage: item.gstPercentage,
+                extraPersonCount: item.extraPersonCount,
+                extraBedCount: item.extraBedCount,
+                discount: item.discount,
+                gstCharge: item.gstCharge,
+                totalPrice: item.totalPrice,
+                occupancyDate: item.occupancyDate
+                // occupancyTime: item.occupancyTime
+            });
+    
+            await data.save();
         }));   
     } catch(e) {
         return res.status(500).send(e);
@@ -624,8 +622,6 @@ async function newRoomValues(hotel, bookings) {
 
     await Promise.all(bookings.map(async (booking) => {         
         if (booking.operation !== "A") return; 
-        
-        // if (((order.operation) === "A") || ((order.operation) === "M")) {
 
         // check for item existance
         const master = await Rooms.findOne(
