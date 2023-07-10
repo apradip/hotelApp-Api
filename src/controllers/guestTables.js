@@ -11,7 +11,7 @@ class foodType {
     constructor(id, name, unitPrice, quantity, serviceChargePercentage, gstPercentage) {
       this.id = id;
       this.name = name;
-      this.unitPrice = unitPrice;
+      this.unitPrice = unitPrice.toFixed(0);
       this.quantity = quantity;
       this.serviceChargePercentage = serviceChargePercentage;
       this.gstPercentage = gstPercentage;
@@ -23,7 +23,7 @@ class expenseType {
         this.billNo = billNo,
         this.type = "T",
         this.expenseId = expenseId,
-        this.expenseAmount = expenseAmount,
+        this.expenseAmount = expenseAmount.toFixed(0),
         this.narration = "Expense for the food items."
     };
 };
