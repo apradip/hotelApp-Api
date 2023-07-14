@@ -67,7 +67,6 @@ const handelSearch = async (req, res) => {
         }
 
         const guests = await Guest.aggregate(pipeline); 
-
         await Promise.all(guests.map(async (guest) => {
             let tables = "";
 
@@ -93,6 +92,7 @@ const handelSearch = async (req, res) => {
                 inDate: guest.inDate,
                 inTime: guest.inTime,
                 totalBalance: guest.balance,
+                option: guest.option,
                 transactionId: guest.tablesDetail.length > 0 ? guest.tablesDetail[guest.tablesDetail.length - 1]._id : ""
             };
             

@@ -19,13 +19,18 @@ router.route("/:hotelId")
         ROLE_LIST.RECEPTIONIST, 
         ROLE_LIST.RESTAURANT_MANAGER), handelCreate);
 
-router.route("/:hotelId/:_id")
+router.route("/:hotelId/:guestId")
     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
         ROLE_LIST.OFFICE_STAFF, 
         ROLE_LIST.RECEPTIONIST, 
         ROLE_LIST.RESTAURANT_MANAGER), handelDetail)
+    .post(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+        ROLE_LIST.HOTEL_ADMIN, 
+        ROLE_LIST.KITCHEN_ADMIN, 
+        ROLE_LIST.OFFICE_STAFF, 
+        ROLE_LIST.RESTAURANT_MANAGER), handelUpdate)
     .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
@@ -37,12 +42,5 @@ router.route("/:hotelId/:_id")
         ROLE_LIST.KITCHEN_ADMIN, 
         ROLE_LIST.OFFICE_STAFF, 
         ROLE_LIST.RESTAURANT_MANAGER), handelRemove);
-
-router.route("/:hotelId/:_id/option")
-    .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
-        ROLE_LIST.HOTEL_ADMIN, 
-        ROLE_LIST.KITCHEN_ADMIN, 
-        ROLE_LIST.OFFICE_STAFF, 
-        ROLE_LIST.RESTAURANT_MANAGER), handelUpdate);
     
 module.exports = router;

@@ -84,7 +84,10 @@ const handelSearch = async (req, res) => {
                 inDate: guest.inDate,
                 inTime: guest.inTime,
                 totalBalance: guest.balance,
-                transactionId: await getActiveItem(guest.servicesDetail) 
+                option: guest.option,
+                transactionId: await getActiveItem(guest.servicesDetail),
+                tableTransactionId: await getActiveItem(guest.tablesDetail),
+                miscellaneousTransactionId: await getActiveItem(guest.miscellaneaDetail)
             };
             
             itemList.push(object);
@@ -231,7 +234,6 @@ const handelOrder = async (req, res) => {
                     );    
     
                     if (!master) return;
-
                     orderDb.push(new serviceType(master._id, 
                                                 master.name, 
                                                 master.price,

@@ -138,6 +138,7 @@ const handelSearch = async (req, res) => {
                 plan: await Plan.getName(hotelId, guest.planId),
                 rooms: rooms,   
                 totalBalance: guest.balance,
+                option: guest.option,
                 inDate: guest.inDate,
                 inTime: guest.inTime
             };
