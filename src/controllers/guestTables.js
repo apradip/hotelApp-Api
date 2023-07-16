@@ -7,6 +7,13 @@ const GuestFoodTransaction = require("../models/guestFoodsTransaction");
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const date = require("date-and-time");
 
+class tableType {
+    constructor(id, no) {
+      this.id = id;
+      this.no = no;
+    }
+};
+
 class foodType {
     constructor(id, name, unitPrice, quantity, serviceChargePercentage, gstPercentage) {
       this.id = id;
@@ -15,6 +22,14 @@ class foodType {
       this.quantity = quantity;
       this.serviceChargePercentage = serviceChargePercentage;
       this.gstPercentage = gstPercentage;
+    }
+};
+
+class foodTransactionType {
+    constructor(tables, foods) {    
+        this.tables = tables;
+        this.foods = foods;
+        this.isCheckedout = false;
     }
 };
 
@@ -175,6 +190,97 @@ const handelDetail = async (req, res) => {
     }        
 
     return res.status(200).send(itemList);
+};
+
+
+// handel assign table
+// url : hotel Id / guest Id
+// body : {"tables": [{"id": "", "no": ""}]}
+const handelAssignTable = async (req, res) => {
+    const {hotelId, guestId} = req.params;
+    const {tables} = req.body;
+
+    try {
+        if (!tables) return;
+        const transactions = new foodTransactionType([], []);
+
+        await Promise.all(tables.map(async (table) => {
+            // check if the table is empty
+            const filter = {
+                hotelId, 
+                _id: mongoose.Types.ObjectId(table.id), 
+                isOccupied: false, 
+                isEnable: true
+            };
+            const foundTable = await Table.findOne(filter);
+
+            if (foundTable) {
+                transactions.tables.push(new tableType(
+                    foundTable._id, 
+                    foundTable.no
+                ));
+            }
+
+            const update = {
+                guestId: guestId, 
+                isOccupied: true
+            };
+            // const resTableUpdate = await Table.updateOne(filter, update);
+            // if (!resTableUpdate) return res.status(404).send()
+        }));
+
+        const filter1 = {
+            $match: {
+                hotelId,
+                _id: mongoose.Types.ObjectId(guestId),         
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$tablesDetail"
+        };
+        const filter3 = {
+            $match: {
+                "tablesDetail.isCheckedout": false
+            }
+        };
+        
+        const guests = await Guest.aggregate([filter1, filter2, filter3]);
+
+        if (guests.length > 0) {
+            const itemTransactionId = guests[0].tablesDetail._id;
+
+            await Guest.updateOne(
+                {
+                    hotelId,
+                    _id: mongoose.Types.ObjectId(guestId), 
+                    isActive: true,
+                    isEnable: true
+                },
+                {
+                    $set: {
+                        "tablesDetail.$[ele].tables": transactions.tables
+                    }
+                },
+                { 
+                    arrayFilters: [ 
+                        {"ele._id": mongoose.Types.ObjectId(itemTransactionId)},
+                    ]           
+                }
+            );
+
+        } else {
+            //add new
+            const filterGuest = {_id: guestId};
+            const updateGuest = {$push: {tablesDetail: transactions}};
+            const resGuestUpdate = await Guest.updateOne(filterGuest, updateGuest);
+        }
+    } catch(e) {
+        return res.status(500).send(e);
+    }
+
+    return res.status(200).send();
 };
 
 
@@ -612,13 +718,13 @@ const handelCheckout = async (req, res) => {
 
         //update all tables guestid it null & occupied status is false
         await Promise.all(foundTableDetails.map(async (item) => {
-            item.tablesDetail.forEach(async (tableDetail) => {
-                tableDetail.tables.forEach(async (table) => {
+            await Promise.all(item.tablesDetail.map(async (tableDetail) => {
+                await Promise.all(tableDetail.tables.map(async (table) => {
                     await Table.findByIdAndUpdate(
                                     mongoose.Types.ObjectId(table.id), 
                                     {$set: {isOccupied: false, guestId: ""}});  
-                });
-            });
+                }));
+            }));
         }));
     
         // update out date & time
@@ -651,12 +757,50 @@ const handelCheckout = async (req, res) => {
 };
 
 
+async function getActiveTables(hotelId, guestId) {
+    let tables = "";
+    
+    try {
+        const filter1 = {
+            $match: {
+                hotelId,
+                _id: mongoose.Types.ObjectId(guestId),         
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$tablesDetail"
+        };
+        const filter3 = {
+            $match: {
+                "tablesDetail.isCheckedout": false
+            }
+        };
+        
+        const guests = await Guest.aggregate([filter1, filter2, filter3]);
+
+        if (!guests) return; 
+        tables = guests[0].tablesDetail.tables;
+        // await Promise.all(guests[0].tablesDetail.tables.map(async (table) => {  
+        //     tables.length > 0 ?  tables = tables + ", " + table.no : tables = table.no;       
+        // }));
+    } catch(e) {
+        return e;
+    }
+
+    return tables;
+};
+
+
 
 module.exports = {
     handelSearch,
     handelDetail,
     handelOrder,
+    handelAssignTable,
     handelDelivery,
     handelGenerateBill,
-    handelCheckout
+    handelCheckout,
+    getActiveTables
 };

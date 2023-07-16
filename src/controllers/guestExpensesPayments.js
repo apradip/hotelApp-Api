@@ -141,9 +141,9 @@ async function totalExpense(hotelId, guestId) {
                                         .select('expenseAmount')
                                         .exec();
 
-                data.forEach(element => {
+                await Promise.all(data.map(async (element) => {
                     total +=  element.expenseAmount;
-                });
+                }));
 
                 resolve(total);
             },1);
@@ -162,9 +162,9 @@ async function totalPayment(hotelId, guestId) {
                                         .select('paymentAmount')
                                         .exec();
 
-                data.forEach(element => {
+                await Promise.all(data.map(async (element) => {
                     total +=  element.paymentAmount;
-                });
+                }))
 
                 resolve(total);
             },1);

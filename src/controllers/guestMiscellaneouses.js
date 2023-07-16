@@ -6,6 +6,8 @@ const GuestMiscellaneousTransaction = require("../models/guestMiscellaneousesTra
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const date = require("date-and-time");
 
+const GuestTable = require("./guestTables");
+
 class miscellaneousType {
     constructor(id, name, unitPrice, quantity, serviceChargePercentage, gstPercentage) {
       this.id = id;
@@ -73,17 +75,7 @@ const handelSearch = async (req, res) => {
 
         const guests = await Guest.aggregate(pipeline); 
         await Promise.all(guests.map(async (guest) => {
-            // let tables = "";
-
-            // if (guest.tablesDetail.length > 0) {
-            //     if (!search) {
-            //         tables = guest.tablesDetail[guest.tablesDetail.length - 1].tables;
-            //     } else {
-            //         guest.tablesDetail[guest.tablesDetail.length - 1].tables.map(async (table) => {
-            //             tables.length > 0 ?  tables = tables + ", " + table.no : tables = table.no;
-            //         });
-            //     }
-            // }
+            const tables = await GuestTable.getActiveTables(hotelId, guest._id);
 
             const object = {
                 id: guest._id,
@@ -93,7 +85,7 @@ const handelSearch = async (req, res) => {
                 corporateName: guest.corporateName,
                 corporateAddress: guest.corporateAddress,
                 gstNo: guest.gstNo,
-                // tables: tables,
+                tables: tables,
                 inDate: guest.inDate,
                 inTime: guest.inTime,
                 totalBalance: guest.balance,

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const {handelSearch, handelDetail, handelOrder, handelDelivery,
+const {handelSearch, handelDetail, handelOrder, handelAssignTable, handelDelivery,
     handelGenerateBill, handelCheckout} = require("../../controllers/guestTables");
 const ROLE_LIST = require("../../config/roleList");
 const verifyRoles = require("../../middlewares/verifyRoles");
@@ -24,8 +24,16 @@ router.route("/:hotelId/:guestId")
         ROLE_LIST.RECEPTIONIST,
         ROLE_LIST.RESTAURANT_MANAGER,
         ROLE_LIST.CHEF,
-        ROLE_LIST.JOUNIER_CHEF), handelDetail);     //display all food ordered by the guest
-            
+        ROLE_LIST.JOUNIER_CHEF), handelDetail)     //display all food ordered by the guest
+    .put(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+        ROLE_LIST.HOTEL_ADMIN, 
+        ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.OFFICE_STAFF,
+        ROLE_LIST.RECEPTIONIST,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.CHEF,
+        ROLE_LIST.JOUNIER_CHEF), handelAssignTable);     //assign table to guest
+                
 router.route("/:hotelId/:guestId/:transactionId")
     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 

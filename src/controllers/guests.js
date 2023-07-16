@@ -138,40 +138,41 @@ const handelCreate = async (req, res) => {
                 option});
                 
             const resAdd = await data.save();
-            if (!resAdd) return res.status(400).send();
+            // if (!resAdd) return res.status(400).send();
 
-            const guestId = data._id;    
-            const transaction = new foodTransactionType([], []);
+            // const guestId = data._id;    
+            // const transaction = new foodTransactionType([], []);
 
-            for(const table of tables) {
-                // check if the table is empty
-                const filter = {
-                    hotelId, 
-                    _id: mongoose.Types.ObjectId(table.id), 
-                    isOccupied: false, 
-                    isEnable: true
-                };
-                const foundTable = await Table.findOne(filter);
+            // // for(const table of tables) {
+            // await Promise.all(tables.map(async (table) => {
+            //     // check if the table is empty
+            //     const filter = {
+            //         hotelId, 
+            //         _id: mongoose.Types.ObjectId(table.id), 
+            //         isOccupied: false, 
+            //         isEnable: true
+            //     };
+            //     const foundTable = await Table.findOne(filter);
     
-                if (foundTable) {
-                    transaction.tables.push(new tableType(
-                        table.id, 
-                        foundTable.no
-                    ));
-                }
+            //     if (foundTable) {
+            //         transaction.tables.push(new tableType(
+            //             table.id, 
+            //             foundTable.no
+            //         ));
+            //     }
     
-                const update = {
-                    guestId: guestId, 
-                    isOccupied: true
-                };
-                const resTableUpdate = await Table.updateOne(filter, update);
-                if (!resTableUpdate) return res.status(404).send();
-            }
+            //     const update = {
+            //         guestId: guestId, 
+            //         isOccupied: true
+            //     };
+            //     const resTableUpdate = await Table.updateOne(filter, update);
+            //     if (!resTableUpdate) return res.status(404).send();
+            // }));
     
-            const filterGuest = {_id: guestId};
-            const updateGuest = {$push: {tablesDetail: transaction}};
-            const resGuestUpdate = await Guest.updateOne(filterGuest, updateGuest);  
-            if (!resGuestUpdate) return res.status(404).send();
+            // const filterGuest = {_id: guestId};
+            // const updateGuest = {$push: {tablesDetail: transaction}};
+            // const resGuestUpdate = await Guest.updateOne(filterGuest, updateGuest);  
+            // if (!resGuestUpdate) return res.status(404).send();
 
             return res.status(200).send(data)
 
