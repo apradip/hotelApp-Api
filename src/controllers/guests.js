@@ -23,13 +23,15 @@ const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
 
+    let pipeline = [];
+
     try {
         const filter1 = {
             $match: {
                 hotelId,
                 isEnable: true
             }
-        }
+        };
         const filter2 = {
             $match: {
                 $or: [{name: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
@@ -37,23 +39,22 @@ const handelSearch = async (req, res) => {
                 {corporateName: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
                 {corporateAddress: {$regex: ".*" + search.trim().toUpperCase() + ".*"}}]
             }
-        }
+        };
         const filter3 = {
             $sort: {
                 name: 1, corporateName: 1
             }
-        }
-        let pipeline = []
-
+        };
+    
         if (search) {
-            pipeline = [filter1, filter2, filter3]
+            pipeline = [filter1, filter2, filter3];
         } else {
-            pipeline = [filter1, filter3]
+            pipeline = [filter1, filter3];
         }
 
-        const data = await Guest.aggregate(pipeline)
-        if (!data) return res.status(404).send()
-        return res.status(200).send(data)
+        const data = await Guest.aggregate(pipeline);
+        if (!data) return res.status(404).send();
+        return res.status(200).send(data);
 
     } catch(e) {
         return res.status(500).send(e);
@@ -63,15 +64,15 @@ const handelSearch = async (req, res) => {
 //handel detail guest
 //query string : hotel Id / guest Id
 const handelDetail = async (req, res) => {
-    const {hotelId, guestId} = req.params
+    const {hotelId, guestId} = req.params;
 
     try {
-        const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true})
-        if (!data) return res.status(404).send()
+        const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true});
+        if (!data) return res.status(404).send();
 
-        return res.status(200).send(data)
+        return res.status(200).send(data);
     } catch(e) {
-        return res.status(500).send(e)
+        return res.status(500).send(e);
     }
 };
 
@@ -83,29 +84,29 @@ const handelDetail = async (req, res) => {
 //        "dayCount" : 0, "bookingAgentId" : "", "planId" : "", "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 //body small: {"name" : "", "mobile" : "", "guestCount" : 0, "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 const handelCreate = async (req, res) => {
-    const {hotelId} = req.params
-    const {option} = req.body
+    const {hotelId} = req.params;
+    const {option} = req.body;
 
     try {
-        if (option.trim().toUpperCase() === 'R') {  //For room
+        if (option.trim().toUpperCase() === "R") {  //For room
             const {idDocumentId, idNo, name, age, fatherName, address, city, 
                 policeStation, state, pin, mobile, email, guestCount, 
                 guestMaleCount, guestFemaleCount, dayCount, bookingAgentId, 
-                planId, corporateName, corporateAddress, gstNo} = req.body
+                planId, corporateName, corporateAddress, gstNo} = req.body;
 
                 const data = new Guest({hotelId,
                     idDocumentId,
-                    idNo: idNo ? idNo.trim().toUpperCase() : '', 
-                    name: name ? name.trim().toUpperCase() : '', 
+                    idNo: idNo ? idNo.trim().toUpperCase() : "", 
+                    name: name ? name.trim().toUpperCase() : "", 
                     age,
-                    fatherName: fatherName ? fatherName.trim().toUpperCase() : '',
-                    address: address ? address.trim().toUpperCase() : '',
-                    city: city ? city.trim().toUpperCase() : '',
-                    policeStation: policeStation ? policeStation.trim().toUpperCase() : '',
-                    state: state ? state.trim().toUpperCase() : '',
-                    pin: pin ? pin.trim() : '',
+                    fatherName: fatherName ? fatherName.trim().toUpperCase() : "",
+                    address: address ? address.trim().toUpperCase() : "",
+                    city: city ? city.trim().toUpperCase() : "",
+                    policeStation: policeStation ? policeStation.trim().toUpperCase() : "",
+                    state: state ? state.trim().toUpperCase() : "",
+                    pin: pin ? pin.trim() : "",
                     mobile,
-                    email: email ? email.trim().toLowerCase() : '',
+                    email: email ? email.trim().toLowerCase() : "",
                     guestCount,
                     guestMaleCount,
                     guestFemaleCount,
@@ -117,23 +118,23 @@ const handelCreate = async (req, res) => {
                     gstNo,
                     option});
 
-            const resAdd = await data.save()
-            if (!resAdd) return res.status(400).send()
+            const resAdd = await data.save();
+            if (!resAdd) return res.status(400).send();
     
-            return res.status(200).send(data)
+            return res.status(200).send(data);
                             
-        } else if (option.trim().toUpperCase() === 'T') {   //for table
+        } else if (option.trim().toUpperCase() === "T") {   //for table
             const {name, mobile, guestCount, 
                 corporateName, corporateAddress, gstNo, 
-                tables} = req.body
+                tables} = req.body;
 
             const data = new Guest({
                 hotelId,
-                name: name ? name.trim().toUpperCase() : '', 
+                name: name ? name.trim().toUpperCase() : "", 
                 mobile,
                 guestCount,
-                corporateName: corporateName ? corporateName.trim().toUpperCase() : '',
-                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : '', 
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
                 gstNo,
                 option});
                 
@@ -176,66 +177,64 @@ const handelCreate = async (req, res) => {
 
             return res.status(200).send(data)
 
-        } else if (option.trim().toUpperCase() === 'S') {   //For service
-            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body
+        } else if (option.trim().toUpperCase() === "S") {   //For service
+            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body;
 
             const data = new Guest({
                 hotelId,
-                name: name ? name.trim().toUpperCase() : '', 
+                name: name ? name.trim().toUpperCase() : "", 
                 mobile,
                 guestCount,
-                corporateName: corporateName ? corporateName.trim().toUpperCase() : '',
-                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : '', 
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
                 gstNo,
-                option})
+                option});
 
-            const resAdd = await data.save()
-            if (!resAdd) return res.status(400).send()
+            const resAdd = await data.save();
+            if (!resAdd) return res.status(400).send();
     
-            return res.status(200).send(data)
+            return res.status(200).send(data);
 
-        } else if (option.trim().toUpperCase() === 'M') {   //For miscellaneous
-            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body
+        } else if (option.trim().toUpperCase() === "M") {   //For miscellaneous
+            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body;
 
             const data = new Guest({
                 hotelId,
-                name: name ? name.trim().toUpperCase() : '', 
+                name: name ? name.trim().toUpperCase() : "", 
                 mobile,
                 guestCount,
-                corporateName: corporateName ? corporateName.trim().toUpperCase() : '',
-                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : '', 
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
                 gstNo,
                 option
-            })
+            });
 
-            const resAdd = await data.save()
-            if (!resAdd) return res.status(400).send()
+            const resAdd = await data.save();
+            if (!resAdd) return res.status(400).send();
     
-            return res.status(200).send(data)
+            return res.status(200).send(data);
 
-        } else if (option.trim().toUpperCase() === 'A') {   //For advance
-            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body
+        } else if (option.trim().toUpperCase() === "A") {   //For advance
+            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} = req.body;
 
             const data = new Guest({
                 hotelId,
-                name: name ? name.trim().toUpperCase() : '', 
+                name: name ? name.trim().toUpperCase() : "", 
                 mobile,
                 guestCount,
-                corporateName: corporateName ? corporateName.trim().toUpperCase() : '',
-                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : '', 
+                corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
                 gstNo,
-                option})
+                option});
 
-            const resAdd = await data.save()
-            if (!resAdd) return res.status(400).send()
+            const resAdd = await data.save();
+            if (!resAdd) return res.status(400).send();
     
-            return res.status(200).send(data)
+            return res.status(200).send(data);
         }
     } catch(e) {
-        return res.status(500).send(e)
+        return res.status(500).send(e);
     }
-    
-    // return res.status(404).send()
 };
 
 //handel update guest
@@ -246,36 +245,35 @@ const handelCreate = async (req, res) => {
 //        "dayCount" : 0, "bookingAgentId" : "", "planId" : "", "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 //body detail: {"name" : "", "mobile" : "", "guestCount" : 0, "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 const handelUpdate = async (req, res) => {
-    const {hotelId, guestId} = req.params
-    const {option} = req.body
+    const {hotelId, guestId} = req.params;
+    const {option} = req.body;
 
     try {
-        if (option.trim().toUpperCase() === 'S') {
-            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} =  req.body
-            const data = await Guest.findOne({hotelId, isEnable: true, guestId})
-            if (!data) return res.status(404).send()
+        if (option.trim().toUpperCase() === "S") {
+            const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} =  req.body;
+            const data = await Guest.findOne({hotelId, isEnable: true, guestId});
+            if (!data) return res.status(404).send();
 
             const resUpdate = await Guest.findByIdAndUpdate(guestId, 
                 {
-                    name: name ? name.trim().toUpperCase() : '', 
+                    name: name ? name.trim().toUpperCase() : "", 
                     mobile,
                     guestCount,
-                    corporateName: corporateName ? corporateName.trim().toUpperCase() : '',
-                    corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : '', 
+                    corporateName: corporateName ? corporateName.trim().toUpperCase() : "",
+                    corporateAddress: corporateAddress ? corporateAddress.trim().toUpperCase() : "", 
                     gstNo
-                })
+                });
 
-            if (!resUpdate) return res.status(400).send(resUpdate)
+            if (!resUpdate) return res.status(400).send(resUpdate);
+            return res.status(200).send(resUpdate);
 
-            return res.status(200).send(resUpdate)
-
-        } else if (option.trim().toUpperCase() === 'D') {
+        } else if (option.trim().toUpperCase() === "D") {
             const {idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, 
                 pin, phone, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
-                dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} =  req.body
+                dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} =  req.body;
             
-            const data = await Guest.findOne({hotelId, isEnable: true, guestId})
-            if (!data) return res.status(404).send()
+            const data = await Guest.findOne({hotelId, isEnable: true, guestId});
+            if (!data) return res.status(404).send();
 
             const resUpdate = await Guest.findByIdAndUpdate(guestId, 
                 {
@@ -301,48 +299,45 @@ const handelUpdate = async (req, res) => {
                     corporateName, 
                     corporateAddress, 
                     gstNo
-                })
-            if (!resUpdate) return res.status(400).send(resUpdate)
+                });
+            if (!resUpdate) return res.status(400).send(resUpdate);
 
-            return res.status(200).send(resUpdate)
+            return res.status(200).send(resUpdate);
         }
     } catch(e) {
-        return res.status(500).send(e)
+        return res.status(500).send(e);
     }
-
-    // return res.status(404).send()
 };
 
 //handel checkout guest
 //query string : hotel Id / guest Id 
 const handelCheckout = async (req, res) => {
-    const {hotelId, guestId} = req.params
+    const {hotelId, guestId} = req.params;
 
     try {
         // check if total expense & total payment is same
-        const data = await Guest.findOne({hotelId, isEnable: true, isActive: true, guestId})
-        if (!data) return res.status(404).send()
+        const data = await Guest.findOne({hotelId, isEnable: true, isActive: true, guestId});
+        if (!data) return res.status(404).send();
 
         const resUpdate = await Guest.findByIdAndUpdate(guestId, 
             {isActive: false, 
                 updatedDate: Date.now});
+        if (!resUpdate) return res.status(400).send(resUpdate);
 
-        if (!resUpdate) return res.status(400).send(resUpdate)
-
-        return res.status(200).send()
+        return res.status(200).send();
     } catch(e) {
-        return res.status(500).send(e)
+        return res.status(500).send(e);
     }
 };
 
 //handel delete guest
 //query string : hotel Id / guestId
 const handelRemove = async (req, res) => {
-    const {hotelId, guestId} = req.params
+    const {hotelId, guestId} = req.params;
     
     try {
-        const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true})
-        if (!data) return res.status(404).send()
+        const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true});
+        if (!data) return res.status(404).send();
 
         if (data.option == "T") {
             //get last transaction id
@@ -382,12 +377,12 @@ const handelRemove = async (req, res) => {
             });
         }
 
-        const resDelete = await Guest.findByIdAndUpdate(guestId, {isEnable: false})
-        if (!resDelete) return res.status(400).send(resDelete)
+        const resDelete = await Guest.findByIdAndUpdate(guestId, {isEnable: false});
+        if (!resDelete) return res.status(400).send(resDelete);
 
-        return res.status(200).send(resDelete)
+        return res.status(200).send(resDelete);
     } catch(e) {
-        return res.status(500).send(e)
+        return res.status(500).send(e);
     }
 };
 

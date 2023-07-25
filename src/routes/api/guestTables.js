@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-const {handelSearch, handelDetail, handelOrder, handelAssignTable, handelDelivery,
-    handelGenerateBill, handelCheckout} = require("../../controllers/guestTables");
+const {handelSearch, handelDetail, handelAssignTable, handelOrder, handelDelivery,
+    handelGenerateBill, handelPayment, handelCheckout} = require("../../controllers/guestTables");
 const ROLE_LIST = require("../../config/roleList");
 const verifyRoles = require("../../middlewares/verifyRoles");
 
@@ -32,7 +32,15 @@ router.route("/:hotelId/:guestId")
         ROLE_LIST.RECEPTIONIST,
         ROLE_LIST.RESTAURANT_MANAGER,
         ROLE_LIST.CHEF,
-        ROLE_LIST.JOUNIER_CHEF), handelAssignTable);     //assign table to guest
+        ROLE_LIST.JOUNIER_CHEF), handelAssignTable)     //assign table to guest
+    .delete(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+        ROLE_LIST.HOTEL_ADMIN, 
+        ROLE_LIST.KITCHEN_ADMIN,
+        ROLE_LIST.OFFICE_STAFF,
+        ROLE_LIST.RECEPTIONIST,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.CHEF,
+        ROLE_LIST.JOUNIER_CHEF), handelCheckout);       // checkout the guest
                 
 router.route("/:hotelId/:guestId/:transactionId")
     .get(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
@@ -58,14 +66,17 @@ router.route("/:hotelId/:guestId/:transactionId")
         ROLE_LIST.RECEPTIONIST,
         ROLE_LIST.RESTAURANT_MANAGER,
         ROLE_LIST.CHEF,
-        ROLE_LIST.JOUNIER_CHEF), handelDelivery)        // delivery food for the previous order
-    .delete(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
+        ROLE_LIST.JOUNIER_CHEF), handelDelivery);        // delivery food for the previous order
+                                                
+router.route("/:hotelId/:guestId/:expenseId/:billId")        
+    .post(verifyRoles(ROLE_LIST.SYSTEM_ADMIN, 
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.KITCHEN_ADMIN,
-        ROLE_LIST.OFFICE_STAFF,
-        ROLE_LIST.RECEPTIONIST,
+        ROLE_LIST.SERVICE_ADMIN,
         ROLE_LIST.RESTAURANT_MANAGER,
-        ROLE_LIST.CHEF,
-        ROLE_LIST.JOUNIER_CHEF), handelCheckout);       // checkout the guest
-                                                
+        ROLE_LIST.SERVICE_MANAGER,
+        ROLE_LIST.RESTAURANT_MANAGER,
+        ROLE_LIST.OFFICE_STAFF,
+        ROLE_LIST.RECEPTIONIST), handelPayment);     // payment 
+
 module.exports = router;

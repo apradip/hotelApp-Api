@@ -284,6 +284,10 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
     narration: {
         type: String
     },
+    paymentStatus: {
+        type: Boolean,
+        default: false        
+    },
     transactionDate: {
         type: String,
         default: function() {
