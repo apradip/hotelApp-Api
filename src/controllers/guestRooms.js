@@ -5,6 +5,7 @@ const Guest = require("../models/guests");
 const Rooms = require("../models/rooms");
 const GuestRoomTransaction = require("../models/guestRoomsTransaction");
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
+const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
 const Plan = require("./plans");
 const BookingAgent = require("./bookingAgents");
 const date = require("date-and-time");
@@ -156,61 +157,37 @@ const handelSearch = async (req, res) => {
 
         const dbGuests = await Guest.aggregate(pipeline); 
         await Promise.all(dbGuests.map(async (guest) => {
-            // const tables = await GuestTable.getActiveTables(hotelId, guest._id);
-            //const tables = "";
-            //const rooms = await getActiveRoom(guest.roomsDetail);
-            
-            // let rooms = "";
-
-            // if (guest.roomsDetail.length > 0) {
-            //     if (!search) {
-            //         rooms = guest.roomsDetail[guest.roomsDetail.length - 1].rooms;
-            //     } else {
-            //         guest.roomsDetail[guest.roomsDetail.length - 1].rooms.map(async (room) => {
-            //             rooms.length > 0 ?  rooms = rooms + ", " + room.no : rooms = room.no;
-            //         });
-            //     }
-            // }
-
-        guestList.push(new guestType(
-            guest._id,
-            guest.idDocumentId,
-            guest.idNo,
-            guest.name,
-            guest.age,
-            guest.fatherName,
-            guest.address,
-            guest.city,
-            guest.policeStation,
-            guest.state,
-            guest.pin,
-            guest.phone,
-            guest.mobile,
-            guest.email,
-            guest.guestCount,
-            guest.guestMaleCount,
-            guest.guestFemaleCount,
-            guest.corporateName,
-            guest.corporateAddress,
-            guest.gstNo,
-            guest.dayCount,
-            await BookingAgent.getName(guest.bookingAgentId),
-            await Plan.getName(hotelId, guest.planId),
-            guest.balance,
-            guest.inDate,
-            guest.inTime,
-            guest.option
-        ));
-
-
-            // const object = {
-            //     rooms: rooms,   
-            //     inDate: guest.inDate,
-            //     inTime: guest.inTime,
-            //     option: guest.option,
-            // };
-            
-            // guestList.push(object);
+            guestList.push(new guestType(
+                guest._id,
+                guest.idDocumentId,
+                guest.idNo,
+                guest.name,
+                guest.age,
+                guest.fatherName,
+                guest.address,
+                guest.city,
+                guest.policeStation,
+                guest.state,
+                guest.pin,
+                guest.phone,
+                guest.mobile,
+                guest.email,
+                guest.guestCount,
+                guest.guestMaleCount,
+                guest.guestFemaleCount,
+                guest.corporateName,
+                guest.corporateAddress,
+                guest.gstNo,
+                guest.dayCount,
+                await BookingAgent.getName(guest.bookingAgentId),
+                await Plan.getName(hotelId, guest.planId),
+                guest.balance,
+                guest.inDate,
+                guest.inTime,
+                guest.option,
+                undefined,
+                await getActiveRooms(hotelId, guest._id),
+            ));
         }));
     } catch(e) {
         return res.status(500).send(e);
@@ -430,6 +407,30 @@ const handelBooking = async (req, res) => {
                         }]           
                     }
                 );  
+
+                //append the current product to transaction document
+                await Promise.all(dbBooking.map(async (room) => {     
+                    const data = new GuestRoomTransaction({
+                        hotelId,
+                        guestId,
+                        id: room.id,
+                        no: room.no,
+                        tariff: room.tariff,
+                        extraPersonTariff: room.extraPersonTariff,
+                        extraBedTariff: room.extraBedTariff,
+                        maxDiscount: room.maxDiscount,
+                        gstPercentage: room.gstPercentage,
+                        extraPersonCount: room.extraPersonCount,
+                        extraBedCount: room.extraBedCount,
+                        discount: room.discount,
+                        gstCharge: room.gstCharge,
+                        totalPrice: room.totalPrice,
+                        occupancyDate: room.occupancyDate
+                        // occupancyTime: item.occupancyTime
+                    });
+            
+                    await data.save();
+                }));   
             }
         } else {
             dbBooking = await newRoomValues(hotel, bookings);
@@ -447,34 +448,31 @@ const handelBooking = async (req, res) => {
                     }
                 }
             );  
+
+            //append the current product to transaction document
+            await Promise.all(dbBooking.rooms.map(async (room) => {     
+                const data = new GuestRoomTransaction({
+                    hotelId,
+                    guestId,
+                    id: room.id,
+                    no: room.no,
+                    tariff: room.tariff,
+                    extraPersonTariff: room.extraPersonTariff,
+                    extraBedTariff: room.extraBedTariff,
+                    maxDiscount: room.maxDiscount,
+                    gstPercentage: room.gstPercentage,
+                    extraPersonCount: room.extraPersonCount,
+                    extraBedCount: room.extraBedCount,
+                    discount: room.discount,
+                    gstCharge: room.gstCharge,
+                    totalPrice: room.totalPrice,
+                    occupancyDate: room.occupancyDate
+                    // occupancyTime: item.occupancyTime
+                });
+        
+                await data.save();
+            }));   
         }
-
-        //append the current product to transaction document
-        await Promise.all(dbBooking.map(async (room) => {     
-            // const item = guest.roomsDetail.rooms;
-            // if (!item) return;
-
-            const data = new GuestRoomTransaction({
-                hotelId,
-                guestId,
-                id: room.id,
-                no: room.no,
-                tariff: room.tariff,
-                extraPersonTariff: room.extraPersonTariff,
-                extraBedTariff: room.extraBedTariff,
-                maxDiscount: room.maxDiscount,
-                gstPercentage: room.gstPercentage,
-                extraPersonCount: room.extraPersonCount,
-                extraBedCount: room.extraBedCount,
-                discount: room.discount,
-                gstCharge: room.gstCharge,
-                totalPrice: room.totalPrice,
-                occupancyDate: room.occupancyDate
-                // occupancyTime: item.occupancyTime
-            });
-    
-            await data.save();
-        }));   
     } catch(e) {
         return res.status(500).send(e);
     }
@@ -628,8 +626,17 @@ const handelGenerateBill = async (req, res) => {
 
         const dbBalance = await Guest.aggregate([filterBalance1, filterBalance2, filterBalance3]);
         if (!dbBalance) return;
+        if (dbBalance.length === 0) return;
         
-        const balance = dbBalance[0].totalExpense + dbBalance[0].totalPayment;
+        let totalExpense = 0;
+        let totalPayment = 0;
+
+        await Promise.all(dbBalance.map(async (transaction, idx) => {
+            totalExpense += transaction.totalExpense;
+            totalPayment += transaction.totalPayment;
+        }));
+
+        const balance = totalExpense + totalPayment;
 
         // Start :: update balance
         await Guest.updateOne(
@@ -664,25 +671,18 @@ const handelGenerateBill = async (req, res) => {
             $unwind: "$roomsDetail.rooms" 
         };  
         const filterRoom4 = {
-            $unwind: "$expensesPaymentsDetail"
-        };
-        const filterRoom5 = {
             $match: {
-                "roomsDetail._id": mongoose.Types.ObjectId(transactionId),
-                "expensesPaymentsDetail.expenseId": transactionId,
-                "roomsDetail.rooms.occupancyDate": {$exists:true},
-                // "roomsDetail.rooms.occupancyTime": {$exists:true}
+                "roomsDetail._id": mongoose.Types.ObjectId(transactionId)
             }
         };
-        const filterRoom6 = {
+        const filterRoom5 = {
             $group: {
                 _id: "$roomsDetail._id",
-                rooms: {$push: "$roomsDetail.rooms"},
-                // expensesPaymentsDetail: {$push: "$expensesPaymentsDetail"}
+                rooms: {$push: "$roomsDetail.rooms"}
             }
         };
 
-        const dbRoomList = await Guest.aggregate([filterRoom1, filterRoom2, filterRoom3, filterRoom4, filterRoom5, filterRoom6]);
+        const dbRoomList = await Guest.aggregate([filterRoom1, filterRoom2, filterRoom3, filterRoom4, filterRoom5]);
         if (!dbRoomList) res.status(500).send(e);
         if (dbRoomList.length === 0) res.status(500).send(e);
         const expenseId = dbRoomList[0]._id;
@@ -835,7 +835,6 @@ const handelPayment = async (req, res) => {
             paymentAmount: amount,
             narration: narration
         });
-
         await dataPayment.save();
         //End :: insert into guest payment transaction
 
@@ -888,65 +887,44 @@ async function newRoomValues(hotel, bookings) {
     // insert all add items
     const transaction = new roomTransactionType([]);
 
-    await Promise.all(bookings.map(async (booking) => {         
-        if (booking.operation !== "A") return; 
+    try {
+        await Promise.all(bookings.map(async (room) => {         
+            if (room.operation !== "A") return; 
 
-        // check for item existance
-        const master = await Rooms.findOne(
-            {
-                _id: mongoose.Types.ObjectId(booking.id), 
-                hotelId: hotel._id, 
-                // isOccupied: false,
-                isEnable: true
-            }
-        );    
+            // check for item existance
+            const master = await Rooms.findOne(
+                {
+                    _id: mongoose.Types.ObjectId(room.id), 
+                    hotelId: hotel._id, 
+                    // isOccupied: false,
+                    isEnable: true
+                }
+            );    
+            if (!master) return;
 
-        if (!master) return;
-
-        transaction.rooms.push(
-            new roomType(
-                master._id, 
-                master.no, 
-                master.tariff,
-                master.extraPersonTariff,
-                master.extraBedTariff,
-                master.maxDiscount,
-                booking.extraPerson,
-                booking.extraBed,
-                booking.discount,
-                booking.occupancyDate,
-                await GST.search((master.tariff - booking.discount) + 
-                (master.extraPersonTariff * booking.extraPerson) +
-                (master.extraBedTariff * booking.extraBed))
-            ));
-    }));
+            transaction.rooms.push(
+                new roomType(
+                    room.id, 
+                    master.no, 
+                    master.tariff,
+                    master.extraPersonTariff,
+                    master.extraBedTariff,
+                    master.maxDiscount,
+                    room.extraPerson,
+                    room.extraBed,
+                    room.discount,
+                    room.occupancyDate,
+                    await GST.search((master.tariff - room.discount) + 
+                    (master.extraPersonTariff * room.extraPerson) +
+                    (master.extraBedTariff * room.extraBed))
+                ));
+        }));
+    } catch(e) {
+        return;
+    }
 
     return transaction;
 };
-
-
-async function getActiveRoom(detail) {
-    let rooms = "";
-
-//      await Promise.all(detail.map(async (item) => {         
-//         if ((!item.isCheckedout) && (transactionId === "undefined")) {
-//             transactionId = item._id.toHexString();
-//         }
-//     }));
-
-    if (detail.length > 0) {
-        if (!search) {
-            rooms = detail[detail.length - 1].rooms;
-        } else {
-            detail[detail.length - 1].rooms.map(async (room) => {
-                rooms.length > 0 ?  rooms = rooms + ", " + room.no : rooms = room.no;
-            });
-        }
-    }
-
-    return rooms;
-};
-
 
 async function getActiveId(hotelId, guestId) {
     let activeTransactionId = "undefined";
@@ -980,6 +958,39 @@ async function getActiveId(hotelId, guestId) {
     return activeTransactionId;
 };
 
+async function getActiveRooms(hotelId, guestId) {
+    let rooms = undefined;
+    
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$roomsDetail"
+        };
+        const filter3 = {
+            $match: {
+                "roomsDetail.isCheckedout": false
+            }
+        };
+        
+        const guests = await Guest.aggregate([filter1, filter2, filter3]);
+
+        if (!guests.length) return; 
+        if (!guests[0].roomsDetail.rooms.length) return;
+        rooms = guests[0].roomsDetail.rooms;
+    } catch(e) {
+        return;
+    }
+
+    return rooms;
+};
+
 
 module.exports = {
     handelSearch,
@@ -988,5 +999,6 @@ module.exports = {
     handelGenerateBill,
     handelPayment,
     handelCheckout,
-    getActiveId
+    getActiveId,
+    getActiveRooms
 };

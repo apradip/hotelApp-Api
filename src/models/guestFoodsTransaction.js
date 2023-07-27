@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+// const validator = require("validator");
 
 const guestFoodTransactionSchema = new mongoose.Schema({
     hotelId: {
@@ -26,13 +27,22 @@ const guestFoodTransactionSchema = new mongoose.Schema({
         type: Number
     },
     serviceCharge: {
-        type: Number
+        type: Number,
+        // default: function() {
+        //     return ((this.unitPrice * this.quantity) * (this.serviceChargePercentage / 100)).toFixed(2)
+        // }        
     },
     gstCharge: {
-        type: Number
+        type: Number,
+        // default: function() {
+        //     return ((this.unitPrice * this.quantity) * (this.gstPercentage / 100)).toFixed(2)
+        // }
     },
     totalPrice: {
-        type: Number
+        type: Number,
+        // default: function() {
+        //     return ((this.unitPrice * this.quantity) + this.serviceCharge + this.gstCharge).toFixed(2)
+        // }        
     },
     orderDate: {
         type: String

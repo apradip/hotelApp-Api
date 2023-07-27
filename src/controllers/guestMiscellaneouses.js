@@ -7,6 +7,8 @@ const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPayment
 const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
 const date = require("date-and-time");
 
+const GuestRoom = require("./guestRooms");
+
 
 class miscellaneousType {
     constructor(id, name, unitPrice, quantity, serviceChargePercentage, gstPercentage) {
@@ -116,19 +118,38 @@ const handelSearch = async (req, res) => {
 
         const dbGuests = await Guest.aggregate(pipeline); 
         await Promise.all(dbGuests.map(async (guest) => {
-            guestList.push(new guestType(
-                guest._id,
-                guest.name,
-                guest.mobile,
-                guest.guestCount,
-                guest.corporateName,
-                guest.corporateAddress,
-                guest.gstNo,
-                guest.balance,
-                guest.inDate,
-                guest.inTime,
-                guest.option
-            ));
+
+            if (guest.option === "R") {
+                guestList.push(new guestType(
+                    guest._id,
+                    guest.name,
+                    guest.mobile,
+                    guest.guestCount,
+                    guest.corporateName,
+                    guest.corporateAddress,
+                    guest.gstNo,
+                    guest.balance,
+                    guest.inDate,
+                    guest.inTime,
+                    guest.option,
+                    undefined,
+                    await GuestRoom.getActiveRooms(hotelId, guest._id)
+                ));
+            } else {
+                guestList.push(new guestType(
+                    guest._id,
+                    guest.name,
+                    guest.mobile,
+                    guest.guestCount,
+                    guest.corporateName,
+                    guest.corporateAddress,
+                    guest.gstNo,
+                    guest.balance,
+                    guest.inDate,
+                    guest.inTime,
+                    guest.option
+                ));
+            }
         }));
     } catch(e) {
         return res.status(500).send(e);
@@ -592,7 +613,17 @@ const handelGenerateBill = async (req, res) => {
 
         const dbBalance = await Guest.aggregate([filterBalance1, filterBalance2, filterBalance3]);
         if (!dbBalance) return;
-        const balance = dbBalance[0].totalExpense + dbBalance[0].totalPayment;
+        if (dbBalance.length === 0) return;
+
+        let totalExpense = 0;
+        let totalPayment = 0;
+
+        await Promise.all(dbBalance.map(async (transaction, idx) => {
+            totalExpense += transaction.totalExpense;
+            totalPayment += transaction.totalPayment;
+        }));
+
+        const balance = totalExpense + totalPayment;
 
         // Start :: update balance
         await Guest.updateOne(

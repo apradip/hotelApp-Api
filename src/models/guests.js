@@ -237,7 +237,6 @@ const miscellaneousSchema = new mongoose.Schema({
     }    
 });
 
-
 const roomTransactionSchema = new mongoose.Schema({
     rooms: [roomSchema],
     isCheckedout: false
@@ -301,7 +300,6 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
         }        
     }
 });
-
 
 const guestSchema = new mongoose.Schema({
     hotelId: {
