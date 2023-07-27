@@ -5,9 +5,8 @@ const Miscellaneous = require("../models/miscellaneouses");
 const GuestMiscellaneousTransaction = require("../models/guestMiscellaneousesTransaction");
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
-const date = require("date-and-time");
-
 const GuestRoom = require("./guestRooms");
+const date = require("date-and-time");
 
 
 class miscellaneousType {
@@ -79,20 +78,34 @@ class paymentTransactionType {
 const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
+    const roomOnly = req.query.roomonly;
 
     let guestList = [];
     let pipeline = [];
     
     try {
-        const filter1 = {
-            $match: {
-                hotelId,
-                isActive: true,
-                isEnable: true,
-                outDate: {$exists:false},
-                outTime: {$exists:false},
-                $or: [{option: "R"}, {option: "M"}]
-            }
+        let filter1 = "";
+
+        if (roomOnly === "true") {
+            filter1 = {
+                $match: {
+                    hotelId,
+                    isActive: true,
+                    isEnable: true,
+                    outDate: {$exists:false},
+                    outTime: {$exists:false},
+                    option: "R"
+                }};
+        } else {
+            filter1 = {
+                $match: {
+                    hotelId,
+                    isActive: true,
+                    isEnable: true,
+                    outDate: {$exists:false},
+                    outTime: {$exists:false},
+                    $or: [{option: "R"}, {option: "M"}]
+                }};
         };
         const filter2 = {
             $match: {
@@ -110,15 +123,9 @@ const handelSearch = async (req, res) => {
             }
         };
         
-        if (!search) {
-            pipeline = [filter1, filter3];
-        } else {
-            pipeline = [filter1, filter2, filter3];
-        }
-
+        search ? pipeline = [filter1, filter2, filter3] : pipeline = [filter1, filter3];
         const dbGuests = await Guest.aggregate(pipeline); 
         await Promise.all(dbGuests.map(async (guest) => {
-
             if (guest.option === "R") {
                 guestList.push(new guestType(
                     guest._id,

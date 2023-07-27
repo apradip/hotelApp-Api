@@ -24,9 +24,6 @@ class foodType {
       this.quantity = quantity;
       this.serviceChargePercentage = serviceChargePercentage;
       this.gstPercentage = gstPercentage;
-    //   this.serviceCharge = ((unitPrice * quantity) * (serviceChargePercentage / 100)).toFixed(0);
-    //   this.gstCharge = ((unitPrice * quantity) * (gstPercentage / 100)).toFixed(0);
-    //   this.totalPrice = ((unitPrice * quantity) + ((unitPrice * quantity) * (serviceChargePercentage / 100)) + ((unitPrice * quantity) * (gstPercentage / 100))).toFixed(0);
     }
 };
 class foodTransactionType {
@@ -92,21 +89,35 @@ class paymentTransactionType {
 const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
+    const roomOnly = req.query.roomonly;
 
     let guestList = [];
     let pipeline = [];
     
     try {
-        const filter1 = {
-            $match: {
-                hotelId,
-                isActive: true,
-                isEnable: true,
-                outDate: {$exists:false},
-                outTime: {$exists:false},
-                $or: [{option: "R"}, {option: "T"}]
-            }
-        };
+        let filter1 = "";
+
+        if (roomOnly === "true") {
+            filter1 = {
+                $match: {
+                    hotelId,
+                    isActive: true,
+                    isEnable: true,
+                    outDate: {$exists:false},
+                    outTime: {$exists:false},
+                    option: "R"
+                }};
+        } else {
+            filter1 = {
+                $match: {
+                    hotelId,
+                    isActive: true,
+                    isEnable: true,
+                    outDate: {$exists:false},
+                    outTime: {$exists:false},
+                    $or: [{option: "R"}, {option: "T"}]
+                }};
+        };        
         const filter2 = {
             $match: {
                 $or: [{name: {$regex: ".*" + search.trim().toUpperCase() + ".*"}},
@@ -122,13 +133,8 @@ const handelSearch = async (req, res) => {
                 name: 1
             }
         };
-
-        if (!search) {
-            pipeline = [filter1, filter3];
-        } else {
-            pipeline = [filter1, filter2, filter3];
-        }
-
+        
+        search ? pipeline = [filter1, filter2, filter3] : pipeline = [filter1, filter3];
         const dbGuests = await Guest.aggregate(pipeline); 
         await Promise.all(dbGuests.map(async (guest) => {
             if (guest.option === "R") {
