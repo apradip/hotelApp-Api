@@ -182,7 +182,7 @@ const handelSearch = async (req, res) => {
 
 // handel show all food items
 // url : hotel Id / guest Id 
-// query string : ?option: [non delivery / all]
+// query string : ?option = option: [non delivery / all / all for this guest]
 const handelDetail = async (req, res) => {
     const {hotelId, guestId} = req.params;
     const option = req.query.option;
@@ -240,7 +240,9 @@ const handelDetail = async (req, res) => {
         guest.transactionId = await getActiveId(hotelId, guestId);
         guest.tables = await getActiveTables(hotelId, guestId);
 
-        if (option === "A") 
+        if (option === "GA")
+            pipeline = [filter1, filter2, filter4];
+        else if (option === "A") 
             pipeline = [filter1, filter2, filter3, filter4];
         else if (option === "N") 
             pipeline = [filter1, filter2, filter3, filter4, filter5];
