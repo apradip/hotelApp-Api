@@ -8,12 +8,19 @@ class tableType {
       this.no = no;
     }
 };
-
 class foodTransactionType {
     constructor(tables, foods) {    
         this.tables = tables;
         this.foods = foods;
         this.isCheckedout = false;
+    }
+};
+class paymentTransactionType {
+    constructor(amount, narration) {
+        this.type = "P",
+        this.paymentAmount = amount,
+        this.narration = narration,
+        this.paymentStatus = true
     }
 };
 
@@ -249,7 +256,10 @@ const handelUpdate = async (req, res) => {
     const {option} = req.body;
 
     try {
-        if (option.trim().toUpperCase() === "S") {
+        if ((option.trim().toUpperCase() === "M") || 
+            (option.trim().toUpperCase() === "S") ||
+            (option.trim().toUpperCase() === "T") ||
+            (option.trim().toUpperCase() === "A")) {
             const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} =  req.body;
             const data = await Guest.findOne({hotelId, isEnable: true, guestId});
             if (!data) return res.status(404).send();
@@ -267,7 +277,7 @@ const handelUpdate = async (req, res) => {
             if (!resUpdate) return res.status(400).send(resUpdate);
             return res.status(200).send(resUpdate);
 
-        } else if (option.trim().toUpperCase() === "D") {
+        } else if (option.trim().toUpperCase() === "R") {
             const {idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, 
                 pin, phone, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
                 dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} =  req.body;

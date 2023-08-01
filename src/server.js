@@ -112,6 +112,9 @@ app.use("/api/guestServices", require("./routes/api/guestServices"));
 app.use("/api/guestTables", require("./routes/api/guestTables"));
 
 //guestpayments CURD api
+app.use("/api/guestPayments", require("./routes/api/guestPayments"));
+
+//guestexpensepayments CURD api
 app.use("/api/guestExpensesPayments", require("./routes/api/guestExpensesPayments"));
 
 
