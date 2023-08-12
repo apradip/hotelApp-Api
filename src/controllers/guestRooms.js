@@ -361,30 +361,40 @@ const handelBooking = async (req, res) => {
                     if (booking.operation === "A" || booking.operation === "M") {
                         
                         // check for item existance
-                        const master = await Rooms.findOne(
-                            {
-                                _id: mongoose.Types.ObjectId(booking.id), 
-                                hotelId, 
-                                isEnable: true
-                            }
-                        );    
+                        const filter = {
+                            _id: mongoose.Types.ObjectId(booking.id), 
+                            hotelId, 
+                            // isOccupied: false, 
+                            isEnable: true
+                        };
             
-                        if (!master) return;
+                        const foundRoom = await Rooms.findOne(filter);
+            
+                        if (!foundRoom) return;
 
+                        const update = {
+                            guestId: guestId,
+                            guestCount: Number(foundRoom.accommodation) + Number(booking.extraPerson),
+                            isOccupied: true
+                        };
+
+                        const resRoomUpdate = await Rooms.updateOne(filter, update);
+                        if (!resRoomUpdate) return res.status(404).send();
+                        
                         dbBooking.push(new roomType(
-                            master._id, 
-                            master.no, 
-                            master.tariff,
-                            master.extraPersonTariff,
-                            master.extraBedTariff,
-                            master.maxDiscount,
+                            foundRoom._id, 
+                            foundRoom.no, 
+                            foundRoom.tariff,
+                            foundRoom.extraPersonTariff,
+                            foundRoom.extraBedTariff,
+                            foundRoom.maxDiscount,
                             booking.extraPerson,
                             booking.extraBed,
                             booking.discount,
                             booking.occupancyDate,
-                            await GST.search((master.tariff - booking.discount) + 
-                                (master.extraPersonTariff * booking.extraPerson) +
-                                (master.extraBedTariff * booking.extraBed))
+                            await GST.search((foundRoom.tariff - booking.discount) + 
+                                (foundRoom.extraPersonTariff * booking.extraPerson) +
+                                (foundRoom.extraBedTariff * booking.extraBed))
                         ));
                     }
                 }));
@@ -433,7 +443,7 @@ const handelBooking = async (req, res) => {
                 }));   
             }
         } else {
-            dbBooking = await newRoomValues(hotel, bookings);
+            dbBooking = await newRoomValues(hotel, guestId, bookings);
 
             await Guest.updateOne(
                 {
@@ -857,7 +867,35 @@ const handelPayment = async (req, res) => {
 const handelCheckout = async (req, res) => {
     const {hotelId, guestId} = req.params;
 
-    try {
+    // try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $project: {
+                _id: 0,
+                roomsDetail: {
+                    $slice: ["$roomsDetail", -1] 
+                }
+            }
+        };
+
+        const foundRoomDetails = await Guest.aggregate([filter1, filter2]);  
+        //update all room guestid it null & occupied status is false
+        await Promise.all(foundRoomDetails.map(async (item) => {
+            await Promise.all(item.roomsDetail.map(async (roomDetail) => {
+                await Promise.all(roomDetail.rooms.map(async (room) => {
+                    await Rooms.findByIdAndUpdate(
+                        mongoose.Types.ObjectId(room.id), 
+                        {$set: {isOccupied: false, guestId: "", guestCount: 0}});  
+                }));
+            }));
+        }));
+
         // update out date & time
         await Guest.updateOne(
             {
@@ -875,15 +913,15 @@ const handelCheckout = async (req, res) => {
                 }
             }
         );
-    } catch(e) {
-        return res.status(500).send(e);
-    }
+    // } catch(e) {
+    //     return res.status(500).send(e);
+    // }
 
     return res.status(200).send();    
 };
 
 
-async function newRoomValues(hotel, bookings) {
+async function newRoomValues(hotel, guestId, bookings) {
     // insert all add items
     const transaction = new roomTransactionType([]);
 
@@ -892,31 +930,41 @@ async function newRoomValues(hotel, bookings) {
             if (room.operation !== "A") return; 
 
             // check for item existance
-            const master = await Rooms.findOne(
-                {
-                    _id: mongoose.Types.ObjectId(room.id), 
-                    hotelId: hotel._id, 
-                    // isOccupied: false,
-                    isEnable: true
-                }
-            );    
-            if (!master) return;
+            const filter = {
+                _id: mongoose.Types.ObjectId(room.id), 
+                // hotelId: hotel._id, 
+                // isOccupied: false, 
+                isEnable: true
+            };
+
+            const foundRoom = await Rooms.findOne(filter);
+
+            if (!foundRoom) return;
+
+            const update = {
+                guestId: guestId,
+                guestCount: Number(foundRoom.accommodation) + Number(room.extraPerson),
+                isOccupied: true
+            };
+
+            const resRoomUpdate = await Rooms.updateOne(filter, update);
+            if (!resRoomUpdate) return res.status(404).send();
 
             transaction.rooms.push(
                 new roomType(
                     room.id, 
-                    master.no, 
-                    master.tariff,
-                    master.extraPersonTariff,
-                    master.extraBedTariff,
-                    master.maxDiscount,
+                    foundRoom.no, 
+                    foundRoom.tariff,
+                    foundRoom.extraPersonTariff,
+                    foundRoom.extraBedTariff,
+                    foundRoom.maxDiscount,
                     room.extraPerson,
                     room.extraBed,
                     room.discount,
                     room.occupancyDate,
-                    await GST.search((master.tariff - room.discount) + 
-                    (master.extraPersonTariff * room.extraPerson) +
-                    (master.extraBedTariff * room.extraBed))
+                    await GST.search((foundRoom.tariff - room.discount) + 
+                    (foundRoom.extraPersonTariff * room.extraPerson) +
+                    (foundRoom.extraBedTariff * room.extraBed))
                 ));
         }));
     } catch(e) {

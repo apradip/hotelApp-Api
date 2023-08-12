@@ -37,7 +37,7 @@ class expenseType {
 class guestType {
     constructor(id, name, mobile, guestCount, corporateName, corporateAddress, 
         gstNo, balance, inDate, inTime, option, transactionId = undefined, 
-        items = []) {
+        items = [], rooms = []) {
         this.id = id,
         this.name = name,
         this.mobile = mobile,
@@ -50,7 +50,8 @@ class guestType {
         this.inTime = inTime,
         this.option = option,
         this.transactionId = transactionId,
-        this.items = items
+        this.items = items,
+        this.rooms = rooms
     };
 }; 
 class billType {
@@ -140,6 +141,7 @@ const handelSearch = async (req, res) => {
                     guest.inTime,
                     guest.option,
                     undefined,
+                    await getPendingOrderItems(hotelId, guest._id),
                     await GuestRoom.getActiveRooms(hotelId, guest._id)
                 ));
             } else {
@@ -154,7 +156,9 @@ const handelSearch = async (req, res) => {
                     guest.balance,
                     guest.inDate,
                     guest.inTime,
-                    guest.option
+                    guest.option,
+                    undefined,
+                    await getPendingOrderItems(hotelId, guest._id)
                 ));
             }
         }));
@@ -386,6 +390,8 @@ const handelDelivery = async (req, res) => {
     const {hotelId, guestId, transactionId} = req.params;
     const {deliveries} = req.body;
 
+    let totalPriceAllInclusive = 0;
+
     try {
         await Promise.all(deliveries.map(async (delivery) => {         
             if (!delivery) return;
@@ -448,6 +454,8 @@ const handelDelivery = async (req, res) => {
                 const item = guest.miscellaneaDetail.miscellanea;
                 if (!item) return;
 
+                totalPriceAllInclusive += item.totalPrice;
+
                 const data = new GuestMiscellaneousTransaction({
                     hotelId,
                     guestId,
@@ -468,7 +476,17 @@ const handelDelivery = async (req, res) => {
             
                 await data.save();
             }));   
+
         }));
+
+        totalPriceAllInclusive = (totalPriceAllInclusive * -1);
+
+        //Start :: update balance
+        await Guest.findByIdAndUpdate(
+            mongoose.Types.ObjectId(guestId), 
+            {$inc: {balance: totalPriceAllInclusive.toFixed(0)}}
+        );
+        //End :: update balance
     } catch(e) {
         return res.status(500).send(e);
     }
@@ -599,57 +617,6 @@ const handelGenerateBill = async (req, res) => {
                 // End :: update expense transaction
             }
         }
-
-        // Start :: calculate & update balance
-        const filterBalance1 = {
-            $match: {
-                _id: mongoose.Types.ObjectId(guestId),         
-                hotelId,
-                isActive: true,
-                isEnable: true
-            }
-        };
-        const filterBalance2 = {
-            $unwind: "$expensesPaymentsDetail"
-        };
-        const filterBalance3 = {
-            $group: {
-                _id: "$expenseId._id",
-                totalExpense: {$sum: "$expensesPaymentsDetail.expenseAmount"},
-                totalPayment: {$sum: "$expensesPaymentsDetail.paymentAmount"}                        
-            }
-        };
-
-        const dbBalance = await Guest.aggregate([filterBalance1, filterBalance2, filterBalance3]);
-        if (!dbBalance) return;
-        if (dbBalance.length === 0) return;
-
-        let totalExpense = 0;
-        let totalPayment = 0;
-
-        await Promise.all(dbBalance.map(async (transaction, idx) => {
-            totalExpense += transaction.totalExpense;
-            totalPayment += transaction.totalPayment;
-        }));
-
-        const balance = totalExpense + totalPayment;
-
-        // Start :: update balance
-        await Guest.updateOne(
-            {
-                _id: mongoose.Types.ObjectId(guestId), 
-                hotelId,
-                isActive: true,
-                isEnable: true
-            },
-            {
-                $set: {
-                    balance: balance.toFixed(0)
-                }
-            }
-        );  
-        // End :: update balance
-        // End :: calculate & update balance
 
         // Start :: show all bill items 
         const filterItem1 = {
@@ -948,6 +915,63 @@ async function getActiveId(hotelId, guestId) {
     return activeTransactionId;
 };
 
+async function getPendingOrderItems (hotelId, guestId) {
+    let items = [];
+
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$miscellaneaDetail"
+        };
+        const filter3 = { 
+            $match: {
+                "miscellaneaDetail.isCheckedout": false
+            }
+        };
+        const filter4 = { 
+            $unwind: "$miscellaneaDetail.miscellanea"
+        };
+        const filter5 = {
+            $match: {
+                "miscellaneaDetail.miscellanea.despatchDate": {$exists: false},
+                "miscellaneaDetail.miscellanes.despatchTime": {$exists: false}
+            }
+        };
+                
+        const dbItems = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]);
+
+        await Promise.all(dbItems.map(async (dbItem) => {    
+            const item = dbItem.miscellaneaDetail.miscellanea;
+
+            items.push({
+                itemTransactionId: item._id,
+                id: item.id,
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
+                serviceChargePercentage: item.serviceChargePercentage,
+                serviceCharge: item.serviceCharge,
+                gstPercentage: item.gstPercentage,
+                gstCharge: item.gstCharge,
+                totalPrice: item.totalPrice,
+                orderDate: item.orderDate,
+                orderTime: item.orderTime
+            });
+        }));
+
+    } catch(e) {
+        return e;
+    }
+
+    return items;
+};
 
 module.exports = {
     handelSearch,

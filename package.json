@@ -30,6 +30,7 @@
     "otp-generators": "^1.0.3",
     "otplib": "^12.0.1",
     "path": "^0.12.7",
+    "socket.io": "^4.7.1",
     "url": "^0.11.0",
     "uuid": "^9.0.0",
     "validator": "^13.7.0"

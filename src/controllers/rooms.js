@@ -9,13 +9,13 @@ const handelSearch = async (req, res) => {
         
         const data = await Room.find({hotelId, isEnable: true})
                                         .sort("no")                                
-                                        .select("hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
+                                        .select("hotelId categoryId _id no accommodation guestId guestCount tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
         if (!data) return res.status(404).send();
 
         if (search) {
             const filterData = await Room.find({hotelId, isEnable: true, no: {$regex: ".*" + search.trim().toUpperCase() + ".*"}})
                                                 .sort("no")                                
-                                                .select("hotelId categoryId _id no tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
+                                                .select("hotelId categoryId _id no accommodation guestId guestCount tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -46,15 +46,16 @@ const handelDetail = async (req, res) => {
 
 //handel add room
 //query string : hotel Id
-//body : { "categoryId" : "", "no" : "", "tariff" : 0, "maxDiscount" : 0, "extraBedTariff" : 0, "extraPersonTariff" : 0 }
+//body : { "categoryId" : "", "no" : "", "accommodation" : 0, "tariff" : 0, "maxDiscount" : 0, "extraBedTariff" : 0, "extraPersonTariff" : 0 }
 const handelCreate = async (req, res) => {
     try {
         const hotelId = req.params.hotelId;
-        const {categoryId, no, tariff, maxDiscount, extraBedTariff, extraPersonTariff} =  req.body;
+        const {categoryId, no, accommodation, tariff, maxDiscount, extraBedTariff, extraPersonTariff} =  req.body;
         const data = new Room({
             hotelId,
             categoryId,
             no: no.trim().toUpperCase(),
+            accommodation: accommodation,
             tariff: tariff,
             maxDiscount: maxDiscount,
             extraBedTariff: extraBedTariff,
@@ -77,11 +78,11 @@ const handelCreate = async (req, res) => {
 
 //handel update room
 //query string : hotel Id / room Id
-//body : { "categoryId" : "", "no" : "", "tariff" : 0, "maxDiscount" : 0, "extraBedTariff" : 0, "extraPersonTariff" : 0 }
+//body : { "categoryId" : "", "no" : "", "accommodation" : 0, "tariff" : 0, "maxDiscount" : 0, "extraBedTariff" : 0, "extraPersonTariff" : 0 }
 const handelUpdate = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const {categoryId, no, tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied} =  req.body;
+        const {categoryId, no, accommodation, tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied} =  req.body;
         const data = await Room.findOne({hotelId, isEnable: true, _id});
         if (!data) return res.status(404).send();
 
@@ -94,7 +95,14 @@ const handelUpdate = async (req, res) => {
             })
         }
 
-        const resUpdate = await Room.findByIdAndUpdate(_id, {categoryId, no: no.trim().toUpperCase(), tariff, maxDiscount, extraBedTariff, extraPersonTariff, isOccupied});
+        const resUpdate = await Room.findByIdAndUpdate(_id, {categoryId, 
+                                                            no: no.trim().toUpperCase(), 
+                                                            accommodation: accommodation,
+                                                            tariff, 
+                                                            maxDiscount, 
+                                                            extraBedTariff, 
+                                                            extraPersonTariff, 
+                                                            isOccupied});
         if (!resUpdate) return res.status(400).send(resUpdate);
 
         return res.status(200).send(resUpdate);

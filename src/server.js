@@ -3,13 +3,18 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
-const {logger} = require("./middlewares/logEvents");
+const http = require("http");
+const { Server } = require("socket.io");
+const socketOptions = require("./config/socketOptions");
+const { logger } = require("./middlewares/logEvents");
 const errorHandler = require("./middlewares/errorHandler");
 const verifyJWT = require("./middlewares/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
-const PORT = process.env.API_SERVER_PORT || 3500;
+
+const PORT_EXPRESS = process.env.API_SERVER_PORT || 3500;
+const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
 
 // Connect to MongoDB
 connectDB();
@@ -29,6 +34,51 @@ app.use(express.urlencoded({ extended: false }));
 
 // built-in middleware for json 
 app.use(express.json());
+
+// create and run socket server
+const serverSocket = http.createServer(app);
+
+const io = new Server(serverSocket, {
+    cors: {
+      origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
+      methods: ["GET", "POST"]
+    }
+});
+  
+io.on("connection", (socket) => {
+    console.log(`User Connected: ${socket.id}`);
+  
+    socket.on("join_room", (data) => {
+        // console.log("join_room" + data);
+        socket.join(data);
+    });
+  
+    socket.on("send_message", (data) => {
+        // console.log("send_message" + data);
+        socket.broadcast.emit("receive_message", data);
+        // socket.to(data.room).emit("receive_message", data);
+    });
+
+    socket.on("M_order", (guestId) => {
+        // console.log("send_message" + data);
+        socket.broadcast.emit("M_order", guestId);
+        // socket.to(data.room).emit("receive_message", data);
+    });
+
+    socket.on("S_order", (guestId) => {
+        // console.log("send_message" + data);
+        socket.broadcast.emit("S_order", guestId);
+        // socket.to(data.room).emit("receive_message", data);
+    });
+
+    socket.on("T_order", (guestId) => {
+        // console.log("send_message" + data);
+        socket.broadcast.emit("T_order", guestId);
+        // socket.to(data.room).emit("receive_message", data);
+    });
+
+});
+  
 
 //middleware for cookies
 app.use(cookieParser());
@@ -124,6 +174,10 @@ app.get("/", (req, res) => {
 
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-    console.log(`Node server is running on ${PORT}...`);
-})
+app.listen(PORT_EXPRESS, () => {
+    console.log(`Node server is running on ${PORT_EXPRESS}...`);
+});
+
+serverSocket.listen(PORT_SOCKET, () => {
+    console.log(`Socket server is running on ${PORT_SOCKET}...`);
+});

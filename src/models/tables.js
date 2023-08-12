@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
+// const validator = require("validator");
 
 const tableSchema = new mongoose.Schema({
     hotelId: {
@@ -16,14 +16,21 @@ const tableSchema = new mongoose.Schema({
             }
        }
     }, 
+    accommodation: {
+        type: Number,
+        default: 0,
+    },
     description: {
         type: String,
-        // minLength: [3, 'Invalid description!'],
         maxLength: [1020, 'Invalid description!']
     }, 
     guestId: {
         type: String,
         default: null
+    },
+    guestCount: {
+        type: Number,
+        default: 0,
     },
     isOccupied: {
         type: Boolean, 

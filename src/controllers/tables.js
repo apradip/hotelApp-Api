@@ -13,11 +13,11 @@ const handelSearch = async (req, res) => {
         if (option === "E") {
             data = await Table.find({hotelId, isEnable: true, isOccupied: false})
                                      .sort("no")                                
-                                     .select("hotelId _id no description isOccupied");
+                                     .select("hotelId _id no accommodation description guestId guestCount isOccupied");
         } else {
             data = await Table.find({hotelId, isEnable: true})
                                      .sort("no")                                
-                                     .select("hotelId _id no description isOccupied");
+                                     .select("hotelId _id no accommodation description guestId guestCount isOccupied");
         }
 
         if (!data) return res.status(404).send();
@@ -25,7 +25,7 @@ const handelSearch = async (req, res) => {
         if (search) {
             const filterData = await Table.find({hotelId, isEnable: true, no: {$regex: ".*" + search.trim().toUpperCase() + ".*"}})
                                                 .sort("no")                                
-                                                .select("hotelId _id no description isOccupied");
+                                                .select("hotelId _id no accommodation description guestId guestCount isOccupied");
             if (!filterData) return res.status(404).send();
 
             return res.status(200).send(filterData);        
@@ -56,14 +56,15 @@ const handelDetail = async (req, res) => {
 
 //handel add table
 //query string : hotel Id
-//body : { "no" : "", "description" : "" }
+//body : { "no" : "", "accommodation" : 0, "description" : "" }
 const handelCreate = async (req, res) => {
     try {
         const hotelId = req.params.hotelId;
-        const {no, description} =  req.body;
+        const {no, accommodation, description} =  req.body;
         const data = new Table({
             hotelId,
             no: no.trim().toUpperCase(),
+            accommodation: accommodation,
             description: description.length > 0 ? description.trim() : "", 
         });
 
@@ -82,11 +83,11 @@ const handelCreate = async (req, res) => {
 
 //handel update table
 //query string : hotel Id / table Id
-//body : { "no" : "", "description" : "" }
+//body : { "no" : "", "accommodation" : 0, "description" : "" }
 const handelUpdate = async (req, res) => {
     try {
         const {hotelId, _id} = req.params;
-        const {no, description, isOccupied} =  req.body;
+        const {no, accommodation, description} =  req.body;
         const data = await Table.findOne({hotelId, isEnable: true, _id});
         if (!data) return res.status(404).send();
 
@@ -99,10 +100,9 @@ const handelUpdate = async (req, res) => {
             })
         }
 
-        const resUpdate = await Table.findByIdAndUpdate(_id, {
-                                                                no: no.trim().toUpperCase(), 
-                                                                description: description.length > 0 ? description.trim() : "", 
-                                                                isOccupied});
+        const resUpdate = await Table.findByIdAndUpdate(_id, {no: no.trim().toUpperCase(), 
+                                                                accommodation: accommodation,
+                                                                description: description.length > 0 ? description.trim() : ""});
         if (!resUpdate) return res.status(400).send(resUpdate);
 
         return res.status(200).send(resUpdate);

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-// const validator = require("validator");
 
 const roomSchema = new mongoose.Schema({
     hotelId: {
@@ -20,6 +19,10 @@ const roomSchema = new mongoose.Schema({
             }
        }
     }, 
+    accommodation: {
+        type: Number,
+        default: 0,
+    },
     tariff: {
         type: Number,
         required: [true, 'Ttariff require!'],
@@ -63,6 +66,14 @@ const roomSchema = new mongoose.Schema({
                 throw new Error("Incorrect extra person charge!");
             }
         }
+    },
+    guestId: {
+        type: String,
+        default: null
+    },
+    guestCount: {
+        type: Number,
+        default: 0,
     },
     isOccupied: {
         type: Boolean, 
