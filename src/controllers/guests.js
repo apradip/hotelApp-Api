@@ -62,7 +62,6 @@ const handelSearch = async (req, res) => {
         const data = await Guest.aggregate(pipeline);
         if (!data) return res.status(404).send();
         return res.status(200).send(data);
-
     } catch(e) {
         return res.status(500).send(e);
     }
@@ -147,40 +146,6 @@ const handelCreate = async (req, res) => {
                 
             const resAdd = await data.save();
             // if (!resAdd) return res.status(400).send();
-
-            // const guestId = data._id;    
-            // const transaction = new foodTransactionType([], []);
-
-            // // for(const table of tables) {
-            // await Promise.all(tables.map(async (table) => {
-            //     // check if the table is empty
-            //     const filter = {
-            //         hotelId, 
-            //         _id: mongoose.Types.ObjectId(table.id), 
-            //         isOccupied: false, 
-            //         isEnable: true
-            //     };
-            //     const foundTable = await Table.findOne(filter);
-    
-            //     if (foundTable) {
-            //         transaction.tables.push(new tableType(
-            //             table.id, 
-            //             foundTable.no
-            //         ));
-            //     }
-    
-            //     const update = {
-            //         guestId: guestId, 
-            //         isOccupied: true
-            //     };
-            //     const resTableUpdate = await Table.updateOne(filter, update);
-            //     if (!resTableUpdate) return res.status(404).send();
-            // }));
-    
-            // const filterGuest = {_id: guestId};
-            // const updateGuest = {$push: {tablesDetail: transaction}};
-            // const resGuestUpdate = await Guest.updateOne(filterGuest, updateGuest);  
-            // if (!resGuestUpdate) return res.status(404).send();
 
             return res.status(200).send(data)
 

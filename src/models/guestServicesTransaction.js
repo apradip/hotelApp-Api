@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-// const validator = require("validator");
+
 
 const guestServiceTransactionSchema = new mongoose.Schema({
     hotelId: {
@@ -36,17 +36,19 @@ const guestServiceTransactionSchema = new mongoose.Schema({
         type: Number
     },
     orderDate: {
-        type: String
+        type: Date
+        // type: String
     },
-    orderTime: {
-        type: String
-    },
+    // orderTime: {
+    //     type: String
+    // },
     despatchDate: {
-        type: String
+        type: Date
+        // type: String
     },
-    despatchTime: {
-        type: String
-    }
+    // despatchTime: {
+    //     type: String
+    // }
 });
 
 const GuestServiceTransaction = new mongoose.model("GuestServiceTransaction", guestServiceTransactionSchema);

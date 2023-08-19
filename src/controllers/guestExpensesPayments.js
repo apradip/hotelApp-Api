@@ -30,7 +30,8 @@ const handelSearch = async (req, res) => {
 
         filterData = await GuestExpensePayment.find({hotelId, isEnable: true})
                     .sort("transactionDate")                                
-                    .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
+                    .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate updatedDate")
+                    // .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
                     .exec();
 
         if (searchGuest !== "") {
@@ -49,7 +50,8 @@ const handelSearch = async (req, res) => {
             if (filterGuestData) {                                            
                 filterData = await filterData.find({guestId: {$in:filterGuestData}})
                     .sort("transactionDate")                                
-                    .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
+                    // .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
+                    .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate updatedDate")
                     .exec();
             }
         }
@@ -61,7 +63,8 @@ const handelSearch = async (req, res) => {
                                                             {paymentAmount: {$gte: searchAmountMax}},
                                                             ]})
                                                         .sort("transactionDate")                                
-                                                        .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
+                                                        // .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
+                                                        .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate updatedDate")
                                                         .exec();
         }
 
@@ -69,7 +72,8 @@ const handelSearch = async (req, res) => {
             filterData = await filterData.find({transactionDate: {$lte: searchDateEnd},
                 transactionDate: {$gte: searchDateStart}})
                                                         .sort("transactionDate")
-                                                        .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
+                                                        // .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate transactionTime updatedDate")
+                                                        .select("_id hotelId guestId expenseAmount paymentAmount narration transactionDate updatedDate")
                                                         .exec();
         }
         
@@ -283,7 +287,8 @@ const handelUpdate = async (req, res) => {
                 _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                 corporateName: 0, corporateAddress: 0, gstNo: 0, 
                 roomsDetail: 0, miscellaneousDetail: 0, servicesDetail: 0,
-                tablesDetail: 0, balance: 0, inDate: 0, inTime: 0,
+                // tablesDetail: 0, balance: 0, inDate: 0, inTime: 0,
+                tablesDetail: 0, balance: 0, inDate: 0,
                 option: 0, isActive: 0, isEnable: 0, updatedDate: 0
             }
         };
@@ -367,7 +372,8 @@ const handelRemove = async (req, res) => {
                 _id: 0, hotelId: 0, name: 0, mobile: 0, guestCount: 0, 
                 corporateName: 0, corporateAddress: 0, gstNo: 0, 
                 roomsDetail: 0, miscellaneousDetail: 0, servicesDetail: 0,
-                tablesDetail: 0, balance: 0, inDate: 0, inTime: 0,
+                // tablesDetail: 0, balance: 0, inDate: 0, inTime: 0,
+                tablesDetail: 0, balance: 0, inDate: 0,
                 option: 0, isActive: 0, isEnable: 0, updatedDate: 0
             }
         };

@@ -8,7 +8,6 @@ const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPayment
 const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
 const Plan = require("./plans");
 const BookingAgent = require("./bookingAgents");
-const date = require("date-and-time");
 
 
 class roomType {
@@ -34,7 +33,7 @@ class roomType {
         this.discount = discount.toFixed(0),
         this.gstCharge = gstCharge.toFixed(0),
         this.totalPrice = totalPrice.toFixed(0),
-        this.occupancyDate = date.format(new Date(occupancyDate), "YYYY-MM-DD")
+        this.occupancyDate = occupancyDate
     }
 };
 class roomTransactionType {
@@ -55,7 +54,7 @@ class expenseType {
 class guestType {
     constructor(id, idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, pin, phone, mobile, email, 
         guestCount, guestMaleCount, guestFemaleCount, corporateName, corporateAddress, gstNo, 
-        dayCount, bookingAgent, plan, balance, inDate, inTime, option, transactionId = undefined, 
+        dayCount, bookingAgent, plan, balance, inDate, outDate, option, transactionId = undefined, 
         rooms = []) {
         this.id = id,
         this.idDocumentId = idDocumentId,
@@ -82,7 +81,7 @@ class guestType {
         this.plan = plan,
         this.balance = balance,
         this.inDate = inDate,
-        this.inTime = inTime,
+        this.outDate = outDate,
         this.option = option,
         this.transactionId = transactionId,
         this.rooms = rooms
@@ -123,7 +122,6 @@ const handelSearch = async (req, res) => {
                 isActive: true,
                 isEnable: true,
                 outDate: {$exists:false},
-                outTime: {$exists:false},
                 option: "R"
             }
         };
@@ -145,7 +143,6 @@ const handelSearch = async (req, res) => {
         const filter3 = {
             $sort: {
                 inDate: 1, 
-                inTime: 1, 
                 name: 1
             }
         };
@@ -182,8 +179,8 @@ const handelSearch = async (req, res) => {
                 await BookingAgent.getName(guest.bookingAgentId),
                 await Plan.getName(hotelId, guest.planId),
                 guest.balance,
-                guest.inDate,
-                guest.inTime,
+                await getCheckInDate(hotelId, guest._id),
+                await getCheckOutDate(hotelId, guest._id),
                 guest.option,
                 undefined,
                 await getActiveRooms(hotelId, guest._id),
@@ -193,6 +190,7 @@ const handelSearch = async (req, res) => {
         return res.status(500).send(e);
     }
 
+    // console.log(guestList);
     return res.status(200).send(guestList);
 };
 
@@ -220,18 +218,13 @@ const handelDetail = async (req, res) => {
             $unwind: "$roomsDetail"
         };
         const filter3 = { 
-            $match: {
-                "roomsDetail.isCheckedout": false
-            }
+            $match: {"roomsDetail.isCheckedout": false}
         };
         const filter4 = { 
             $unwind: "$roomsDetail.rooms"
         };
         const filter5 = {
-            $match: {
-                "roomsDetail.rooms.checkoutDate": {$exists: false},
-                // "roomsDetail.rooms.checkoutTime": {$exists: false}
-            }
+            $match: {"roomsDetail.rooms.checkoutDate": {$exists: false}}
         };
 
         // get guest detail
@@ -263,8 +256,8 @@ const handelDetail = async (req, res) => {
                 await BookingAgent.getName(dbGuest[0].bookingAgentId),
                 await Plan.getName(hotelId, dbGuest[0].planId),
                 dbGuest[0].balance,
-                dbGuest[0].inDate,
-                dbGuest[0].inTime,
+                await getCheckInDate(hotelId, guestId),
+                await getCheckOutDate(hotelId, guestId),
                 dbGuest[0].option
             );
         }
@@ -344,6 +337,7 @@ const handelBooking = async (req, res) => {
 
                 const guests = await Guest.aggregate([filter1, filter2, filter3]);  
                 if (!guests) return;
+                
                 dbBooking = guests[0].roomsDetail.rooms;
 
                 await Promise.all(bookings.map(async (booking, idx) => {    
@@ -436,7 +430,6 @@ const handelBooking = async (req, res) => {
                         gstCharge: room.gstCharge,
                         totalPrice: room.totalPrice,
                         occupancyDate: room.occupancyDate
-                        // occupancyTime: item.occupancyTime
                     });
             
                     await data.save();
@@ -477,7 +470,6 @@ const handelBooking = async (req, res) => {
                     gstCharge: room.gstCharge,
                     totalPrice: room.totalPrice,
                     occupancyDate: room.occupancyDate
-                    // occupancyTime: item.occupancyTime
                 });
         
                 await data.save();
@@ -522,8 +514,7 @@ const handelGenerateBill = async (req, res) => {
         };  
         const filterSum5 = {
             $match: {
-                "roomsDetail.rooms.occupancyDate": {$exists:true},
-                // "roomsDetail.rooms.occupancyTime": {$exists:true}
+                "roomsDetail.rooms.occupancyDate": {$exists:true}
             }
         };
         const filterSum6 = {
@@ -907,8 +898,7 @@ const handelCheckout = async (req, res) => {
             },
             {
                 $set: {
-                    outDate: date.format(new Date(), "YYYY-MM-DD"), 
-                    outTime: date.format(new Date(), "HH:mm"),
+                    outDate: new Date(), 
                     isActive: false
                 }
             }
@@ -1037,6 +1027,80 @@ async function getActiveRooms(hotelId, guestId) {
     }
 
     return rooms;
+};
+
+async function getCheckInDate(hotelId, guestId) {
+    let date = undefined;
+
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$roomsDetail"
+        };
+        const filter3 = {
+            $match: {"roomsDetail.isCheckedout": false}
+        };
+        const filter4 = {
+            $unwind: "$roomsDetail.rooms"
+        };
+        const filter5 = {
+            $sort: {"roomsDetail.rooms.occupancyDate": 1}
+        };
+
+        const chekin = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]).limit(1);
+
+        if (!chekin.length) return; 
+ 
+        date = chekin[0].roomsDetail.rooms.occupancyDate;
+    } catch(e) {
+        return;
+    }
+
+    return date;
+};
+
+async function getCheckOutDate(hotelId, guestId) {
+    let date = undefined;
+
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$roomsDetail"
+        };
+        const filter3 = {
+            $match: {"roomsDetail.isCheckedout": false}
+        };
+        const filter4 = {
+            $unwind: "$roomsDetail.rooms"
+        };
+        const filter5 = {
+            $sort: {"roomsDetail.rooms.occupancyDate": -1}
+        };
+
+        const chekout = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]).limit(1);
+
+        if (!chekout.length) return; 
+ 
+        date = chekout[0].roomsDetail.rooms.occupancyDate;
+    } catch(e) {
+        return;
+    }
+
+    return date;
 };
 
 

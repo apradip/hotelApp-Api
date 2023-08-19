@@ -25,7 +25,6 @@ const serviceSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        // minLength: [3, 'Invalid description!'],
         maxLength: [1020, 'Invalid description!']
     }, 
     isEnable: {

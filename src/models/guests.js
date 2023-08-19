@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const date = require("date-and-time");
+// const date = require("date-and-time");
 
 
 const roomSchema = new mongoose.Schema({
@@ -53,7 +53,8 @@ const roomSchema = new mongoose.Schema({
         }        
     },
     occupancyDate: { 
-        type: String
+        type: Date
+        // type: String
     },
 });
 
@@ -104,23 +105,29 @@ const foodSchema = new mongoose.Schema({
         }        
     },
     orderDate: { 
-        type: String,
+        type: Date,
         default: function() {
-            return date.format(new Date(), "YYYY-MM-DD");
+            return new Date();
         }
+
+        // type: String,
+        // default: function() {
+        //     return date.format(new Date(), "YYYY-MM-DD");
+        // }
     },
-    orderTime: { 
-        type: String,
-        default: function() {
-            return date.format(new Date(), "HH:mm");
-        }
-    },
+    // orderTime: { 
+    //     type: String,
+    //     default: function() {
+    //         return date.format(new Date(), "HH:mm");
+    //     }
+    // },
     despatchDate: { 
-        type: String
+        type: Date
+        // type: String
     },
-    despatchTime: { 
-        type: String 
-    }
+    // despatchTime: { 
+    //     type: String 
+    // }
 });
 
 const serviceSchema = new mongoose.Schema({
@@ -161,23 +168,29 @@ const serviceSchema = new mongoose.Schema({
         }        
     },
     orderDate: { 
-        type: String,
+        type: Date,
         default: function() {
-            return date.format(new Date(), "YYYY-MM-DD");
+            return new Date();
         }
+
+        // type: String,
+        // default: function() {
+        //     return date.format(new Date(), "YYYY-MM-DD");
+        // }
     },
-    orderTime: { 
-        type: String,
-        default: function() {
-            return date.format(new Date(), "HH:mm");
-        }
-    },
+    // orderTime: { 
+    //     type: String,
+    //     default: function() {
+    //         return date.format(new Date(), "HH:mm");
+    //     }
+    // },
     despatchDate: { 
-        type: String
+        type: Date
+        // type: String
     },
-    despatchTime: { 
-        type: String 
-    }
+    // despatchTime: { 
+    //     type: String 
+    // }
 });
 
 const miscellaneousSchema = new mongoose.Schema({
@@ -217,24 +230,30 @@ const miscellaneousSchema = new mongoose.Schema({
             return ((this.unitPrice * this.quantity) + this.serviceCharge + this.gstCharge).toFixed(0);
         }        
     },
-    orderDate: { 
-        type: String,
+    orderDate: {
+        type: Date,
         default: function() {
-            return date.format(new Date(), "YYYY-MM-DD");
+            return new Date();
         }
+
+        // type: String,
+        // default: function() {
+        //     return date.format(new Date(), "YYYY-MM-DD");
+        // }
     },
-    orderTime: { 
-        type: String,
-        default: function() {
-            return date.format(new Date(), "HH:mm");
-        }
-    },
+    // orderTime: { 
+    //     type: String,
+    //     default: function() {
+    //         return date.format(new Date(), "HH:mm");
+    //     }
+    // },
     despatchDate: { 
-        type: String
+        // type: String
+        type: Date
     },
-    despatchTime: { 
-        type: String 
-    }    
+    // despatchTime: { 
+    //     type: String 
+    // }    
 });
 
 const roomTransactionSchema = new mongoose.Schema({
@@ -288,17 +307,22 @@ const expensesPaymentsTransactionSchema = new mongoose.Schema({
         default: false        
     },
     transactionDate: {
-        type: String,
+        type: Date,
         default: function() {
-            return date.format(new Date(), "YYYY-MM-DD")
-        }        
+            return new Date();
+        }
+
+        // type: String,
+        // default: function() {
+        //     return date.format(new Date(), "YYYY-MM-DD")
+        // }        
     },
-    transactionTime: {
-        type: String,
-        default: function() {
-            return date.format(new Date(), "HH:mm")
-        }        
-    }
+    // transactionTime: {
+    //     type: String,
+    //     default: function() {
+    //         return date.format(new Date(), "HH:mm")
+    //     }        
+    // }
 });
 
 const guestSchema = new mongoose.Schema({
@@ -416,23 +440,29 @@ const guestSchema = new mongoose.Schema({
         }        
     },
     inDate: {
-        type: String,
+        type: Date,
         default: function() {
-            return date.format(new Date(), "YYYY-MM-DD")
-        }        
+            return new Date();
+        }
+
+        // type: String,
+        // default: function() {
+        //     return date.format(new Date(), "YYYY-MM-DD")
+        // }        
     },
-    inTime: {
-        type: String,
-        default: function() {
-            return date.format(new Date(), "HH:mm")
-        }        
-    },
+    // inTime: {
+    //     type: String,
+    //     default: function() {
+    //         return date.format(new Date(), "HH:mm")
+    //     }        
+    // },
     outDate: {
-        type: String
+        type: Date
+        // type: String
     },
-    outTime: {
-        type: String
-    },
+    // outTime: {
+    //     type: String
+    // },
     option: {
         type: String,
         required: [true, "option require!"]

@@ -1,0 +1,13 @@
+20230819	08:37:06	613402ea-ae63-497e-aa1d-df33f7bff119	OPTIONS	http://localhost:3000	/api/accessLevels?search=
+20230819	08:37:06	ab3cb1d0-7db4-416f-b169-2ef9802d350d	GET	http://localhost:3000	/api/accessLevels?search=
+20230819	08:37:06	c0592ee8-3cfa-446f-8852-4abef945799b	OPTIONS	http://localhost:3000	/api/refreshToken
+20230819	08:37:06	18c6ba29-332e-4816-ae14-b0aba2a8141f	GET	http://localhost:3000	/api/refreshToken
+20230819	08:37:06	d0827db3-f719-4c2d-b3dd-77bae69a88aa	GET	http://localhost:3000	/api/accessLevels?search=
+20230819	08:37:11	863e3f54-f1e0-429f-bb94-d75375283e54	OPTIONS	http://localhost:3000	/api/guestMiscellaneouses/64252efb369c403b60effae8?search=&roomonly=false
+20230819	08:37:11	8635e7f7-50bc-449b-b675-5da8b30498b9	GET	http://localhost:3000	/api/guestMiscellaneouses/64252efb369c403b60effae8?search=&roomonly=false
+20230819	08:37:12	65e9c210-942a-4ffb-828b-e2e7267e6d6a	OPTIONS	http://localhost:3000	/api/guestRooms/64252efb369c403b60effae8?search=
+20230819	08:37:12	7ea2275f-d007-4139-a54e-9659d49c7691	GET	http://localhost:3000	/api/guestRooms/64252efb369c403b60effae8?search=
+20230819	08:37:23	b722c693-71ea-4740-8830-7db572e3baef	OPTIONS	http://localhost:3000	/api/guestTables/64252efb369c403b60effae8?search=&roomonly=false
+20230819	08:37:23	9adf29fc-7bd1-45bf-a4d0-5ce28dc9889e	GET	http://localhost:3000	/api/guestTables/64252efb369c403b60effae8?search=&roomonly=false
+20230819	08:37:25	3876c137-7e03-4131-89fb-48d7a4b9e423	OPTIONS	http://localhost:3000	/api/guestRooms/64252efb369c403b60effae8?search=
+20230819	08:37:25	74666716-72f8-4956-8429-0aae64aa0d46	GET	http://localhost:3000	/api/guestRooms/64252efb369c403b60effae8?search=

@@ -35,17 +35,19 @@ const guestMiscellaneousTransactionSchema = new mongoose.Schema({
         type: Number
     },
     orderDate: {
-        type: String
+        // type: String
+        type: Date
     },
-    orderTime: {
-        type: String
-    },
+    // orderTime: {
+    //     type: String
+    // },
     despatchDate: {
-        type: String
+        // type: String
+        type: Date
     },
-    despatchTime: {
-        type: String
-    }
+    // despatchTime: {
+    //     type: String
+    // }
 });
 
 const GuestMiscellaneousTransaction = new mongoose.model("GuestMiscellaneousTransaction", guestMiscellaneousTransactionSchema);

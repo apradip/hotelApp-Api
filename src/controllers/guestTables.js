@@ -6,7 +6,6 @@ const Food = require("../models/foods");
 const GuestFoodTransaction = require("../models/guestFoodsTransaction");
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
-const date = require("date-and-time");
 
 const GuestRoom = require("./guestRooms");
 
@@ -44,7 +43,7 @@ class expenseType {
 };
 class guestType {
     constructor(id, name, mobile, guestCount, corporateName, corporateAddress, 
-        gstNo, balance, inDate, inTime, option, transactionId = undefined, 
+        gstNo, balance, inDate, option, transactionId = undefined, 
         tables = [],
         items = [],
         rooms = []) {
@@ -57,7 +56,6 @@ class guestType {
         this.gstNo = gstNo,
         this.balance = balance,
         this.inDate = inDate,
-        this.inTime = inTime,
         this.option = option,
         this.transactionId = transactionId,
         this.tables = tables,
@@ -106,7 +104,6 @@ const handelSearch = async (req, res) => {
                     isActive: true,
                     isEnable: true,
                     outDate: {$exists:false},
-                    outTime: {$exists:false},
                     option: "R"
                 }};
         } else {
@@ -116,7 +113,6 @@ const handelSearch = async (req, res) => {
                     isActive: true,
                     isEnable: true,
                     outDate: {$exists:false},
-                    outTime: {$exists:false},
                     $or: [{option: "R"}, {option: "T"}]
                 }};
         };        
@@ -131,7 +127,6 @@ const handelSearch = async (req, res) => {
         const filter3 = {
             $sort: {
                 inDate: 1, 
-                inTime: 1, 
                 name: 1
             }
         };
@@ -150,7 +145,6 @@ const handelSearch = async (req, res) => {
                     guest.gstNo,
                     guest.balance,
                     guest.inDate,
-                    guest.inTime,
                     guest.option,
                     undefined,
                     [],
@@ -168,7 +162,6 @@ const handelSearch = async (req, res) => {
                     guest.gstNo,
                     guest.balance,
                     guest.inDate,
-                    guest.inTime,
                     guest.option,
                     undefined,
                     await getActiveTables(hotelId, guest._id),
@@ -216,8 +209,7 @@ const handelDetail = async (req, res) => {
         };
         const filter5 = {
             $match: {
-                "tablesDetail.foods.despatchDate": {$exists: false},
-                "tablesDetail.foods.despatchTime": {$exists: false}
+                "tablesDetail.foods.despatchDate": {$exists: false}
             }
         };
 
@@ -235,14 +227,18 @@ const handelDetail = async (req, res) => {
                 dbGuest[0].gstNo,
                 dbGuest[0].balance,
                 dbGuest[0].inDate,
-                dbGuest[0].inTime,
                 dbGuest[0].option
             );
         }
         
         // get active transaction id
-        guest.transactionId = await getActiveId(hotelId, guestId);
-        guest.tables = await getActiveTables(hotelId, guestId);
+        const tranId = await getActiveId(hotelId, guestId);
+        
+        if (tranId) {
+           guest.transactionId = tranId;
+        }
+
+        // guest.tables = await getActiveTables(hotelId, guestId);
 
         if (option === "GA")
             pipeline = [filter1, filter2, filter4];
@@ -267,9 +263,7 @@ const handelDetail = async (req, res) => {
                 gstCharge: item.gstCharge,
                 totalPrice: item.totalPrice,
                 orderDate: item.orderDate,
-                orderTime: item.orderTime,
-                despatchDate: item.despatchDate,
-                despatchTime: item.despatchTime,
+                despatchDate: item.despatchDate
             });
         }));
     } catch(e) {
@@ -520,8 +514,7 @@ const handelDelivery = async (req, res) => {
                 },
                 {
                     $set: {
-                        "tablesDetail.$[ele].foods.$[fele].despatchDate": date.format(new Date(), "YYYY-MM-DD"), 
-                        "tablesDetail.$[ele].foods.$[fele].despatchTime": date.format(new Date(), "HH:mm")
+                        "tablesDetail.$[ele].foods.$[fele].despatchDate": new Date()
                     }
                 },
                 { 
@@ -556,8 +549,7 @@ const handelDelivery = async (req, res) => {
             const filter5 = {
                 $match: {
                     "tablesDetail.foods._id": mongoose.Types.ObjectId(delivery.itemTransactionId),
-                    "tablesDetail.foods.despatchDate": {$exists:true},
-                    "tablesDetail.foods.despatchTime": {$exists:true}
+                    "tablesDetail.foods.despatchDate": {$exists:true}
                 }
             };
                 
@@ -583,9 +575,7 @@ const handelDelivery = async (req, res) => {
                     quantity: item.quantity,
                     totalPrice: item.totalPrice,
                     orderDate: item.orderDate,
-                    orderTime: item.orderTime,
-                    despatchDate: item.despatchDate,
-                    despatchTime: item.despatchTime
+                    despatchDate: item.despatchDate
                 });
         
                 await data.save();
@@ -640,8 +630,7 @@ const handelGenerateBill = async (req, res) => {
         };  
         const filterSum5 = {
             $match: {
-                "tablesDetail.foods.despatchDate": {$exists:true},
-                "tablesDetail.foods.despatchTime": {$exists:true}
+                "tablesDetail.foods.despatchDate": {$exists:true}
             }
         };
         const filterSum6 = {
@@ -802,8 +791,7 @@ const handelGenerateBill = async (req, res) => {
         const filterItem4 = {
             $match: {
                 "tablesDetail._id": mongoose.Types.ObjectId(transactionId),
-                "tablesDetail.foods.despatchDate": {$exists:true},
-                "tablesDetail.foods.despatchTime": {$exists:true}
+                "tablesDetail.foods.despatchDate": {$exists:true}
             }
         };
         const filterItem5 = {
@@ -1031,8 +1019,7 @@ const handelCheckout = async (req, res) => {
             },
             {
                 $set: {
-                    outDate: date.format(new Date(), "YYYY-MM-DD"), 
-                    outTime: date.format(new Date(), "HH:mm"),
+                    outDate: new Date(), 
                     isActive: false
                 }
             }
@@ -1081,7 +1068,7 @@ const handelCheckout = async (req, res) => {
 // };
 
 async function getActiveId(hotelId, guestId) {
-    let activeTransactionId = "undefined";
+    let activeTransactionId = undefined;
     
     try {
         const filter1 = {
@@ -1102,9 +1089,11 @@ async function getActiveId(hotelId, guestId) {
         };
         
         const guests = await Guest.aggregate([filter1, filter2, filter3]);
-        if (!guests) return activeTransactionId; 
-        if (guests.length === 0) return activeTransactionId;
-        activeTransactionId = guests[0].tablesDetail._id.toHexString();
+        if (guests) {
+            if (guests.length > 0) {
+                activeTransactionId = guests[0].tablesDetail._id.toHexString();
+            }
+        }
     } catch(e) {
         return;
     }
@@ -1169,8 +1158,7 @@ async function getPendingOrderItems (hotelId, guestId) {
         };
         const filter5 = {
             $match: {
-                "tablesDetail.foods.despatchDate": {$exists: false},
-                "tablesDetail.foods.despatchTime": {$exists: false}
+                "tablesDetail.foods.despatchDate": {$exists: false}
             }
         };
                 
@@ -1190,8 +1178,7 @@ async function getPendingOrderItems (hotelId, guestId) {
                 gstPercentage: item.gstPercentage,
                 gstCharge: item.gstCharge,
                 totalPrice: item.totalPrice,
-                orderDate: item.orderDate,
-                orderTime: item.orderTime
+                orderDate: item.orderDate
             });
         }));
 

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-// const validator = require("validator");
 
 const miscellaneousSchema = new mongoose.Schema({
     hotelId: {
@@ -21,7 +20,6 @@ const miscellaneousSchema = new mongoose.Schema({
     },
     description: {
         type: String,
-        // minLength: [3, 'Invalid description!'],
         maxLength: [1020, 'Invalid description!']
     }, 
     isEnable: {

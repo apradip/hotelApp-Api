@@ -5,7 +5,7 @@ const Services = require("../models/services");
 const GuestServiceTransaction = require("../models/guestServicesTransaction");
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
-const date = require("date-and-time");
+// const date = require("date-and-time");
 
 const GuestRoom = require("./guestRooms");
 
@@ -36,7 +36,7 @@ class expenseType {
 };
 class guestType {
     constructor(id, name, mobile, guestCount, corporateName, corporateAddress, 
-        gstNo, balance, inDate, inTime, option, transactionId = undefined, 
+        gstNo, balance, inDate, option, transactionId = undefined, 
         items = [], rooms = []) {
         this.id = id,
         this.name = name,
@@ -47,7 +47,6 @@ class guestType {
         this.gstNo = gstNo,
         this.balance = balance,
         this.inDate = inDate,
-        this.inTime = inTime,
         this.option = option,
         this.transactionId = transactionId,
         this.items = items,
@@ -95,7 +94,6 @@ const handelSearch = async (req, res) => {
                     isActive: true,
                     isEnable: true,
                     outDate: {$exists:false},
-                    outTime: {$exists:false},
                     option: "R"
                 }};
         } else {
@@ -105,7 +103,6 @@ const handelSearch = async (req, res) => {
                     isActive: true,
                     isEnable: true,
                     outDate: {$exists:false},
-                    outTime: {$exists:false},
                     $or: [{option: "R"}, {option: "S"}]
                 }};
         };
@@ -120,7 +117,6 @@ const handelSearch = async (req, res) => {
         const filter3 = {
             $sort: {
                 inDate: 1, 
-                inTime: 1, 
                 name: 1
             }
         };
@@ -139,7 +135,6 @@ const handelSearch = async (req, res) => {
                     guest.gstNo,
                     guest.balance,
                     guest.inDate,
-                    guest.inTime,
                     guest.option,
                     undefined,
                     await getPendingOrderItems(hotelId, guest._id),
@@ -156,7 +151,6 @@ const handelSearch = async (req, res) => {
                     guest.gstNo,
                     guest.balance,
                     guest.inDate,
-                    guest.inTime,
                     guest.option,
                     undefined,
                     await getPendingOrderItems(hotelId, guest._id)
@@ -203,8 +197,7 @@ const handelDetail = async (req, res) => {
         };
         const filter5 = {
             $match: {
-                "servicesDetail.services.despatchDate": {$exists: false},
-                "servicesDetail.services.despatchTime": {$exists: false}
+                "servicesDetail.services.despatchDate": {$exists: false}
             }
         };
 
@@ -222,7 +215,6 @@ const handelDetail = async (req, res) => {
                 dbGuest[0].gstNo,
                 dbGuest[0].balance,
                 dbGuest[0].inDate,
-                dbGuest[0].inTime,
                 dbGuest[0].option
             );
         }
@@ -254,9 +246,7 @@ const handelDetail = async (req, res) => {
                 gstCharge: item.gstCharge,
                 totalPrice: item.totalPrice,
                 orderDate: item.orderDate,
-                orderTime: item.orderTime,
-                despatchDate: item.despatchDate,
-                despatchTime: item.despatchTime,
+                despatchDate: item.despatchDate
             });
         }));
     } catch(e) {
@@ -407,8 +397,7 @@ const handelDelivery = async (req, res) => {
                 },
                 {
                     $set: {
-                        "servicesDetail.$[ele].services.$[sele].despatchDate": date.format(new Date(), "YYYY-MM-DD"), 
-                        "servicesDetail.$[ele].services.$[sele].despatchTime": date.format(new Date(), "HH:mm")
+                        "servicesDetail.$[ele].services.$[sele].despatchDate": new Date()
                     }
                 },
                 { 
@@ -443,8 +432,7 @@ const handelDelivery = async (req, res) => {
             const filter5 = {
                 $match: {
                     "servicesDetail.services._id": mongoose.Types.ObjectId(delivery.itemTransactionId),
-                    "servicesDetail.services.despatchDate": {$exists:true},
-                    "servicesDetail.services.despatchTime": {$exists:true}
+                    "servicesDetail.services.despatchDate": {$exists:true}
                 }
             };
 
@@ -470,9 +458,7 @@ const handelDelivery = async (req, res) => {
                     quantity: item.quantity,
                     totalPrice: item.totalPrice,
                     orderDate: item.orderDate,
-                    orderTime: item.orderTime,
-                    despatchDate: item.despatchDate,
-                    despatchTime: item.despatchTime
+                    despatchDate: item.despatchDate
                 });
         
                 await data.save();
@@ -526,8 +512,7 @@ const handelGenerateBill = async (req, res) => {
         };  
         const filterSum5 = {
             $match: {
-                "servicesDetail.services.despatchDate": {$exists:true},
-                "servicesDetail.services.despatchTime": {$exists:true}
+                "servicesDetail.services.despatchDate": {$exists:true}
             }
         };
         const filterSum6 = {
@@ -636,8 +621,7 @@ const handelGenerateBill = async (req, res) => {
         const filterItem4 = {
             $match: {
                 "servicesDetail._id": mongoose.Types.ObjectId(transactionId),
-                "servicesDetail.services.despatchDate": {$exists:true},
-                "servicesDetail.services.despatchTime": {$exists:true}
+                "servicesDetail.services.despatchDate": {$exists:true}
             }
         };
         const filterItem5 = {
@@ -836,8 +820,7 @@ const handelCheckout = async (req, res) => {
             },
             {
                 $set: {
-                    outDate: date.format(new Date(), "YYYY-MM-DD"), 
-                    outTime: date.format(new Date(), "HH:mm"),
+                    outDate: new Date(), 
                     isActive: false
                 }
             }
@@ -940,8 +923,7 @@ async function getPendingOrderItems (hotelId, guestId) {
         };
         const filter5 = {
             $match: {
-                "servicesDetail.services.despatchDate": {$exists: false},
-                "servicesDetail.services.despatchTime": {$exists: false}
+                "servicesDetail.services.despatchDate": {$exists: false}
             }
         };
                 
@@ -961,8 +943,7 @@ async function getPendingOrderItems (hotelId, guestId) {
                 gstPercentage: item.gstPercentage,
                 gstCharge: item.gstCharge,
                 totalPrice: item.totalPrice,
-                orderDate: item.orderDate,
-                orderTime: item.orderTime
+                orderDate: item.orderDate
             });
         }));
 

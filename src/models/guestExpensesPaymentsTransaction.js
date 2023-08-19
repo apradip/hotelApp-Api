@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
-const date = require("date-and-time");
+// const validator = require("validator");
+// const date = require("date-and-time");
 
 const guestExpensesPaymentsTransactionSchema = new mongoose.Schema({
     hotelId: {
@@ -34,17 +34,22 @@ const guestExpensesPaymentsTransactionSchema = new mongoose.Schema({
         required: [true, 'Invalid narration!']
     },
     transactionDate: {
-        type: String,
+        type: Date,
         default: function() {
-            return date.format(new Date(), "YYYY-MM-DD")
-        }        
+            return new Date();
+        }
+
+        // type: String,
+        // default: function() {
+        //     return date.format(new Date(), "YYYY-MM-DD")
+        // }        
     },
-    transactionTime: {
-        type: String,
-        default: function() {
-            return date.format(new Date(), "HH:mm")
-        }        
-    }
+    // transactionTime: {
+    //     type: String,
+    //     default: function() {
+    //         return date.format(new Date(), "HH:mm")
+    //     }        
+    // }
 });
 
 const GuestExpensePaymentTransaction = new mongoose.model("GuestExpensePaymentTransaction", guestExpensesPaymentsTransactionSchema);

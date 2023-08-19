@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-// const validator = require("validator");
 
 const guestFoodTransactionSchema = new mongoose.Schema({
     hotelId: {
