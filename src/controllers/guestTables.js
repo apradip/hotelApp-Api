@@ -43,7 +43,7 @@ class expenseType {
 };
 class guestType {
     constructor(id, name, mobile, guestCount, corporateName, corporateAddress, 
-        gstNo, balance, inDate, option, transactionId = undefined, 
+        gstNo, balance, inDate, outDate = "", option, transactionId = undefined, 
         tables = [],
         items = [],
         rooms = []) {
@@ -56,6 +56,7 @@ class guestType {
         this.gstNo = gstNo,
         this.balance = balance,
         this.inDate = inDate,
+        this.outDate = outDate,
         this.option = option,
         this.transactionId = transactionId,
         this.tables = tables,
@@ -144,10 +145,11 @@ const handelSearch = async (req, res) => {
                     guest.corporateAddress,
                     guest.gstNo,
                     guest.balance,
-                    guest.inDate,
+                    await getCheckInDate(hotelId, guest._id),
+                    await getCheckOutDate(hotelId, guest._id),
                     guest.option,
                     undefined,
-                    [],
+                    await getActiveTables(hotelId, guest._id),
                     await getPendingOrderItems(hotelId, guest._id),
                     await GuestRoom.getActiveRooms(hotelId, guest._id)
                 ));
@@ -162,6 +164,7 @@ const handelSearch = async (req, res) => {
                     guest.gstNo,
                     guest.balance,
                     guest.inDate,
+                    "",
                     guest.option,
                     undefined,
                     await getActiveTables(hotelId, guest._id),
@@ -227,7 +230,10 @@ const handelDetail = async (req, res) => {
                 dbGuest[0].gstNo,
                 dbGuest[0].balance,
                 dbGuest[0].inDate,
-                dbGuest[0].option
+                "",
+                dbGuest[0].option,
+                undefined,
+                await getActiveTables(hotelId, dbGuest[0]._id)
             );
         }
         
@@ -237,8 +243,6 @@ const handelDetail = async (req, res) => {
         if (tranId) {
            guest.transactionId = tranId;
         }
-
-        // guest.tables = await getActiveTables(hotelId, guestId);
 
         if (option === "GA")
             pipeline = [filter1, filter2, filter4];
@@ -282,6 +286,31 @@ const handelAssignTable = async (req, res) => {
     const {tables, guestCount} = req.body;
 
     try {
+        const filter = {
+            guestId: mongoose.Types.ObjectId(guestId), 
+            hotelId, 
+            isOccupied: true,
+            isEnable: true
+        };
+        const occupiedTable = await Table.find(filter);
+
+        await Promise.all(occupiedTable.map(async (table) => {
+            const filter = {
+                _id: mongoose.Types.ObjectId(table.id), 
+                hotelId, 
+                isOccupied: true,
+                isEnable: true
+            };
+    
+            const update = {
+                guestId: "",
+                guestCount: 0, 
+                isOccupied: false
+            };
+
+            const resTableUpdate = await Table.updateOne(filter, update);
+        }));
+
         if (!tables) return res.status(500).send();
         const transactions = new foodTransactionType([], []);
 
@@ -290,7 +319,6 @@ const handelAssignTable = async (req, res) => {
             const filter = {
                 _id: mongoose.Types.ObjectId(table.id), 
                 hotelId, 
-                // isOccupied: false, 
                 isEnable: true
             };
             const foundTable = await Table.findOne(filter);
@@ -311,6 +339,11 @@ const handelAssignTable = async (req, res) => {
             const resTableUpdate = await Table.updateOne(filter, update);
             if (!resTableUpdate) return res.status(404).send()
         }));
+
+
+
+
+
 
         const filter1 = {
             $match: {
@@ -996,9 +1029,9 @@ const handelCheckout = async (req, res) => {
             }
         };
 
-        const foundTableDetails = await Guest.aggregate([filter1, filter2]);  
+        const guest = await Guest.aggregate([filter1, filter2]);  
         //update all tables guestid it null & occupied status is false
-        await Promise.all(foundTableDetails.map(async (item) => {
+        await Promise.all(guest.map(async (item) => {
             await Promise.all(item.tablesDetail.map(async (tableDetail) => {
                 await Promise.all(tableDetail.tables.map(async (table) => {
                     await Table.findByIdAndUpdate(
@@ -1032,40 +1065,79 @@ const handelCheckout = async (req, res) => {
 };
 
 
-// async function newItemValues(hotel, orders) {
-//     // insert all add items
-//     const transaction = new foodTransactionType([], []);
+async function getCheckInDate(hotelId, guestId) {
+    let date = undefined;
 
-//     try {
-//         await Promise.all(orders.map(async (item) => {         
-//             if ((item.operation) !== "A") return;
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$roomsDetail"
+        };
+        const filter3 = {
+            $match: {"roomsDetail.isCheckedout": false}
+        };
+        const filter4 = {
+            $unwind: "$roomsDetail.rooms"
+        };
+        const filter5 = {
+            $sort: {"roomsDetail.rooms.occupancyDate": 1}
+        };
 
-//             // check for item existance
-//             const master = await Food.findOne(
-//                 {
-//                     _id: mongoose.Types.ObjectId(item.id), 
-//                     hotelId: hotel._id, 
-//                     isEnable: true
-//                 }
-//             );    
-//             if (!master) return;
-                    
-//             transaction.foods.push(
-//                 new foodType(
-//                     item.id, 
-//                     master.name, 
-//                     master.price,
-//                     item.quantity,
-//                     hotel.serviceChargePercentage,
-//                     hotel.foodGstPercentage
-//                 ));
-//         }));
-//     } catch(e) {
-//         return;
-//     }
+        const chekin = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]).limit(1);
 
-//     return transaction;
-// };
+        if (!chekin.length) return; 
+ 
+        date = chekin[0].roomsDetail.rooms.occupancyDate;
+    } catch(e) {
+        return;
+    }
+
+    return date;
+};
+
+async function getCheckOutDate(hotelId, guestId) {
+    let date = undefined;
+
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$roomsDetail"
+        };
+        const filter3 = {
+            $match: {"roomsDetail.isCheckedout": false}
+        };
+        const filter4 = {
+            $unwind: "$roomsDetail.rooms"
+        };
+        const filter5 = {
+            $sort: {"roomsDetail.rooms.occupancyDate": -1}
+        };
+
+        const chekout = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]).limit(1);
+
+        if (!chekout.length) return; 
+ 
+        date = chekout[0].roomsDetail.rooms.occupancyDate;
+    } catch(e) {
+        return;
+    }
+
+    return date;
+};
 
 async function getActiveId(hotelId, guestId) {
     let activeTransactionId = undefined;

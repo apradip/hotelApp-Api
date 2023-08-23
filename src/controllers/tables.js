@@ -2,6 +2,7 @@ const Table = require("../models/tables");
 
 
 //handel search table
+//option [E = empty / else all]
 //query string : hotel Id?search= table no
 const handelSearch = async (req, res) => {
     try {

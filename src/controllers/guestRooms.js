@@ -232,7 +232,7 @@ const handelDetail = async (req, res) => {
         const dbGuest = await Guest.aggregate(pipeline);  
         if (dbGuest.length > 0) {
             guest = new guestType(
-                dbGuest[0]._id,
+                dbGuest[0].id,
                 dbGuest[0].idDocumentId,
                 dbGuest[0].idNo,
                 dbGuest[0].name,
@@ -258,13 +258,15 @@ const handelDetail = async (req, res) => {
                 dbGuest[0].balance,
                 await getCheckInDate(hotelId, guestId),
                 await getCheckOutDate(hotelId, guestId),
-                dbGuest[0].option
+                dbGuest[0].option,
+                undefined,
+                dbGuest[0].rooms
             );
         }
 
         // get active transaction id
         guest.transactionId = await getActiveId(hotelId, guestId);
-        
+
         // get all active transaction items
         if (option === "A") 
             pipeline = [filter1, filter2, filter3, filter4];
@@ -289,7 +291,7 @@ const handelDetail = async (req, res) => {
                 discount: item.discount,
                 gstCharge: item.gstCharge,
                 finalTariff: item.totalPrice,
-                occupancyDate: item.occupancyDate
+                occupancyDate: item.occupancyDate,
             });
         }));
     } catch(e) {

@@ -1,16 +1,25 @@
 const Room = require("../models/rooms");
 
 //handel search room
-//query string : hotel Id?search= room no
+//query string : hotel Id?option=O occupied else all &search= room no
 const handelSearch = async (req, res) => {
     try {
         const hotelId = req.params.hotelId;
+        const option = req.query.option;
         const search = req.query.search;
-        
-        const data = await Room.find({hotelId, isEnable: true})
+        let data = [];
+
+        if (option === "O") {
+            data = await Room.find({hotelId, isEnable: true, isOccupied: true})
+                                    .sort("no")                                
+                                    .select("hotelId categoryId _id no accommodation guestId guestCount tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
+        } else {   
+            data = await Room.find({hotelId, isEnable: true})
                                         .sort("no")                                
                                         .select("hotelId categoryId _id no accommodation guestId guestCount tariff maxDiscount extraBedTariff extraPersonTariff isOccupied");
-        if (!data) return res.status(404).send();
+        }
+
+        // if (!data) return res.status(404).send();
 
         if (search) {
             const filterData = await Room.find({hotelId, isEnable: true, no: {$regex: ".*" + search.trim().toUpperCase() + ".*"}})

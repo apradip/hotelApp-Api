@@ -16,6 +16,13 @@ const connectDB = require("./config/dbConn");
 const PORT_EXPRESS = process.env.API_SERVER_PORT || 3500;
 const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
 
+const messageRoom = {
+    Room: "SOCKET_ROOM",
+    Table: "SOCKET_TABLE",
+    Service: "SOCKET_SERVICE",
+    Miscellaneous: "SOCKET_MISCELLANEOUS"
+};
+
 // Connect to MongoDB
 connectDB();
 
@@ -59,24 +66,21 @@ io.on("connection", (socket) => {
         // socket.to(data.room).emit("receive_message", data);
     });
 
-    socket.on("M_order", (guestId) => {
-        // console.log("send_message" + data);
-        socket.broadcast.emit("M_order", guestId);
-        // socket.to(data.room).emit("receive_message", data);
+    socket.on(messageRoom.Miscellaneous, (message) => {
+        socket.broadcast.emit(messageRoom.Miscellaneous, message);
     });
 
-    socket.on("S_order", (guestId) => {
-        // console.log("send_message" + data);
-        socket.broadcast.emit("S_order", guestId);
-        // socket.to(data.room).emit("receive_message", data);
+    socket.on(messageRoom.Service, (message) => {
+        socket.broadcast.emit(messageRoom.Service, message);
     });
 
-    socket.on("T_order", (guestId) => {
-        // console.log("send_message" + data);
-        socket.broadcast.emit("T_order", guestId);
-        // socket.to(data.room).emit("receive_message", data);
+    socket.on(messageRoom.Table, (message) => {
+        socket.broadcast.emit(messageRoom.Table, message);
     });
 
+    socket.on(messageRoom.Room, (message) => {
+        socket.broadcast.emit(messageRoom.Room, message);
+    });
 });
   
 

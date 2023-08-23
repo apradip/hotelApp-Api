@@ -35,7 +35,7 @@ class expenseType {
 };
 class guestType {
     constructor(id, name, mobile, guestCount, corporateName, corporateAddress, 
-        gstNo, balance, inDate, option, transactionId = undefined, 
+        gstNo, balance, inDate, outDate = "", option, transactionId = undefined, 
         items = [], rooms = []) {
         this.id = id,
         this.name = name,
@@ -46,6 +46,7 @@ class guestType {
         this.gstNo = gstNo,
         this.balance = balance,
         this.inDate = inDate,
+        this.outDate = outDate,
         this.option = option,
         this.transactionId = transactionId,
         this.items = items,
@@ -132,7 +133,8 @@ const handelSearch = async (req, res) => {
                     guest.corporateAddress,
                     guest.gstNo,
                     guest.balance,
-                    guest.inDate,
+                    await getCheckInDate(hotelId, guest._id),
+                    await getCheckOutDate(hotelId, guest._id),
                     guest.option,
                     undefined,
                     await getPendingOrderItems(hotelId, guest._id),
@@ -149,6 +151,7 @@ const handelSearch = async (req, res) => {
                     guest.gstNo,
                     guest.balance,
                     guest.inDate,
+                    "",
                     guest.option,
                     undefined,
                     await getPendingOrderItems(hotelId, guest._id)
@@ -863,6 +866,80 @@ async function newItemValues(hotel, orders) {
     }));
 
     return transaction;
+};
+
+async function getCheckInDate(hotelId, guestId) {
+    let date = undefined;
+
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$roomsDetail"
+        };
+        const filter3 = {
+            $match: {"roomsDetail.isCheckedout": false}
+        };
+        const filter4 = {
+            $unwind: "$roomsDetail.rooms"
+        };
+        const filter5 = {
+            $sort: {"roomsDetail.rooms.occupancyDate": 1}
+        };
+
+        const chekin = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]).limit(1);
+
+        if (!chekin.length) return; 
+ 
+        date = chekin[0].roomsDetail.rooms.occupancyDate;
+    } catch(e) {
+        return;
+    }
+
+    return date;
+};
+
+async function getCheckOutDate(hotelId, guestId) {
+    let date = undefined;
+
+    try {
+        const filter1 = {
+            $match: {
+                _id: mongoose.Types.ObjectId(guestId),         
+                hotelId,
+                isActive: true,
+                isEnable: true
+            }
+        };
+        const filter2 = {
+            $unwind: "$roomsDetail"
+        };
+        const filter3 = {
+            $match: {"roomsDetail.isCheckedout": false}
+        };
+        const filter4 = {
+            $unwind: "$roomsDetail.rooms"
+        };
+        const filter5 = {
+            $sort: {"roomsDetail.rooms.occupancyDate": -1}
+        };
+
+        const chekout = await Guest.aggregate([filter1, filter2, filter3, filter4, filter5]).limit(1);
+
+        if (!chekout.length) return; 
+ 
+        date = chekout[0].roomsDetail.rooms.occupancyDate;
+    } catch(e) {
+        return;
+    }
+
+    return date;
 };
 
 async function getActiveId(hotelId, guestId) {
