@@ -5,7 +5,6 @@ const Services = require("../models/services");
 const GuestServiceTransaction = require("../models/guestServicesTransaction");
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
-// const date = require("date-and-time");
 
 const GuestRoom = require("./guestRooms");
 
@@ -80,7 +79,7 @@ class paymentTransactionType {
 const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
-    const roomOnly = req.query.roomonly;
+    const serviceOnly = req.query.serviceonly;
 
     let guestList = [];
     let pipeline = [];
@@ -88,14 +87,14 @@ const handelSearch = async (req, res) => {
     try {
         let filter1 = "";
 
-        if (roomOnly === "true") {
+        if (serviceOnly === "true") {
             filter1 = {
                 $match: {
                     hotelId,
                     isActive: true,
                     isEnable: true,
                     outDate: {$exists:false},
-                    option: "R"
+                    option: "S"
                 }};
         } else {
             filter1 = {

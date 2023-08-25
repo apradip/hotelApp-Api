@@ -6,7 +6,6 @@ const GuestMiscellaneousTransaction = require("../models/guestMiscellaneousesTra
 const GuestExpensesPaymentsTransaction = require("../models/guestExpensesPaymentsTransaction");
 const GuestExpensePayment = require("../models/guestExpensesPaymentsTransaction");
 const GuestRoom = require("./guestRooms");
-// const date = require("date-and-time");
 
 class miscellaneousType {
     constructor(id, name, unitPrice, quantity, serviceChargePercentage, gstPercentage) {
@@ -78,7 +77,7 @@ class paymentTransactionType {
 const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
-    const roomOnly = req.query.roomonly;
+    const miscellaneousOnly = req.query.miscellaneousonly;
 
     let guestList = [];
     let pipeline = [];
@@ -86,14 +85,14 @@ const handelSearch = async (req, res) => {
     try {
         let filter1 = "";
 
-        if (roomOnly === "true") {
+        if (miscellaneousOnly === "true") {
             filter1 = {
                 $match: {
                     hotelId,
                     isActive: true,
                     isEnable: true,
                     outDate: {$exists:false},
-                    option: "R"
+                    option: "M"
                 }};
         } else {
             filter1 = {

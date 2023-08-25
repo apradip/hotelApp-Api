@@ -90,7 +90,7 @@ class paymentTransactionType {
 const handelSearch = async (req, res) => {
     const hotelId = req.params.hotelId;
     const search = req.query.search;
-    const roomOnly = req.query.roomonly;
+    const restaurentOnly = req.query.restaurentonly;
 
     let guestList = [];
     let pipeline = [];
@@ -98,14 +98,14 @@ const handelSearch = async (req, res) => {
     try {
         let filter1 = "";
 
-        if (roomOnly === "true") {
+        if (restaurentOnly === "true") {
             filter1 = {
                 $match: {
                     hotelId,
                     isActive: true,
                     isEnable: true,
                     outDate: {$exists:false},
-                    option: "R"
+                    option: "T"
                 }};
         } else {
             filter1 = {
