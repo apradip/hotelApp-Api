@@ -340,11 +340,6 @@ const handelAssignTable = async (req, res) => {
             if (!resTableUpdate) return res.status(404).send()
         }));
 
-
-
-
-
-
         const filter1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
@@ -414,108 +409,88 @@ const handelOrder = async (req, res) => {
         // get hotel tax details    
         const hotel = await Hotel.detail(hotelId);
 
-        if (transactionId === "undefined") {
+        if (transactionId === "NAN") {
             activeTransactionId = await getActiveId(hotelId, guestId);
         } else {
             activeTransactionId = transactionId;
         }
 
-        // if (transactionId !== "undefined") {
-            // if (!transactionId) return;
+        if (activeTransactionId) {
+            const filter1 = {
+                $match: {
+                    _id: mongoose.Types.ObjectId(guestId),         
+                    hotelId,
+                    isActive: true,
+                    isEnable: true
+                }
+            };
+            const filter2 = {
+                $unwind: "$tablesDetail"
+            };
+            const filter3 = {
+                $match: {
+                    "tablesDetail._id": mongoose.Types.ObjectId(activeTransactionId)
+                }
+            };
 
-            if (activeTransactionId) {
-                const filter1 = {
-                    $match: {
-                        _id: mongoose.Types.ObjectId(guestId),         
-                        hotelId,
-                        isActive: true,
-                        isEnable: true
-                    }
-                };
-                const filter2 = {
-                    $unwind: "$tablesDetail"
-                };
-                const filter3 = {
-                    $match: {
-                        "tablesDetail._id": mongoose.Types.ObjectId(activeTransactionId)
-                    }
-                };
+            const guests = await Guest.aggregate([filter1, filter2, filter3]);  
+            if (!guests) return;
+            dbOrder = guests[0].tablesDetail.foods;
 
-                const guests = await Guest.aggregate([filter1, filter2, filter3]);  
-                if (!guests) return;
-                dbOrder = guests[0].tablesDetail.foods;
+            await Promise.all(orders.map(async (order, idx) => {
+                if (order.quantity <= 0) 
+                    orders[idx].operation = "R";
 
-                await Promise.all(orders.map(async (order, idx) => {
-                    if (order.quantity <= 0) 
-                        orders[idx].operation = "R";
+                if (((order.operation) === "M") || ((order.operation) === "R")) {
+                    const keyToFind = "id";
+                    const valueToFind = order.id;
+                    dbOrder = dbOrder.filter(object => object[keyToFind] !== valueToFind);
+                }
+            }));
 
-                    if (((order.operation) === "M") || ((order.operation) === "R")) {
-                        const keyToFind = "id";
-                        const valueToFind = order.id;
-                        dbOrder = dbOrder.filter(object => object[keyToFind] !== valueToFind);
-                    }
-                }));
-
-                await Promise.all(orders.map(async (order) => {
-                    if (((order.operation) === "A") || ((order.operation) === "M")) {
-                        
-                        // check for item existance
-                        const master = await Food.findOne(
-                            {
-                                _id: mongoose.Types.ObjectId(order.id), 
-                                hotelId, 
-                                isEnable: true
-                            }
-                        );    
-                        if (!master) return;
-
-                        dbOrder.push(new foodType(
-                            master._id, 
-                            master.name, 
-                            master.price,
-                            order.quantity,
-                            hotel.serviceChargePercentage,
-                            hotel.foodGstPercentage
-                        ));
-                    }
-                }));
-
-                await Guest.updateOne(
-                    {
-                        _id: mongoose.Types.ObjectId(guestId), 
-                        hotelId,
-                        isActive: true,
-                        isEnable: true
-                    },
-                    {
-                        $set: {
-                            "tablesDetail.$[ed].foods": dbOrder
+            await Promise.all(orders.map(async (order) => {
+                if (((order.operation) === "A") || ((order.operation) === "M")) {
+                    
+                    // check for item existance
+                    const master = await Food.findOne(
+                        {
+                            _id: mongoose.Types.ObjectId(order.id), 
+                            hotelId, 
+                            isEnable: true
                         }
-                    },
-                    { 
-                        arrayFilters: [{
-                            "ed._id": mongoose.Types.ObjectId(activeTransactionId)
-                        }]           
-                    }
-                );  
-            }
-        // } else {
-            // dbOrder = await newItemValues(hotel, orders);
+                    );    
+                    if (!master) return;
 
-            // await Guest.updateOne(
-            //     {
-            //         _id: mongoose.Types.ObjectId(guestId), 
-            //         hotelId,
-            //         isActive: true,
-            //         isEnable: true
-            //     },
-            //     {
-            //         $push: {
-            //             "tablesDetail.foods": dbOrder
-            //         }
-            //     }
-            // );  
-        // }
+                    dbOrder.push(new foodType(
+                        master._id, 
+                        master.name, 
+                        master.price,
+                        order.quantity,
+                        hotel.serviceChargePercentage,
+                        hotel.foodGstPercentage
+                    ));
+                }
+            }));
+
+            await Guest.updateOne(
+                {
+                    _id: mongoose.Types.ObjectId(guestId), 
+                    hotelId,
+                    isActive: true,
+                    isEnable: true
+                },
+                {
+                    $set: {
+                        "tablesDetail.$[ed].foods": dbOrder
+                    }
+                },
+                { 
+                    arrayFilters: [{
+                        "ed._id": mongoose.Types.ObjectId(activeTransactionId)
+                    }]           
+                }
+            );  
+        }
     } catch(e) {
         return res.status(500).send(e);
     }
