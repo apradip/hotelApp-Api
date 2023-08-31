@@ -19,19 +19,18 @@ const connectDB = require("./config/dbConn");
 const PORT_EXPRESS = process.env.API_SERVER_PORT || 3500;
 const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
 
+const options = {
+    key: fs.readFileSync("private.key"),
+    cert: fs.readFileSync("certificate.crt")
+};
+
 const messageRoom = {
     Room: "SOCKET_ROOM",
     Table: "SOCKET_TABLE",
     Service: "SOCKET_SERVICE",
     Miscellaneous: "SOCKET_MISCELLANEOUS"
 };
-
-const options = {
-    key: fs.readFileSync("private.key"),
-    cert: fs.readFileSync("certificate.crt")
-};
-
-  
+ 
 // Connect to MongoDB
 connectDB();
 
