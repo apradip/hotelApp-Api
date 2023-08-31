@@ -18,7 +18,7 @@ services:
     depends_on:
       - mongo_db
     environment:
-      - DOMAIN=https://www.yoursite.com
+      - DOMAIN=https://hotelapi.wikitoria.in
       - API_SERVER_IP=http://20.219.3.91
       - API_SERVER_PORT=8000
       - FRONTEND_SERVER_IP=http://20.219.3.91
