@@ -19,13 +19,14 @@ const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
 const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
 const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
 
-// var privateKey  = fs.readFileSync("./sslcert/key.pem", "utf8");
-// var certificate = fs.readFileSync("./sslcert/cert.pem", "utf8");
-// var httpsOptions = {key: privateKey, cert: certificate};
+// const httpsOptions = {
+//     key: fs.readFileSync("./sslcert/private.key", "utf8"),
+//     cert: fs.readFileSync("./sslcert/certificate.crt", "utf8")
+// };
 
 const httpsOptions = {
-    key: fs.readFileSync("./sslcert/private.key", "utf8"),
-    cert: fs.readFileSync("./sslcert/certificate.crt", "utf8")
+    key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
+    cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
 };
 
 const messageRoom = {
@@ -181,7 +182,6 @@ app.use("/api/guestPayments", require("./routes/api/guestPayments"));
 
 //guestexpensepayments CURD api
 app.use("/api/guestExpensesPayments", require("./routes/api/guestExpensesPayments"));
-
 
 app.get("/", (req, res) => {
     res.send("HotelApp Restfull API server is running...");
