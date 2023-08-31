@@ -19,11 +19,6 @@ const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
 const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
 const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
 
-// const httpsOptions = {
-//     key: fs.readFileSync("./sslcert/private.key", "utf8"),
-//     cert: fs.readFileSync("./sslcert/certificate.crt", "utf8")
-// };
-
 const httpsOptions = {
     key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
     cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
@@ -194,18 +189,10 @@ httpServer.listen(PORT_HTTP_EXPRESS, () => {
     console.log(`Node server is running on ${PORT_HTTP_EXPRESS}...`);
 });
 
+//listen https server
 httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
     console.log(`Node server is running on ${PORT_HTTPS_EXPRESS}...`);
 });
-
-// app.listen(PORT_EXPRESS, () => {
-//     console.log(`Node server is running on ${PORT_EXPRESS}...`);
-// });
-
-//listen http server
-// app.listen(PORT_EXPRESS, () => {
-//     console.log(`Node server is running on ${PORT_EXPRESS}...`);
-// });
 
 app.listen(PORT_SOCKET, () => {
     console.log(`Socket server is running on ${PORT_SOCKET}...`);
