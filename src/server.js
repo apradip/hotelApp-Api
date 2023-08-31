@@ -25,8 +25,8 @@ const PORT_SOCKET = process.env.SOCKET_PORT || 3600;
 // var httpsOptions = {key: privateKey, cert: certificate};
 
 const httpsOptions = {
-    key: fs.readFileSync("./sslcert/key.pem", "utf8"),
-    cert: fs.readFileSync("./sslcert/cert.pem", "utf8")
+    key: fs.readFileSync("./sslcert/private.key", "utf8"),
+    cert: fs.readFileSync("./sslcert/certificate.crt", "utf8")
 };
 
 const messageRoom = {
