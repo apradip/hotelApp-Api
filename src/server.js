@@ -3,7 +3,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
-// const http = require("http");
+const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const { Server } = require("socket.io");
@@ -16,12 +16,17 @@ const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
 
 
-const PORT_EXPRESS = process.env.API_SERVER_PORT || 3500;
+const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
+const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
 const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
 
-const options = {
-    key: fs.readFileSync("private.key"),
-    cert: fs.readFileSync("certificate.crt")
+// var privateKey  = fs.readFileSync("./sslcert/key.pem", "utf8");
+// var certificate = fs.readFileSync("./sslcert/cert.pem", "utf8");
+// var httpsOptions = {key: privateKey, cert: certificate};
+
+const httpsOptions = {
+    key: fs.readFileSync("./sslcert/key.pem", "utf8"),
+    cert: fs.readFileSync("./sslcert/cert.pem", "utf8")
 };
 
 const messageRoom = {
@@ -51,13 +56,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // create and run socket server
-const serverSocket = https.createServer(options, app);
-
-
-// const serverSocket = http.createServer(app);
-
+// const httpServer = http.createServer(app);
+const httpsServer = https.createServer(httpsOptions, app);
   
-const io = new Server(serverSocket, {
+const io = new Server(httpsServer, {
     cors: {
       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
       methods: ["GET", "POST"]
@@ -188,16 +190,24 @@ app.get("/", (req, res) => {
 
 app.use(errorHandler);
 
-//listen https server
-app.listen(PORT_EXPRESS, () => {
-    console.log(`Node server is running on ${PORT_EXPRESS}...`);
+//listen http server
+// httpServer.listen(PORT_HTTP_EXPRESS, () => {
+//     console.log(`Node server is running on ${PORT_HTTP_EXPRESS}...`);
+// });
+
+httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
+    console.log(`Node server is running on ${PORT_HTTPS_EXPRESS}...`);
 });
+
+// app.listen(PORT_EXPRESS, () => {
+//     console.log(`Node server is running on ${PORT_EXPRESS}...`);
+// });
 
 //listen http server
 // app.listen(PORT_EXPRESS, () => {
 //     console.log(`Node server is running on ${PORT_EXPRESS}...`);
 // });
 
-serverSocket.listen(PORT_SOCKET, () => {
+app.listen(PORT_SOCKET, () => {
     console.log(`Socket server is running on ${PORT_SOCKET}...`);
 });
