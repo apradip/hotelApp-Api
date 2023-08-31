@@ -3,7 +3,9 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
-const http = require("http");
+// const http = require("http");
+const https = require("https");
+const fs = require("fs");
 const { Server } = require("socket.io");
 const socketOptions = require("./config/socketOptions");
 const { logger } = require("./middlewares/logEvents");
@@ -12,6 +14,7 @@ const verifyJWT = require("./middlewares/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
+
 
 const PORT_EXPRESS = process.env.API_SERVER_PORT || 3500;
 const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
@@ -23,6 +26,12 @@ const messageRoom = {
     Miscellaneous: "SOCKET_MISCELLANEOUS"
 };
 
+const options = {
+    key: fs.readFileSync("private.key"),
+    cert: fs.readFileSync("certificate.crt")
+};
+
+  
 // Connect to MongoDB
 connectDB();
 
@@ -43,8 +52,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // create and run socket server
-const serverSocket = http.createServer(app);
+const serverSocket = https.createServer(options, app);
 
+
+// const serverSocket = http.createServer(app);
+
+  
 const io = new Server(serverSocket, {
     cors: {
       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
@@ -99,8 +112,6 @@ app.use("/api/forgetPassword", require("./routes/forgetPassword"));
 //find user
 //query string : hotel id / user name
 app.use("/api/users", require("./routes/findUser"));
-
-
 
 
 app.use(verifyJWT);
@@ -178,9 +189,15 @@ app.get("/", (req, res) => {
 
 app.use(errorHandler);
 
+//listen https server
 app.listen(PORT_EXPRESS, () => {
     console.log(`Node server is running on ${PORT_EXPRESS}...`);
 });
+
+//listen http server
+// app.listen(PORT_EXPRESS, () => {
+//     console.log(`Node server is running on ${PORT_EXPRESS}...`);
+// });
 
 serverSocket.listen(PORT_SOCKET, () => {
     console.log(`Socket server is running on ${PORT_SOCKET}...`);
