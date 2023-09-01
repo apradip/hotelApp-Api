@@ -7,6 +7,7 @@ const http = require("http");
 const https = require("https");
 const fs = require("fs");
 const { Server } = require("socket.io");
+const { WebhookClient } = require('dialogflow-fulfillment');
 const socketOptions = require("./config/socketOptions");
 const { logger } = require("./middlewares/logEvents");
 const errorHandler = require("./middlewares/errorHandler");
@@ -14,6 +15,9 @@ const verifyJWT = require("./middlewares/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
+
+//dialog flow api code file
+const { handelDemo, handelRoomEnquiry } = require('./controllers/dialogFlow/df_rooms');
 
 const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
 const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
@@ -50,10 +54,18 @@ app.use(express.urlencoded({ extended: false }));
 // built-in middleware for json 
 app.use(express.json());
 
-// create and run socket server
-const httpServer = http.createServer(app);
+// create and run node server
+// const httpServer = http.createServer(app);
 const httpsServer = https.createServer(httpsOptions, app);
-  
+
+// create & run socket server for front end communication
+// const io = new Server(httpServer, {
+//     cors: {
+//       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
+//       methods: ["GET", "POST"]
+//     }
+// });
+
 const io = new Server(httpsServer, {
     cors: {
       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
@@ -62,18 +74,18 @@ const io = new Server(httpsServer, {
 });
   
 io.on("connection", (socket) => {
-    console.log(`User Connected: ${socket.id}`);
+    // console.log(`User Connected: ${socket.id}`);
   
-    socket.on("join_room", (data) => {
-        // console.log("join_room" + data);
-        socket.join(data);
-    });
+    // socket.on("join_room", (data) => {
+    //     // console.log("join_room" + data);
+    //     socket.join(data);
+    // });
   
-    socket.on("send_message", (data) => {
-        // console.log("send_message" + data);
-        socket.broadcast.emit("receive_message", data);
-        // socket.to(data.room).emit("receive_message", data);
-    });
+    // socket.on("send_message", (data) => {
+    //     // console.log("send_message" + data);
+    //     socket.broadcast.emit("receive_message", data);
+    //     // socket.to(data.room).emit("receive_message", data);
+    // });
 
     socket.on(messageRoom.Miscellaneous, (message) => {
         socket.broadcast.emit(messageRoom.Miscellaneous, message);
@@ -92,10 +104,32 @@ io.on("connection", (socket) => {
     });
 });
   
-
 //middleware for cookies
 app.use(cookieParser());
 
+//start apis for dialog flow
+// app.use("/dfapi/room", require("./routes/df_api/df_room"));
+
+
+app.get("/", (req, res) => {
+    res.send("HotelApp Restfull API server is live...");
+});
+
+app.post("/wh/api/", express.json(), (req, res) => {
+    const agent = new WebhookClient({ 
+        request: req, 
+        response: res 
+    });
+
+    const intentMap = new Map();
+    intentMap.set('DemoIntent', handelDemo);
+    intentMap.set('RoomEnquiryIntent - yes', handelRoomEnquiry);
+
+    agent.handleRequest(intentMap);
+});
+
+
+//start apis for front end
 //login
 app.use("/api/login", require("./routes/auth"));
 
@@ -178,22 +212,18 @@ app.use("/api/guestPayments", require("./routes/api/guestPayments"));
 //guestexpensepayments CURD api
 app.use("/api/guestExpensesPayments", require("./routes/api/guestExpensesPayments"));
 
-app.get("/", (req, res) => {
-    res.send("HotelApp Restfull API server is running...");
-});
-
 app.use(errorHandler);
-
-//listen http server
-httpServer.listen(PORT_HTTP_EXPRESS, () => {
-    console.log(`Node server is running on ${PORT_HTTP_EXPRESS}...`);
-});
-
-//listen https server
-httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
-    console.log(`Node server is running on ${PORT_HTTPS_EXPRESS}...`);
-});
 
 app.listen(PORT_SOCKET, () => {
     console.log(`Socket server is running on ${PORT_SOCKET}...`);
+});
+
+//listen http server
+// httpServer.listen(PORT_HTTP_EXPRESS, () => {
+//     console.log(`Node http server is running on ${PORT_HTTP_EXPRESS}...`);
+// });
+
+//listen https server
+httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
+    console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
 });
