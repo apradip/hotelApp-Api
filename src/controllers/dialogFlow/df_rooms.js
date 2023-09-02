@@ -1,4 +1,5 @@
 const Room = require("../../models/rooms");
+const dfff = require('dialogflow-fulfillment');
 
 const hotelId = "64252efb369c403b60effae8";
 
@@ -24,36 +25,27 @@ const handelRoomEnquiry = async (agent) => {
     }
 
     if (isAvailable) {
-      const response = {
-        messages: [
-          {
-            payload: {
-              messages: [
-                {
-                  speech: `Hello, great news we have ${data.length} rooms avaliable`,
-                  linkmessage: [{
-                    message: 'google',
-                    link: 'www.google.com'
-                  }, {
-                    message: 'yahoo',
-                    link: 'www.yahoo.co.in'
-                  }],
-                  button: [{
-                    buttonname: 'Book the room'
-                  },
-                  {
-                    buttonname: 'No'
-                  }]
+      var payloadData = {
+        "richContent": [
+          [
+            {
+              "type": "accordion",
+              "title": "Accordion title",
+              "subtitle": "Accordion subtitle",
+              "image": {
+                "src": {
+                  "rawUrl": "https://example.com/images/logo.png"
                 }
-              ]
+              },
+              "text": "Accordion text"
             }
-          }
+          ]
         ]
       };
 
-      agent.add(new Payload(agent.UNSPECIFIED, response, { rawPayload: true, sendAsMessage: true}));
+      // agent.add(new dfff.Payload(agent.UNSPECIFIED, payloadData, {sendAsMessage: true, rawPayload: true }));
 
-      // agent.add(`Hello, great news we have ${data.length} rooms avaliable`);    
+      agent.add(`Hello, great news we have ${data.length} rooms avaliable`);    
     } else {
       agent.add(`Sorry, we have no room on that time`);    
     }

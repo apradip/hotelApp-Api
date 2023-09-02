@@ -55,23 +55,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // create and run node server
-// const httpServer = http.createServer(app);
-const httpsServer = https.createServer(httpsOptions, app);
+const httpServer = http.createServer(app);
+// const httpsServer = https.createServer(httpsOptions, app);
 
 // create & run socket server for front end communication
-// const io = new Server(httpServer, {
-//     cors: {
-//       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
-//       methods: ["GET", "POST"]
-//     }
-// });
-
-const io = new Server(httpsServer, {
+const io = new Server(httpServer, {
     cors: {
       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
       methods: ["GET", "POST"]
     }
 });
+
+// const io = new Server(httpsServer, {
+//     cors: {
+//       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
+//       methods: ["GET", "POST"]
+//     }
+// });
   
 io.on("connection", (socket) => {
     // console.log(`User Connected: ${socket.id}`);
@@ -106,10 +106,6 @@ io.on("connection", (socket) => {
   
 //middleware for cookies
 app.use(cookieParser());
-
-//start apis for dialog flow
-// app.use("/dfapi/room", require("./routes/df_api/df_room"));
-
 
 app.get("/", (req, res) => {
     res.send("HotelApp Restfull API server is live...");
@@ -219,11 +215,11 @@ app.listen(PORT_SOCKET, () => {
 });
 
 //listen http server
-// httpServer.listen(PORT_HTTP_EXPRESS, () => {
-//     console.log(`Node http server is running on ${PORT_HTTP_EXPRESS}...`);
-// });
-
-//listen https server
-httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
-    console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
+httpServer.listen(PORT_HTTP_EXPRESS, () => {
+    console.log(`Node http server is running on ${PORT_HTTP_EXPRESS}...`);
 });
+
+// //listen https server
+// httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
+//     console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
+// });
