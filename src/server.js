@@ -19,14 +19,14 @@ const connectDB = require("./config/dbConn");
 //dialog flow api code file
 const { handelDemo, handelRoomEnquiry } = require('./controllers/dialogFlow/df_rooms');
 
-// const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
-const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
+const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
+// const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
 const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
 
-const httpsOptions = {
-    key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
-    cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
-};
+// const httpsOptions = {
+//     key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
+//     cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
+// };
 
 const messageRoom = {
     Room: "SOCKET_ROOM",
@@ -55,23 +55,23 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 // create and run node server
-// const httpServer = http.createServer(app);
-const httpsServer = https.createServer(httpsOptions, app);
+const httpServer = http.createServer(app);
+// const httpsServer = https.createServer(httpsOptions, app);
 
-// // create & run socket server for front end communication
-// const io = new Server(httpServer, {
-//     cors: {
-//       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
-//       methods: ["GET", "POST"]
-//     }
-// });
-
-const io = new Server(httpsServer, {
+// create & run socket server for front end communication
+const io = new Server(httpServer, {
     cors: {
       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
       methods: ["GET", "POST"]
     }
 });
+
+// const io = new Server(httpsServer, {
+//     cors: {
+//       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
+//       methods: ["GET", "POST"]
+//     }
+// });
   
 io.on("connection", (socket) => {
     // console.log(`User Connected: ${socket.id}`);
@@ -214,12 +214,12 @@ app.listen(PORT_SOCKET, () => {
     console.log(`Socket server is running on ${PORT_SOCKET}...`);
 });
 
-// //listen http server
-// httpServer.listen(PORT_HTTP_EXPRESS, () => {
-//     console.log(`Node http server is running on ${PORT_HTTP_EXPRESS}...`);
-// });
-
-//listen https server
-httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
-    console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
+//listen http server
+httpServer.listen(PORT_HTTP_EXPRESS, () => {
+    console.log(`Node http server is running on ${PORT_HTTP_EXPRESS}...`);
 });
+
+// //listen https server
+// httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
+//     console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
+// });
