@@ -1,4 +1,4 @@
 node_modules
-# .env
+.env
 sslcert/key.pem
 sslcert/cert.pem

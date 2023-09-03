@@ -25,25 +25,27 @@ const handelRoomEnquiry = async (agent) => {
     }
 
     if (isAvailable) {
-      var payloadData = {
+      const response = 
+      {
         "richContent": [
           [
             {
-              "type": "accordion",
-              "title": "Accordion title",
-              "subtitle": "Accordion subtitle",
-              "image": {
-                "src": {
-                  "rawUrl": "https://example.com/images/logo.png"
+              "type": "chips",
+              "options": [
+                {
+                  "mode": "blocking",
+                  "text": "Chip 1"
+                },
+                {
+                  "text": "Chip 2"
                 }
-              },
-              "text": "Accordion text"
+              ]
             }
           ]
         ]
       };
 
-      // agent.add(new dfff.Payload(agent.UNSPECIFIED, payloadData, {sendAsMessage: true, rawPayload: true }));
+      // agent.add(new dfff.Payload(agent.UNSPECIFIED, response, { rawPayload: true, sendAsMessage: true}));
 
       agent.add(`Hello, great news we have ${data.length} rooms avaliable`);    
     } else {
