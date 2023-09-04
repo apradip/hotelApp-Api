@@ -1,37 +1,39 @@
 version: '3.9'
 services:
-  mongo_db:
-    container_name: db_container
-    image: apradip/hotelapp_db:latest
-    restart: always
-    ports:
-      - 27017:27017
-    volumes: 
-      - ./mongo_db:/data/db
+  # mongo_db:
+  #   container_name: db_container
+  #   image: apradip/hotelapp_db:latest
+  #   restart: always
+  #   ports:
+  #     - 27017:27017
+  #   volumes: 
+  #     - ./mongo_db:/data/db
 
 # Node JS API https://www.youtube.com/watch?v=vm3YfOHf_Cc
   api:
     container_name: api_container
     build: .
     ports:
-      - 3000:3000
+      - 3001:3001
       - 443:443
-    depends_on:
-      - mongo_db
+    # depends_on:
+    #   - mongo_db
     environment:
       - DOMAIN=https://hotelapi.wikitoria.in
-      - API_SERVER_IP=http://20.219.3.91
-      # - API_SERVER_SSL_KEY_FILE=.//sslcert//key.pem
-      # - API_SERVER_SSL_CERT_FILE=.//sslcert//cert.pem
       - API_SERVER_SSL_KEY_FILE=.//sslcert//private.key
       - API_SERVER_SSL_CERT_FILE=.//sslcert//certificate.crt
-      - API_HTTP_SERVER_PORT=80
+      - API_SERVER_IP=http://20.219.3.91
+      # - API_HTTP_SERVER_PORT=80
       - API_HTTPS_SERVER_PORT=443
+      - SOCKET_PORT=3001
+      - SOCKET_PRIVATE_KEY=abcd
+      - SOCKET_PUBLIC_KEY=efgh
       - FRONTEND_SERVER_IP=http://20.219.3.91
       - FRONTEND_SERVER_PORT=3000
       - ACCESS_TOKEN_SECRET=79929dab59c07b6b8a82b4d2805f725b65eb5cf5d7a55733d6fb4cf46bd589585ee120568a6d972019ac303e1e19268a4b5b8c9679da3ced537f64f764185406
       - REFRESH_TOKEN_SECRET=dded652ea31c8a34d294a24d715e79a9d44e74cb9c17fba822766c3408db046faa89ab8c94bbd67c1929f332c391eeba29016ea85355367e6860abaaed26d637
-      - DATABASE_URI=mongodb://db_container:27017/hotelApp
+      # - DATABASE_URI=mongodb://db_container:27017/hotelApp
+      - DATABASE_URI=mongodb+srv://apiUser:P9i8X3e0l0@hotelapp.nei0nms.mongodb.net/hotelApp
       - EMAIL_HOST=smtp.gmail.com
       - EMAIL_PORT=587
       - EMAIL_ADDRESS=pradip.adhikary@gmail.com
@@ -44,5 +46,5 @@ services:
       - SMS_TEMPLATEID=WBPNRD
       - SMS_APIKEY=7724f759-3a60-11ed-9c12-0200cd936042
 
-volumes:
-  mongo_db: {}
+# volumes:
+#   mongo_db: {}
