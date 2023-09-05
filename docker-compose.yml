@@ -1,23 +1,12 @@
 version: '3.9'
 services:
-  # mongo_db:
-  #   container_name: db_container
-  #   image: apradip/hotelapp_db:latest
-  #   restart: always
-  #   ports:
-  #     - 27017:27017
-  #   volumes: 
-  #     - ./mongo_db:/data/db
-
-# Node JS API https://www.youtube.com/watch?v=vm3YfOHf_Cc
+  # Node JS API https://www.youtube.com/watch?v=vm3YfOHf_Cc
   api:
     container_name: api_container
     build: .
     ports:
       - 3001:3001
       - 443:443
-    # depends_on:
-    #   - mongo_db
     environment:
       - API_DOMAIN=https://hotelapi.wikitoria.in
       - FRONTEND_DOMAIN=http://hotel.wikitoria.in
@@ -46,6 +35,3 @@ services:
       - SMS_MODULE=TRANS_SMS
       - SMS_TEMPLATEID=WBPNRD
       - SMS_APIKEY=7724f759-3a60-11ed-9c12-0200cd936042
-
-# volumes:
-#   mongo_db: {}
