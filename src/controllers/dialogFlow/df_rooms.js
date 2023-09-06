@@ -1,4 +1,4 @@
-const Hotel = require("../../models/hotel");
+const Hotel = require("../../models/hotels");
 const Room = require("../../models/rooms");
 const dfff = require('dialogflow-fulfillment');
 
