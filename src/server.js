@@ -119,7 +119,11 @@ app.post("/wh/api/", express.json(), (req, res) => {
 
     const intentMap = new Map();
     intentMap.set('DemoIntent', handelDemo);
+    intentMap.set('PlaceIntent', handelPlaceList);
     intentMap.set('RoomEnquiryIntent - yes', handelRoomEnquiry);
+    intentMap.set('RoomBookingIntent - yes', handelRoomBooking);
+    intentMap.set('RoomPaymentIntent - yes', handelPaymentRealising);
+    intentMap.set('RoomCancellationIntent - yes', handelCancellation);
 
     agent.handleRequest(intentMap);
 });
