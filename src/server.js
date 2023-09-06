@@ -17,7 +17,7 @@ const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
 
 //dialog flow api code file
-const { handelDemo, handelRoomEnquiry } = require('./controllers/dialogFlow/df_rooms');
+const { handelDemo, handelPlaceList, handelRoomEnquiry, handelRoomBooking, handelPaymentRealising, handelCancellation } = require('./controllers/dialogFlow/df_rooms');
 
 // const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
 const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
