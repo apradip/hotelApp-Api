@@ -10,14 +10,14 @@ const handelDemo = async (agent) => {
   agent.add("Sending response from Webhook server as v2.1.1");
 };
 
-const handelPlaceList = async (agent) => {
-    const data = await Hotel.find({isEnable: true}).select({city: 1, _id: 0}).sort({city: 1});
+// const handelPlaceList = async (agent) => {
+//     const data = await Hotel.find({isEnable: true}).select({city: 1, _id: 0}).sort({city: 1});
 
-    agent.add(`Please choose a place`);
-    for (var entry of map.data()) {
-      agent.add(new Suggestion(entry.city));
-    }
-};
+//     agent.add(`Please choose a place`);
+//     for (var entry of map.data()) {
+//       agent.add(new Suggestion(entry.city));
+//     }
+// };
 
 const handelGetPlace = async (agent) => {
   const place = agent.context.get("GetPlaceIntent").parameters["PlaceEntity"];
@@ -122,7 +122,7 @@ const handelCancellation = async (agent) => {
 
 module.exports = {
   handelDemo,
-  handelPlaceList,
+  // handelPlaceList,
   handelGetPlace,
   handelGetStartDate,
   handelRoomEnquiry,

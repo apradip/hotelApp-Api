@@ -17,7 +17,14 @@ const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
 
 //dialog flow api code file
-const { handelDemo, handelPlaceList, handelRoomEnquiry, handelRoomBooking, handelPaymentRealising, handelCancellation } = require('./controllers/dialogFlow/df_rooms');
+const { handelDemo, 
+        // handelPlaceList, 
+        handelGetPlace,
+        handelGetStartDate,
+        handelRoomEnquiry, 
+        handelRoomBooking, 
+        handelPaymentRealising, 
+        handelCancellation } = require('./controllers/dialogFlow/df_rooms');
 
 // const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
 const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
@@ -119,13 +126,8 @@ app.post("/wh/api/", express.json(), (req, res) => {
 
     const intentMap = new Map();
     intentMap.set("DemoIntent", handelDemo);
-    // intentMap.set('PlaceIntent', handelPlaceList);
     intentMap.set("GetPlaceIntent", handelGetPlace);
     intentMap.set("GetStartDateIntent", handelGetStartDate);
-    // intentMap.set("GetUserParticularDisplayIntent - yes", handelRoomEnquiry);
-    // intentMap.set('RoomBookingIntent - yes', handelRoomBooking);
-    // intentMap.set('RoomPaymentIntent - yes', handelPaymentRealising);
-    // intentMap.set('RoomCancellationIntent - yes', handelCancellation);
 
     agent.handleRequest(intentMap);
 });
