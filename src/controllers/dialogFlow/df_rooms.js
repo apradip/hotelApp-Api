@@ -1,4 +1,4 @@
-const { captureRejectionSymbol } = require("nodemailer/lib/xoauth2");
+// const { captureRejectionSymbol } = require("nodemailer/lib/xoauth2");
 const Hotel = require("../../models/hotels");
 const Room = require("../../models/rooms");
 const dfff = require('dialogflow-fulfillment');
@@ -6,7 +6,8 @@ const dfff = require('dialogflow-fulfillment');
 const hotelId = "64252efb369c403b60effae8";
 
 const handelDemo = async (agent) => {
-  agent.add("Sending response from Webhook server as v1.1.11.5");
+  console.log("handelDemo");
+  agent.add("Sending response from Webhook server as v2.1.1");
 };
 
 const handelPlaceList = async (agent) => {
