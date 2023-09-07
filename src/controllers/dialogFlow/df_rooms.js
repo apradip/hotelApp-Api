@@ -20,7 +20,10 @@ const handelPlaceList = async (agent) => {
 
 const handelGetPlace = async (agent) => {
   const place = agent.context.get("GetPlaceIntent").parameters["PlaceEntity"];
-  const dataHotel = await Hotel.find({city: place, isEnable: true}).select({_id: 1});
+  console.log(place);
+  const dataHotel = await Hotel.find({city: {$regex: place, $options: "i"}, isEnable: true}).select({_id: 1});
+  console.log(dataHotel);
+
   dataHotel.length > 0 ? 
     agent.add(`GOOD! When are you arriving at #GetPlaceIntent.PlaceEntity : (i.e. Date in dd/mm/yyyy format)`) : 
     agent.add(`Sorry incorrect place. Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)`);
