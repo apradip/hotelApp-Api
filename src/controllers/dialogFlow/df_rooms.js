@@ -125,8 +125,8 @@ module.exports = {
   // handelPlaceList,
   handelGetPlace,
   handelGetStartDate,
-  handelRoomEnquiry,
-  handelRoomBooking,
-  handelPaymentRealising,
-  handelCancellation
+  // handelRoomEnquiry,
+  // handelRoomBooking,
+  // handelPaymentRealising,
+  // handelCancellation
 };
