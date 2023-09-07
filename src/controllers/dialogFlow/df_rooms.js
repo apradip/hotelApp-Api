@@ -1,3 +1,4 @@
+const { captureRejectionSymbol } = require("nodemailer/lib/xoauth2");
 const Hotel = require("../../models/hotels");
 const Room = require("../../models/rooms");
 const dfff = require('dialogflow-fulfillment');
@@ -15,6 +16,30 @@ const handelPlaceList = async (agent) => {
     for (var entry of map.data()) {
       agent.add(new Suggestion(entry.city));
     }
+};
+
+const handelGetPlace = async (agent) => {
+  const place = agent.context.get("GetPlaceIntent").parameters["PlaceEntity"];
+  const dataHotel = await Hotel.find({city: place, isEnable: true}).select({_id: 1});
+  dataHotel.length > 0 ? 
+    agent.add(`GOOD! When are you arriving at #GetPlaceIntent.PlaceEntity : (i.e. Date in dd/mm/yyyy format)`) : 
+    agent.add(`Sorry incorrect place. Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)`);
+};
+
+const handelGetStartDate = async (agent) => {
+  const place = agent.context.get("GetPlaceIntent").parameters["PlaceEntity"];
+  const startDate = agent.context.get("GetStartDateIntent").parameters["StartDate"];
+  const dt = DateTime.ParseExact(startDate.ToString(), "MM/dd/yyyy hh:mm:ss tt", CultureInfo.InvariantCulture);
+  const sd = dt.ToString("dd/M/yyyy", CultureInfo.InvariantCulture);
+  
+  const currentDate = new Date();
+  const startDt = new Date(startDate);
+  const difference = currentDate - startDt;
+  const differenceDays = difference / (1000 * 60 * 60 * 24);
+
+  differenceDays > 0 ? 
+    agent.add(`GREAT! How long are you going to stay at ${place} (from ${sd} to no. of days)`) :
+    agent.add(`Sorry! It is too early. Please try to book before 1 day. Try again.`);
 };
 
 const handelRoomEnquiry = async (agent) => {
@@ -94,6 +119,8 @@ const handelCancellation = async (agent) => {
 module.exports = {
   handelDemo,
   handelPlaceList,
+  handelGetPlace,
+  handelGetStartDate,
   handelRoomEnquiry,
   handelRoomBooking,
   handelPaymentRealising,

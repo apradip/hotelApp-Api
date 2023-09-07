@@ -120,7 +120,9 @@ app.post("/wh/api/", express.json(), (req, res) => {
     const intentMap = new Map();
     intentMap.set("DemoIntent", handelDemo);
     // intentMap.set('PlaceIntent', handelPlaceList);
-    intentMap.set("GetUserParticularDisplayIntent - yes", handelRoomEnquiry);
+    intentMap.set("GetPlaceIntent", handelGetPlace);
+    intentMap.set("GetStartDateIntent", handelGetStartDate);
+    // intentMap.set("GetUserParticularDisplayIntent - yes", handelRoomEnquiry);
     // intentMap.set('RoomBookingIntent - yes', handelRoomBooking);
     // intentMap.set('RoomPaymentIntent - yes', handelPaymentRealising);
     // intentMap.set('RoomCancellationIntent - yes', handelCancellation);
