@@ -18,10 +18,12 @@ const connectDB = require("./config/dbConn");
 
 //dialog flow api code file
 const { handelDemo, 
-        // handelPlaceList, 
+        handelPlaceList,
         handelGetPlace,
         handelGetStartDate,
-        // handelRoomEnquiry, 
+        handelGetNoOfDays,
+        handelGetNoOfBoders,
+        handelRoomEnquiry, 
         // handelRoomBooking, 
         // handelPaymentRealising, 
         // handelCancellation 
@@ -127,8 +129,13 @@ app.post("/wh/api/", express.json(), (req, res) => {
 
     const intentMap = new Map();
     intentMap.set("DemoIntent", handelDemo);
+    
+    intentMap.set("PlaceListIntent", handelPlaceList);
     intentMap.set("GetPlaceIntent", handelGetPlace);
     intentMap.set("GetStartDateIntent", handelGetStartDate);
+    intentMap.set("GetNoOfDayToStayIntent", handelGetNoOfDays);
+    intentMap.set("GetBorderCountIntent", handelGetNoOfBoders);
+    intentMap.set("GetBorderCountYesIntent", handelRoomEnquiry);
 
     agent.handleRequest(intentMap);
 });
