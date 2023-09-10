@@ -13,7 +13,6 @@ class categoryType {
   };
 };
 
-
 const handelDemo = async (agent) => {
   console.log("handelDemo");
   agent.add("Sending response from Webhook server as v2.1.1");
@@ -31,15 +30,15 @@ const handelPlaceList = async (agent) => {
     }));
 
     const listPayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "Pleas select the place of your visit",
+            type: "info",
+            title: "Pleas select the place of your visit",
           },
           {
-            "type": "chips",
-            "options": placeDisplay
+            type: "chips",
+            options: placeDisplay
           }
         ]
       ]
@@ -47,17 +46,13 @@ const handelPlaceList = async (agent) => {
 
     agent.add(new Payload(agent.UNSPECIFIED, listPayload, {rawPayload: true, sendAsMessage: true}));
   } catch (e) {
-    console.log(e);
-    // const errorMessage = `Sorry! some error occure, please try it from start.`;
-    // agent.add(errorMessage);
-
     const errorPayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! some error occure",
-            "subtitle": "Plase start fro start."
+            type: "info",
+            title: "SORRY! some error occure",
+            subtitle: "Plase start fro start."
           }
         ]
       ]
@@ -72,30 +67,25 @@ const handelGetPlace = async (agent) => {
     const place = agent.context.get("getplaceintent").parameters["geo-city"];
     const dbHotel = await Hotel.findOne({city: {$regex: place, $options: "i"}, isEnable: true}).select({_id: 1});
 
-    // const positiveMessage = `GOOD! When are you arriving at ${place} : (i.e. first date in mm/dd/yyyy format)`;
-    // const negativeMessage = `Sorry incorrect place. Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)`;
-    
-    // dbHotel ? agent.add(positiveMessage) : agent.add(negativeMessage);
-
     const positivePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": `OK! When are you going to visit at ${place}`,
-            "subtitle": `(i.e. first date in mm/dd/yyyy format)`
+            type: "info",
+            title: `OK! When are you going to visit at ${place}`,
+            subtitle: "(i.e. first date in mm/dd/yyyy format)"
           }
         ]
       ]
     };
 
     const negativePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! incorrect place",
-            "subtitle": "Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)"
+            type: "info",
+            title: "SORRY! incorrect place",
+            subtitle: "Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)"
           }
         ]
       ]
@@ -105,16 +95,13 @@ const handelGetPlace = async (agent) => {
       agent.add(new Payload(agent.UNSPECIFIED, positivePayload, {rawPayload: true, sendAsMessage: true})) :
       agent.add(new Payload(agent.UNSPECIFIED, negativePayload, {rawPayload: true, sendAsMessage: true}));
   } catch (e) {
-    // const errorMessage = `Sorry! some error occure, please try it from start.`;
-    // agent.add(errorMessage);
-
     const errorPayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! some error occure",
-            "subtitle": "Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)"
+            type: "info",
+            title: "SORRY! some error occure",
+            subtitle: "Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)"
           }
         ]
       ]
@@ -134,29 +121,25 @@ const handelGetStartDate = async (agent) => {
     const difference = arrivalDate - currentDate;
     const differenceDays = difference / (1000 * 60 * 60 * 24);
 
-    // const positiveMessage = `GREAT! How long are you going to stay at ${place} from ${sd} (no. of days)`;
-    // const negativeMessage = `Sorry! It is too early. Please try to book before 1 day. Try again.`;
-    // differenceDays > 0 ? agent.add(positiveMessage) : agent.add(negativeMessage);
-
     const positivePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": `GREAT! How long are you going to stay at ${place} from ${sd}`,
-            "subtitle": `(no. of days)`
+            type: "info",
+            title: `GREAT! How long are you going to stay at ${place} from ${sd}`,
+            subtitle: "(no. of days)"
           }
         ]
       ]
     };
 
     const negativePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! it is too early",
-            "subtitle": "Please try to book before 1 day. Try again."
+            type: "info",
+            title: "SORRY! it is too early",
+            subtitle: "Please try to book before 1 day. Try again."
           }
         ]
       ]
@@ -166,16 +149,13 @@ const handelGetStartDate = async (agent) => {
       agent.add(new Payload(agent.UNSPECIFIED, positivePayload, {rawPayload: true, sendAsMessage: true})) :
       agent.add(new Payload(agent.UNSPECIFIED, negativePayload, {rawPayload: true, sendAsMessage: true}));
   } catch (e) {
-    // const errorMessage = `Sorry! some error occure, please try it from start.`;
-    // agent.add(errorMessage);
-
     const errorPayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! some error occure",
-            "subtitle": "Please try to book before 1 day. Try again."
+            type: "info",
+            title: "SORRY! some error occure",
+            subtitle: "Please try to book before 1 day. Try again."
           }
         ]
       ]
@@ -192,30 +172,25 @@ const handelGetNoOfDays = async (agent) => {
     const dayCount = agent.context.get("getnoofdaytostayintent").parameters["day-count"];
     const sd = formatDateDDMMMMYYYY(startDate);
 
-    // const positiveMessage = `OWOW ! Let me know no. of person(s) will accompany you at ${place} form ${sd} to next ${dayCount} days (no. of guest)`;
-    // const negativeMessage = `Sorry! It is too early. Please try to book before for at list 1 day. Try again.`;
-
-    // dayCount > 0 ? agent.add(positiveMessage) : agent.add(negativeMessage);
-
     const positivePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": `OWOW! Let me know no. of person(s) will accompany you at ${place} form ${sd} to next ${dayCount} day(s)`,
-            "subtitle": `(no. of guests)`
+            type: "info",
+            title: `OWOW! Let me know no. of person(s) will accompany you at ${place} form ${sd} to next ${dayCount} day(s)`,
+            subtitle: "(no. of guests)"
           }
         ]
       ]
     };
 
     const negativePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! it is too early",
-            "subtitle": "Please try to book before for at list 1 day. Try again."
+            type: "info",
+            title: "SORRY! it is too early",
+            subtitle: "Please try to book before for at list 1 day. Try again."
           }
         ]
       ]
@@ -225,16 +200,13 @@ const handelGetNoOfDays = async (agent) => {
       agent.add(new Payload(agent.UNSPECIFIED, positivePayload, {rawPayload: true, sendAsMessage: true})) :
       agent.add(new Payload(agent.UNSPECIFIED, negativePayload, {rawPayload: true, sendAsMessage: true}));
   } catch (e) {
-    // const errorMessage = `Sorry! some error occure, please try it from start.`;
-    // agent.add(errorMessage);
-
     const errorPayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! some error occure",
-            "subtitle": "Please try to book before 1 day. Try again."
+            type: "info",
+            title: "SORRY! some error occure",
+            subtitle: "Please try to book before 1 day. Try again."
           }
         ]
       ]
@@ -252,29 +224,38 @@ const handelGetNoOfBoders = async (agent) => {
     const borderCount = agent.context.get("getbordercountintent").parameters["border-count"];
     const sd = formatDateDDMMMMYYYY(startDate);
 
-    // const positiveMessage = `GREAT! you are looking for room(s) at ${place} from ${sd} to next ${dayCount} days, for ${borderCount} persons. Is it correct?`;
-    // const negativeMessage = `Sorry! It is less person. Please try to stay 1 or more. Try again.`;
-    // borderCount > 0 ? agent.add(positiveMessage) : agent.add(negativeMessage);
-
     const positivePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": `GREAT! you are looking for room(s) at ${place} from ${sd} to next ${dayCount} day(s), for ${borderCount} person(s).`,
-            "subtitle": `Is it correct? (yes / no)`
+            type: "info",
+            title: `GREAT! you are looking for room(s) at ${place} from ${sd} to next ${dayCount} day(s), for ${borderCount} person(s).`,
+            subtitle: "Is it correct? (yes / no)"
+          },
+          {
+            type: "chips",
+            options: [
+              {
+                mode: "blocking",
+                text: "Yes",
+              },
+              {
+                mode: "blocking",
+                text: "No",
+              }
+            ]
           }
         ]
       ]
     };
 
     const negativePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! it is less person",
-            "subtitle": "Please try to stay 1 or more. Try again."
+            type: "info",
+            title: "SORRY! it is less person",
+            subtitle: "Please try to stay 1 or more. Try again."
           }
         ]
       ]
@@ -284,16 +265,13 @@ const handelGetNoOfBoders = async (agent) => {
       agent.add(new Payload(agent.UNSPECIFIED, positivePayload, {rawPayload: true, sendAsMessage: true})) :
       agent.add(new Payload(agent.UNSPECIFIED, negativePayload, {rawPayload: true, sendAsMessage: true}));
   } catch (e) {
-    // const errorMessage = `Sorry! some error occure, please try it from start.`;
-    // agent.add(errorMessage);
-
     const errorPayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! some error occure",
-            "subtitle": "Please try to stay with 1 or more. Try again."
+            type: "info",
+            title: "SORRY! some error occure",
+            subtitle: "Please try to stay with 1 or more. Try again."
           }
         ]
       ]
@@ -355,23 +333,30 @@ const handelRoomEnquiry = async (agent) => {
         }));
 
         if (categoryList.length > 0) {
-
-          categoryDisplay.push({
-                                 type: "info",
-                                 title: "GERAT! we have following rooms for you."
-                              });
-          
           let idx = 0;                              
           categoryList.map(async (category) => {
             idx++;
-            categoryDisplay.push({
-                                    type: "list",
-                                    title: `${idx}. ${category.category}`,
-                                    subtitle: `Tariff : Rs. ${category.tariff}/- per day +GST`,
-                                    event: {
-                                      event: "BookRoomIntent"
-                                    }
-                                  });
+            categoryDisplay.push([{
+                                  type: "info",
+                                  title: `${idx}. ${category.category}`,
+                                  subtitle: `Tariff : Rs. ${category.tariff}/day +GST`
+                                 },
+                                 {
+                                    type: "chips",
+                                    options: [
+                                      {
+                                        mode: "blocking",
+                                        text: `Brochier ${category.category}`,
+                                      },
+                                      {
+                                        mode: "blocking",
+                                        text: `Book ${category.category}`,
+                                        anchor: {
+                                          "href": "https://hotel.wikitoria.in/book/room/hotelId/roomCayegoryId/startDate/dayCount/guestCount"
+                                        }
+                                      }
+                                    ]
+                                 }]);
           });
 
           isAvailable = true;
@@ -379,24 +364,26 @@ const handelRoomEnquiry = async (agent) => {
       }
     }
 
-    // const positiveMessage = `GERAT! we have room availability for you. Prices are as follows per day +GST ${returnList}`;
-    // const negativeMessage = `SORRY, we have dosen't have any room avaliable.`;
-
-    // isAvailable ?
-    //   agent.add(positiveMessage) :
-    //   agent.add(negativeMessage);    
-
     const positivePayload = {
-      "richContent": [categoryDisplay]
+      richContent: [
+        [
+          {
+            type: "info",
+            title: "GERAT! we got rooms as your requirement.",
+            subtitle: "Please select your option from the list as follows :"
+          }
+        ],
+        ...categoryDisplay
+      ]
     };
 
     const negativePayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY!",
-            "subtitle": "we have dosen't have any room avaliable. Please try it fro start. Hotel place?"
+            type: "info",
+            title: "SORRY!",
+            subtitle: "we have dosen't have any room avaliable. Please try it fro start. Hotel place?"
           }
         ]
       ]
@@ -406,16 +393,13 @@ const handelRoomEnquiry = async (agent) => {
       agent.add(new Payload(agent.UNSPECIFIED, positivePayload, {rawPayload: true, sendAsMessage: true})) :
       agent.add(new Payload(agent.UNSPECIFIED, negativePayload, {rawPayload: true, sendAsMessage: true}));
   } catch (e) {
-    // const errorMessage = `Sorry! some error occure, please try it from start.`;
-    // agent.add(errorMessage);
-
     const errorPayload = {
-      "richContent": [
+      richContent: [
         [
           {
-            "type": "info",
-            "title": "SORRY! some error occure",
-            "subtitle": "Please confirm the place you looking for (i.e.. Digha, Bokkhali, Darjeeling, Puri)"
+            type: "info",
+            title: "SORRY! some error occure",
+            subtitle: "Please confirm the place you looking for."
           }
         ]
       ]
@@ -425,14 +409,109 @@ const handelRoomEnquiry = async (agent) => {
   };
 };
 
+const handelRoomCategoryBrochier = async (agent) => {
+  try {
+    const place = agent.context.get("getplaceintent").parameters["geo-city"];
+    const category = agent.context.get("getroomcategorybrochierintent").parameters["category"];
+
+    let isAvailable = false;
+    let imageDisplay = [];
+
+    const dbHotel = await Hotel.findOne({city: {$regex: place, $options: "i"}, isEnable: true});
+
+    if (dbHotel) {
+      const dbCategory = await RoomCategory.find({hotelId: mongoose.Types.ObjectId(dbHotel._id), 
+                                                      name: {$regex: category, $options: "i"}, 
+                                                      isEnable: true});
+                      
+      await Promise.all(dbCategory.map(async (category) => {
+        await Promise.all(category.images.map(async (image) => {
+          isAvailable = true;
+
+          imageDisplay.push({
+            type: "image",
+            // rawUrl: `https://6a16-103-88-217-89.ngrok-free.app/images/${image.image}`,
+            rawUrl: "https://icon-library.com/images/icon-for-files/icon-for-files-0.jpg",
+            accessibilityText: image.description
+          });
+        }));
+      }));
+    }
+
+    const positivePayload = {
+        richContent: [
+          [{
+            "type": "info",
+            "title": `${category}`
+          }],
+          [...imageDisplay],
+          // [
+          //   {
+          //     type: "button",
+          //     icon: {
+          //       type: "chevron_right",
+          //       color: "#FF9800"
+          //     },
+          //     mode: "blocking",
+          //     text: `Book ${category}`,
+          //     "anchor": {
+          //       "href": "https://stackoverflow.com/questions/23714383/what-are-all-the-possible-values-for-http-content-type-header"
+          //     },
+          //     // event: {
+          //     //   event: "BookRoomIntent"
+          //     // }
+          //   }
+          // ]
+          [{
+            type: "chips",
+            options: [
+              {
+                mode: "blocking",
+                text: `Book ${category}`,
+                anchor: {
+                  "href": "https://www.carwale.com"
+                }
+              }
+            ]
+         }]
+        ]
+      };
+
+    const negativePayload = {
+      richContent: [
+        [
+          {
+            type: "info",
+            title: "SORRY!",
+            subtitle: "we dosen't have any images for the brochier."
+          }
+        ]
+      ]
+    };
+
+    isAvailable ? 
+      agent.add(new Payload(agent.UNSPECIFIED, positivePayload, {rawPayload: true, sendAsMessage: true})) :
+      agent.add(new Payload(agent.UNSPECIFIED, negativePayload, {rawPayload: true, sendAsMessage: true}));
+  } catch (e) {
+    console.log(e);
+
+    const errorPayload = {
+      richContent: [
+        [
+          {
+            type: "info",
+            title: "SORRY! some error occure",
+            subtitle: "Please confirm the place you looking for."
+          }
+        ]
+      ]
+    };
+
+    agent.add(new Payload(agent.UNSPECIFIED, errorPayload, {rawPayload: true, sendAsMessage: true}));        
+  }
+};
+
 const handelRoomBooking = async (agent) => {
-  const place = agent.context.get("roomenquiryintent-followup").parameters["place"];
-  const start_date = agent.context.get("roomenquiryintent-followup").parameters["startdate"];
-  const end_date = agent.context.get("roomenquiryintent-followup").parameters["enddate"];
-  const no_of_border = agent.context.get("roomenquiryintent-followup").parameters["noofboder"];
-  const name = agent.context.get("roomenquiryintent-followup").parameters["name"];
-  const phone = agent.context.get("roomenquiryintent-followup").parameters["phone"];
-  
   agent.add(`Your room is alloted but confirmation will be done after realising the payment.`);    
 };
 
@@ -446,6 +525,7 @@ const handelCancellation = async (agent) => {
 
   agent.add(`We have received your cancellation request. Your booking will be cancelled and payment will be realised to you within 3 working days.`);    
 };
+
 
 
 
@@ -504,6 +584,7 @@ module.exports = {
   handelGetNoOfDays,
   handelGetNoOfBoders,
   handelRoomEnquiry,
+  handelRoomCategoryBrochier,
   // handelRoomBooking,
   // handelPaymentRealising,
   // handelCancellation

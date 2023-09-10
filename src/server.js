@@ -24,6 +24,7 @@ const { handelDemo,
         handelGetNoOfDays,
         handelGetNoOfBoders,
         handelRoomEnquiry, 
+        handelRoomCategoryBrochier,
         // handelRoomBooking, 
         // handelPaymentRealising, 
         // handelCancellation 
@@ -121,6 +122,25 @@ app.get("/", (req, res) => {
     res.send("HotelApp Restfull API server is live...");
 });
 
+// app.get('*', function (req, res) {
+//     var file = path.join(dir, req.path.replace(/\/$/, '/th_0.jpeg'));
+//     // if (file.indexOf(dir + path.sep) !== 0) {
+//     //     return res.status(403).end('Forbidden');
+//     // }
+//     // var type = mime[path.extname(file).slice(1)] || 'text/plain';
+//     var s = fs.createReadStream(file);
+//     s.on('open', function () {
+//         res.set('Content-Type', 'image-jpeg');
+//         s.pipe(res);
+//     });
+//     // s.on('error', function () {
+//     //     res.set('Content-Type', 'text/plain');
+//     //     res.status(404).end('Not found');
+//     // });
+// });
+
+
+
 app.post("/wh/api/", express.json(), (req, res) => {
     const agent = new WebhookClient({ 
         request: req, 
@@ -136,7 +156,8 @@ app.post("/wh/api/", express.json(), (req, res) => {
     intentMap.set("GetNoOfDayToStayIntent", handelGetNoOfDays);
     intentMap.set("GetBorderCountIntent", handelGetNoOfBoders);
     intentMap.set("GetBorderCountYesIntent", handelRoomEnquiry);
-
+    intentMap.set("GetRoomCategoryBrochierIntent", handelRoomCategoryBrochier);
+    
     agent.handleRequest(intentMap);
 });
 

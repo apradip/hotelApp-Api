@@ -1,6 +1,5 @@
 const RoomCategory = require("../models/roomCategories");
 
-
 //handel search room category
 //query string : /hotel Id?search= room category name
 const handelSearch = async (req, res) => {

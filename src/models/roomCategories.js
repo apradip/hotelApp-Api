@@ -1,5 +1,17 @@
 const mongoose = require("mongoose");
 
+const ImageSchema = new mongoose.Schema({
+    id: {
+        type: String
+    },
+    image: {
+        type: String
+    },
+    description: {
+        type: String
+    }
+});
+
 const roomCategorySchema = new mongoose.Schema({
     hotelId: {
         type: String,
@@ -59,6 +71,7 @@ const roomCategorySchema = new mongoose.Schema({
             }
         }
     },
+    images: [ImageSchema],
     isEnable: {
         type: Boolean,
         default: true
