@@ -6,7 +6,7 @@ services:
     build: .
     ports:
       - 3001:3001
-      - 443:443
+      - 8443:443
     environment:
       - API_DOMAIN=https://hotelapi.wikitoria.in
       - FRONTEND_DOMAIN=http://hotel.wikitoria.in
