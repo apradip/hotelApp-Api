@@ -38,6 +38,6 @@ router.route("/:hotelId/:guestId/:expenseId/:billId")
         ROLE_LIST.HOTEL_ADMIN, 
         ROLE_LIST.OFFICE_STAFF,
         ROLE_LIST.RECEPTIONIST), handelPayment);        // payment 
-        
+           
 
 module.exports = router;

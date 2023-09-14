@@ -1110,7 +1110,6 @@ async function getCheckOutDate(hotelId, guestId) {
     return date;
 };
 
-
 module.exports = {
     handelSearch,
     handelDetail,

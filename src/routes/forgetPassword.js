@@ -1,9 +1,9 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const { handelSendOtp } = require('../controllers/forgetPassword');
+const { handelSendOtp } = require("../controllers/forgetPassword");
 
-router.route('/:hotelId')
+router.route("/:hotelId")
     .put(handelSendOtp);
 
 module.exports = router;
