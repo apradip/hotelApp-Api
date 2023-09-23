@@ -44,7 +44,9 @@ const handelPlaceList = async (agent) => {
       ]
     };
 
-    agent.add(new Payload(agent.UNSPECIFIED, listPayload, {rawPayload: true, sendAsMessage: true}));
+    agent.add("Pleas select the place of your visit (i.e. Digha/Puri/Darjeeling/Bakkhali)");
+
+    // agent.add(new Payload(agent.UNSPECIFIED, listPayload, {rawPayload: true, sendAsMessage: true}));
   } catch (e) {
     const errorPayload = {
       richContent: [

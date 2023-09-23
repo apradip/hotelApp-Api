@@ -9,7 +9,7 @@ services:
       - 443:443
     environment:
       - API_DOMAIN=https://hotelapi.wikitoria.in
-      - FRONTEND_DOMAIN=http://hotel.wikitoria.in
+      - FRONTEND_DOMAIN=https://hotel.wikitoria.in:80
       - GOOGLE_DOMAIN=https://google.com
       - GOOGLE_CLOUD_DOMAIN=https://cloud.google.com
       - GOOGLE_DIALOGFLOW_DOMAIN=https://dialogflow.cloud.google.com

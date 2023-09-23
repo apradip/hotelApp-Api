@@ -24,11 +24,31 @@ const { handelDemo,
         handelGetNoOfDays,
         handelGetNoOfBoders,
         handelRoomEnquiry, 
-        handelRoomCategoryBrochier,
+        handelRoomCategoryBrochier
         // handelRoomBooking, 
         // handelPaymentRealising, 
         // handelCancellation 
     } = require('./controllers/dialogFlow/df_rooms');
+
+    const { 
+        handelTest,
+        handelMenu,
+        handelProductMenu,
+        handelServerCategoryMenu,
+        handelDedicatedServerOSMenu,
+        handelDedicatedWindows,
+        handelDedicatedLinux,
+        handelVPSOSMenu,
+        handelVPSWindows,
+        handelVPSLinux,
+        handelSharedServer,
+        handelEmail,
+        handelChatBot,
+        handelEnquiry,
+        handelEnquiryDetails,
+        handelCustomerSupport,
+        handelSupportDetails,
+    } = require('./controllers/dialogFlow/df_pixel');
 
 // const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
 const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
@@ -158,6 +178,46 @@ app.post("/wh/api/", express.json(), (req, res) => {
     intentMap.set("GetBorderCountYesIntent", handelRoomEnquiry);
     intentMap.set("GetRoomCategoryBrochierIntent", handelRoomCategoryBrochier);
     
+    agent.handleRequest(intentMap);
+});
+
+
+
+app.post("/wh/api/pixel", express.json(), (req, res) => {
+    const agent = new WebhookClient({ 
+        request: req, 
+        response: res 
+    });
+
+    const intentMap = new Map();
+    intentMap.set("TestIntent", handelTest);
+    
+    intentMap.set("welcome", handelMenu);
+    
+    intentMap.set("get.product.menu", handelProductMenu);
+    
+    intentMap.set("get.product.server.menu", handelServerCategoryMenu);
+    
+    intentMap.set("get.product.server.dedicated.os.menu", handelDedicatedServerOSMenu);
+    intentMap.set("get.product.server.dedicated.windows.product", handelDedicatedWindows);
+    intentMap.set("get.product.server.dedicated.linux.product", handelDedicatedLinux);
+    
+    intentMap.set("get.product.server.vps.os.menu", handelVPSOSMenu);
+    intentMap.set("get.product.server.vps.windows.product", handelVPSWindows);
+    intentMap.set("get.product.server.vps.linux.product", handelVPSLinux);
+
+    intentMap.set("get.product.server.share.product", handelSharedServer);
+
+    intentMap.set("get.product.email.product", handelEmail);
+
+    intentMap.set("get.product.chatbot.product", handelChatBot);
+
+    intentMap.set("get.enquiry.enquiry", handelEnquiry);
+    intentMap.set("post.enquerydetails.enquiry", handelEnquiryDetails);
+    
+    intentMap.set("get.customersupport.customersupport", handelCustomerSupport);
+    intentMap.set("post.customerdetails.customersupport", handelSupportDetails);
+
     agent.handleRequest(intentMap);
 });
 
