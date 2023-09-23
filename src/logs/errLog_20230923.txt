@@ -1,6 +1,0 @@
-20230923	10:17:40	088b2129-3adf-4f44-b456-9c6ceacc650f	ReferenceError: handelCustomerSupport is not defined
-20230923	10:17:41	f40463a0-4a33-47b1-9370-569ac1f5b47a	ReferenceError: handelCustomerSupport is not defined
-20230923	10:36:04	1345fb7b-69b4-421d-a51a-0cb54327d679	ReferenceError: handelCustomerSupport is not defined
-20230923	10:36:04	e4f8581c-9cf3-404c-983d-0ae1ec81402d	ReferenceError: handelCustomerSupport is not defined
-20230923	10:45:18	5c3501f1-70d4-4939-a1e9-dd0ab5aa0e9b	ReferenceError: handelCustomerSupport is not defined
-20230923	10:45:18	46f714b6-4eab-45a9-aabd-e24ef3b8379b	ReferenceError: handelCustomerSupport is not defined
