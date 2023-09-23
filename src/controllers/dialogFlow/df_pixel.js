@@ -353,7 +353,7 @@ const handelEnquiry = async (agent) => {
   const product = agent.context.get("enquiry").parameters["product"];
 
   try {
-        agent.add(`Thank you!👌\nFor your interest on our product ${product}.\nPlease provide your contact details.\n\nPlease enter your company name:`);
+        agent.add(`Thank you!👌\nFor your interest on our product ${product}.\nPlease provide your contact details.\n\nPlease enter your name:`);
   } catch (e) {
     console.log(e);
   };
