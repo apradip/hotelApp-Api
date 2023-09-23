@@ -58,11 +58,28 @@ const handelMenu = async (agent) => {
 
 const handelProductMenu = async (agent) => {
   try {
-        agent.add(`We have various kind of product (i.e., Server/Email/ChatBot).\n\nWhich product are you looking for?`);
+    let category = [];
+    const res = await axios.get(PRODUCT_SHEETDB_API_URL);
 
-        agent.add(new Suggestion("Server"));
-        agent.add(new Suggestion("Email"));
-        agent.add(new Suggestion("ChatBot"));
+    if (res.data) {
+      let output = `We have various kind of product (i.e., Server/Email/ChatBot).\n\nWhich product are you looking for?`;
+      agent.add(output);
+      
+      res.data.map((item) => {
+        category.push(item.Category)
+      });
+
+      const distinct = [...new Set(category)];
+      distinct.map((item) => {
+        agent.add(new Suggestion(`${item}`));
+      });
+    }
+
+        // agent.add(`We have various kind of product (i.e., Server/Email/ChatBot).\n\nWhich product are you looking for?`);
+
+        // agent.add(new Suggestion("Server"));
+        // agent.add(new Suggestion("Email"));
+        // agent.add(new Suggestion("ChatBot"));
   } catch (e) {
     console.log(e);
   };
@@ -73,11 +90,28 @@ const handelProductMenu = async (agent) => {
 // Server Menu
 const handelServerCategoryMenu = async (agent) => {
   try {
-        agent.add(`We have multiple type of server (i.e., Dedicated/VPS/Share).\n\nWhich category are you looking for?`);
+    let subcategory = [];
+    const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server");
 
-        agent.add(new Suggestion("Dedicated Server"));
-        agent.add(new Suggestion("Virtual Server"));
-        agent.add(new Suggestion("Shared Server"));
+    if (res.data) {
+      let output = `We have multiple type of server (i.e., Dedicated/VPS/Share).\n\nWhich category are you looking for?`;
+      agent.add(output);
+      
+      res.data.map((item) => {
+        subcategory.push(item.SubCategory)
+      });
+
+      const distinct = [...new Set(subcategory)];
+      distinct.map((item) => {
+        agent.add(new Suggestion(`${item} Server`));
+      });
+    }
+
+        // agent.add(`We have multiple type of server (i.e., Dedicated/VPS/Share).\n\nWhich category are you looking for?`);
+
+        // agent.add(new Suggestion("Dedicated Server"));
+        // agent.add(new Suggestion("Virtual Server"));
+        // agent.add(new Suggestion("Shared Server"));
   } catch (e) {
     console.log(e);
   };
@@ -88,10 +122,28 @@ const handelServerCategoryMenu = async (agent) => {
 // Dedicated Server
 const handelDedicatedServerOSMenu = async (agent) => {
   try {
-        agent.add(`We have dedicated server with various OS (i.e., Windows/Linux).\n\nWhich OS are you looking for?`);
+    let os = [];
+    const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=Dedicated");
 
-        agent.add(new Suggestion("Dedicated Windows"));
-        agent.add(new Suggestion("Dedicated Linux"));
+    if (res.data) {
+      let output = `We have dedicated server with various OS (i.e., Windows/Linux).\n\nWhich OS are you looking for?`;
+      agent.add(output);
+      
+      res.data.map((item) => {
+        os.push(item.OS)
+      });
+
+      const distinct = [...new Set(os)];
+      distinct.map((item) => {
+        agent.add(new Suggestion(`Dedicated (${item})`));
+      });
+    }
+
+    
+        // agent.add(`We have dedicated server with various OS (i.e., Windows/Linux).\n\nWhich OS are you looking for?`);
+
+        // agent.add(new Suggestion("Dedicated Windows"));
+        // agent.add(new Suggestion("Dedicated Linux"));
   } catch (e) {
     console.log(e);
   };
@@ -166,10 +218,27 @@ const handelDedicatedLinux = async (agent) => {
 // VPS
 const handelVPSOSMenu = async (agent) => {
   try {
-        agent.add(`We have VPS with various OS (i.e., Windows/Linux).\nWhich OS are you looking for?`);
+    let os = [];
+    const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=VPS");
 
-        agent.add(new Suggestion("VPS Windows"));
-        agent.add(new Suggestion("VPS Linux"));
+    if (res.data) {
+      let output = `We have vps with various OS (i.e., Windows/Linux).\n\nWhich OS are you looking for?`;
+      agent.add(output);
+      
+      res.data.map((item) => {
+        os.push(item.OS)
+      });
+
+      const distinct = [...new Set(os)];
+      distinct.map((item) => {
+        agent.add(new Suggestion(`VPS (${item})`));
+      });
+    }
+
+        //agent.add(`We have VPS with various OS (i.e., Windows/Linux).\nWhich OS are you looking for?`);
+
+        //agent.add(new Suggestion("VPS Windows"));
+        //agent.add(new Suggestion("VPS Linux"));
   } catch (e) {
     console.log(e);
   };
