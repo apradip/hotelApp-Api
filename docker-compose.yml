@@ -13,6 +13,7 @@ services:
       - GOOGLE_DOMAIN=https://google.com
       - GOOGLE_CLOUD_DOMAIN=https://cloud.google.com
       - GOOGLE_DIALOGFLOW_DOMAIN=https://dialogflow.cloud.google.com
+      - SHEETDB_API_DOMAIN=https://sheetdb.io
       - API_SERVER_SSL_KEY_FILE=.//sslcert//private.key
       - API_SERVER_SSL_CERT_FILE=.//sslcert//certificate.crt
       - API_SERVER_IP=43.239.110.22

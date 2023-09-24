@@ -6,6 +6,7 @@ const allowedOrigins = [
     process.env.GOOGLE_DOMAIN,
     process.env.GOOGLE_CLOUD_DOMAIN,
     process.env.GOOGLE_DIALOGFLOW_DOMAIN,
+    process.env.SHEETDB_API_DOMAIN
 ];
 
 module.exports = allowedOrigins;
