@@ -1,22 +1,136 @@
-const { Card, Suggestion, Image } = require("dialogflow-fulfillment");
 const axios = require("axios");
+const { Card, Suggestion, Image } = require("dialogflow-fulfillment");
 
 const PRODUCT_SHEETDB_API_URL = "https://sheetdb.io/api/v1/edmax89c5rfmp";
 const ENQUIRY_SHEETDB_API_URL = "https://sheetdb.io/api/v1/dtc7phqv4mbfi";
 
+class chat {
+  constructor(company = "", person = "", phone = "", note = "", products = []) {
+    this.company = company,  
+    this.person = person,
+    this.phone = phone,
+    this.note = note,
+    this.products = products
+  };
+};
+
+let chatDictionary = {};
+
+
 const handelTest = async (agent) => {
   console.log("handelTest");
+  const CONTEXT_NAME = "test";
+  let person = "";
+
+  const sessionId = agent.session.split("/").pop();
   
-  try {
-    // plain text
-    // agent.add("Sending response from Webhook server as v2.1.1");
-    
+  agent.context.get(CONTEXT_NAME) ? person = agent.context.get(CONTEXT_NAME).parameters["person"].name : person = "";
+  person !== "" ? agent.add(`Thank's ${person}! Do you want any thing else?`) : null;
+
+  // const paraCpmpany = "Pixel";
+  // const paraPerson = "Pradip";
+  // const paraPhone = "9830152752";
+  // const paraNote = "Server error";
+  // const paraProduct = "Win Light (D)";
+  
+  // try {
+    // let currentChat = chatDictionary[sessionId];
+
+    // if (!currentChat) {
+    //   let productArr = [];
+      
+    //   if (paraProduct !== "") {
+    //     productArr.splice(0, 0, paraProduct);
+    //   }
+
+    //   chatDictionary[sessionId] = new chat( 
+    //                                         paraCpmpany !== "" ? paraCpmpany : "", 
+    //                                         paraPerson !== "" ? paraPerson : "", 
+    //                                         paraPhone !== "" ? paraPhone : "", 
+    //                                         paraNote !== "" ? paraNote : "", 
+    //                                         productArr);
+    // } else {
+    //   chatDictionary[sessionId].chat.company = "Coral";
+    // }
+
+    // console.log(chatDictionary);
+    // console.log(chatDictionary[sessionId].products);
+
+    // chatDictionary[sessionId].products.forEach((product) => {
+    //   console.log(product);
+    // })
+
+    // chatList.map((item) => {
+    //   if (item.sessionId === sessionId) {
+    //     if (((item.company === "") || (item.person === "") || (item.phone === "")) && ((paraCpmpany !== "") || (paraPerson !== "") || (paraPhone !== ""))) {
+    //       item.company = paraCpmpany;
+    //       item.person = paraPerson;
+    //       item.phone = paraPhone;
+
+    //       chatList[idx].company = item.company;
+    //       chatList[idx].person = item.person ;
+    //       chatList[idx].phone = item.phone;
+    //     }
+
+    //     if ((item.note === "") && (paraNote !== "")) {
+    //       item.note = paraNote;
+          
+    //       chatList[idx].note = item.note;
+    //     }
+
+    //     if (item.products.length === 0) {
+    //       if (paraProduct !== "") {
+    //         item.products.push(paraProduct);
+
+    //         chatList[idx].products = item.products;
+    //       }
+    //     } else {
+    //       if (paraProduct !== "") {
+    //         let isProductFound = false;
+
+    //         item.products.map((product) => {
+    //           if (product === paraProduct) {
+    //             isProductFound = true;
+    //           }
+    //         });
+
+    //         if (!isProductFound) {
+    //           item.products.push(paraProduct);
+
+    //           chatList[idx].products = item.products;
+    //         }
+    //       }
+    //     }
+
+    //     currentChat = item;
+    //     isSessionFound = true;
+    //   }
+
+    //   idx++;
+    // });
+
+    // if (!isSessionFound) {
+    //   let productArr = [];
+    //   currentChat = new chatType(sessionId, 
+    //                               paraCpmpany !== "" ? paraCpmpany : "", 
+    //                               paraPerson !== "" ? paraPerson : "", 
+    //                               paraPhone !== "" ? paraPhone : "", 
+    //                               paraNote !== "" ? paraNote : "", 
+    //                               paraProduct !== "" ? productArr.push(paraProduct) : productArr);
+
+    //   chatList.push(currentChat);
+    // }
+
+    // console.log(chatList);
+    // console.log(currentChat);
+    // console.log(currentChat.products[0]);
+
     //add text
-    agent.add("Please tell us what you want to know from me?");
+    // agent.add("What is your name ?");
     
     //add suggestion clip
-    agent.add(new Suggestion("Products"));
-    agent.add(new Suggestion("Accounts"));
+    // agent.add(new Suggestion("Products"));
+    // agent.add(new Suggestion("Accounts"));
     // agent.add(new Suggestion("Customer Service"));
 
     // agent.add(new Suggestion({
@@ -36,34 +150,39 @@ const handelTest = async (agent) => {
     //   buttonUrl: 'https://forms.gle/ubCWmJqwet29M5jS6'
     // }));
 
-  } catch (e) {
-    console.log(e)
-  };
-  return;
+  // } catch (e) {
+  //   console.log(e)
+  // };
 };
 
-
-const handelMenu = async (agent) => {
+// Start
+// Initial menu
+const handelWelcome = async (agent) => {
   try {
-        agent.add(`Welcome to Pixel Informatics! 👨‍💼\nI'm happy to help you with anything you need today. It's a pleasure to chat with you today. \n\nWhat do you like to know about?`);
+    // const sessionId = agent.session.split("/").pop();
+    const fulfillment = `Welcome to Pixel Informatics! 👨‍💼\nI'm happy to help you with anything you need today. It's a pleasure to chat with you today. \n\nWhat do you like to know (Product or Support)?`;
 
-        agent.add(new Suggestion("Products"));
-        agent.add(new Suggestion("Support"));
+    agent.add(fulfillment);
+    agent.add(new Suggestion("Products"));
+    agent.add(new Suggestion("Support"));
   } catch (e) {
     console.log(e);
   };
 };
+// Initial menu
+// End
 
-
-
+// Start
+// Product menu
 const handelProductMenu = async (agent) => {
   try {
+    // const sessionId = agent.session.split("/").pop();
     let category = [];
     const res = await axios.get(PRODUCT_SHEETDB_API_URL);
 
     if (res.data) {
-      let output = `We have various kind of product (i.e., Server/Email/ChatBot).\n\nWhich product are you looking for?`;
-      agent.add(output);
+      const fulfillment = `We have quite a range of products (i.e., *Web Servers*, *Email Servers*, *ChatBot Utilities*).\n\nWhich product are you looking for?`;
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         category.push(item.Category)
@@ -74,28 +193,24 @@ const handelProductMenu = async (agent) => {
         agent.add(new Suggestion(`${item}`));
       });
     }
-
-        // agent.add(`We have various kind of product (i.e., Server/Email/ChatBot).\n\nWhich product are you looking for?`);
-
-        // agent.add(new Suggestion("Server"));
-        // agent.add(new Suggestion("Email"));
-        // agent.add(new Suggestion("ChatBot"));
   } catch (e) {
     console.log(e);
   };
 };
-
+// Product menu
+// End
 
 // Start
 // Server Menu
 const handelServerCategoryMenu = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     let subcategory = [];
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server");
 
     if (res.data) {
-      let output = `We have multiple type of server (i.e., Dedicated/VPS/Share).\n\nWhich category are you looking for?`;
-      agent.add(output);
+      const fulfillment = `We have multiple types of servers (i.e., *Dedicated*, *VPS*, *Shared*).\n\nWhat type of server you are looking for?`;
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         subcategory.push(item.SubCategory)
@@ -106,12 +221,6 @@ const handelServerCategoryMenu = async (agent) => {
         agent.add(new Suggestion(`${item} Server`));
       });
     }
-
-        // agent.add(`We have multiple type of server (i.e., Dedicated/VPS/Share).\n\nWhich category are you looking for?`);
-
-        // agent.add(new Suggestion("Dedicated Server"));
-        // agent.add(new Suggestion("Virtual Server"));
-        // agent.add(new Suggestion("Shared Server"));
   } catch (e) {
     console.log(e);
   };
@@ -122,28 +231,23 @@ const handelServerCategoryMenu = async (agent) => {
 // Dedicated Server
 const handelDedicatedServerOSMenu = async (agent) => {
   try {
-    let os = [];
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=Dedicated");
+    let osArr = [];
 
     if (res.data) {
-      let output = `We have dedicated server with various OS (i.e., Windows/Linux).\n\nWhich OS are you looking for?`;
-      agent.add(output);
+      const fulfillment = `We have dedicated server with multiple OS (i.e., *Windows*, *Linux*).\n\nWhat OS you are looking for?`;
+      agent.add(fulfillment);
       
       res.data.map((item) => {
-        os.push(item.OS)
+        osArr.push(item.OS)
       });
 
-      const distinct = [...new Set(os)];
+      const distinct = [...new Set(osArr)];
       distinct.map((item) => {
         agent.add(new Suggestion(`Dedicated (${item})`));
       });
     }
-
-    
-        // agent.add(`We have dedicated server with various OS (i.e., Windows/Linux).\n\nWhich OS are you looking for?`);
-
-        // agent.add(new Suggestion("Dedicated Windows"));
-        // agent.add(new Suggestion("Dedicated Linux"));
   } catch (e) {
     console.log(e);
   };
@@ -151,30 +255,24 @@ const handelDedicatedServerOSMenu = async (agent) => {
 
 const handelDedicatedWindows = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=Dedicated&OS=Windows");
 
     if (res.data) {
-      let output = `We have various kind of dedicated windows server as follows :`;
-      let cnt = 0;
+      let fulfillment = `We have multiple types of dedicated windows server as follows :`;
+      let idx = 0;
 
       res.data.map((item) => {
-        cnt = cnt + 1;
-        output = output + `\n\n${cnt}. ${item.Name}:\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
+        idx = idx + 1;
+        fulfillment = fulfillment + `\n\n${idx}. *${item.Name}* :\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
       });
 
-      output = output + `\n\nPlease provide your contact details to serve your requirement.`;
-      agent.add(output);
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
-
-        // agent.add(`We have following kind of Dedicated Windows Server :\n\n1. Dedicated-Win-Light:\n1 Core CPU, 256 MB Memory, 50 GB SSD Storage with pre-loaded latest version of windows server.\nRs. 650/- pre month.\n\n2. Dedicated-Win-Professional:\n4 Core CPU, 8 GB Memory, 2 TB SSD Storage with pre-loaded latest version of windows server.\nRs. 2500/- per month.\n\n3. Dedicated-Win-Custom:\nAny other custom configuration of windows OS and any hardware configuration can be done as your requirement.\n\nPlease provide your contact details to serve your requirement.`);
-
-        // agent.add(new Suggestion("Dedicated-Win-Light"));
-        // agent.add(new Suggestion("Dedicated-Win-Professional"));
-        // agent.add(new Suggestion("Dedicated-Win-Custom"));
   } catch (e) {
     console.log(e);
   };
@@ -182,30 +280,24 @@ const handelDedicatedWindows = async (agent) => {
 
 const handelDedicatedLinux = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=Dedicated&OS=Linux");
 
     if (res.data) {
-      let output = `We have various kind of dedicated linux server as follows :`;
-      let cnt = 0;
+      let fulfillment = `We have multiple types of dedicated linux server as follows :`;
+      let idx = 0;
 
       res.data.map((item) => {
-        cnt = cnt + 1;
-        output = output + `\n\n${cnt}. ${item.Name}:\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
+        idx = idx + 1;
+        fulfillment = fulfillment + `\n\n${idx}. *${item.Name}* :\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
       });
 
-      output = output + `\n\nPlease provide your contact details to serve your requirement.`;
-      agent.add(output);
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
-
-        // agent.add(`We have following kind of Dedicated Linux Server :\n\n1. Lux-Light:\n1 Core CPU, 256 MB Memory, 50 GB SSD Storage with pre-loaded latest version of linux server.\nRs. 350/- pre month.\n\n2. Lux-Professional:\n2 Core CPU, 4 GB Memory, 2 TB SSD Storage with pre-loaded latest version of linux server.\nRs. 900/- per month.\n\n3. Lux-Custom:\nAny other custom configuration of linux OS and any hardware configuration can be done as your requirement.\n\nPlease provide your contact details to serve your requirement.`);
-
-        // agent.add(new Suggestion("Dedicated-Lux-Light"));
-        // agent.add(new Suggestion("Dedicated-Lux-Professional"));
-        // agent.add(new Suggestion("Dedicated-Lux-Custom"));
   } catch (e) {
     console.log(e);
   };
@@ -218,27 +310,23 @@ const handelDedicatedLinux = async (agent) => {
 // VPS
 const handelVPSOSMenu = async (agent) => {
   try {
-    let os = [];
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=VPS");
+    let osArr = [];
 
     if (res.data) {
-      let output = `We have vps with various OS (i.e., Windows/Linux).\n\nWhich OS are you looking for?`;
-      agent.add(output);
+      const fulfillment = `We have vps with various OS (i.e., *Windows*, *Linux*).\n\nWhich OS you are looking for?`;
+      agent.add(fulfillment);
       
       res.data.map((item) => {
-        os.push(item.OS)
+        osArr.push(item.OS)
       });
 
-      const distinct = [...new Set(os)];
+      const distinct = [...new Set(osArr)];
       distinct.map((item) => {
         agent.add(new Suggestion(`VPS (${item})`));
       });
     }
-
-        //agent.add(`We have VPS with various OS (i.e., Windows/Linux).\nWhich OS are you looking for?`);
-
-        //agent.add(new Suggestion("VPS Windows"));
-        //agent.add(new Suggestion("VPS Linux"));
   } catch (e) {
     console.log(e);
   };
@@ -246,30 +334,24 @@ const handelVPSOSMenu = async (agent) => {
 
 const handelVPSWindows = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=VPS&OS=Windows");
 
     if (res.data) {
-      let output = `We have various kind of virtual private windows server as follows :`;
-      let cnt = 0;
+      let fulfillment = `We have various types of virtual private windows server as follows :`;
+      let idx = 0;
 
       res.data.map((item) => {
-        cnt = cnt + 1;
-        output = output + `\n\n${cnt}. ${item.Name}:\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
+        idx = idx + 1;
+        fulfillment = fulfillment + `\n\n${idx}. *${item.Name}* :\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
       });
 
-      output = output + `\n\nPlease provide your contact details to serve your requirement.`;
-      agent.add(output);
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
-
-        // agent.add(`We have following kind of virtual private windows server :\n\n1. VPS-Win-Light:\n1 Core CPU, 256 MB Memory, 50 GB SSD Storage with pre-loaded latest version of windows server.\nRs. 350/- pre month.\n\n2. VPS-Win-Professional:\n4 Core CPU, 8 GB Memory, 2 TB SSD Storage with pre-loaded latest version of windows server.\nRs. 1200/- per month.\n\n3. VPS-Win-Custom:\nAny other custom configuration of windows OS and any hardware configuration can be done as your requirement.\n\nPlease provide your contact details to serve your requirement.`);
-
-        // agent.add(new Suggestion("VPS-Win-Light"));
-        // agent.add(new Suggestion("VPS-Win-Professional"));
-        // agent.add(new Suggestion("VPS-Win-Custom"));
   } catch (e) {
     console.log(e);
   };
@@ -277,30 +359,24 @@ const handelVPSWindows = async (agent) => {
 
 const handelVPSLinux = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=VPS&OS=Linux");
 
     if (res.data) {
-      let output = `We have various kind of virtual private linux server as follows :`;
-      let cnt = 0;
+      let fulfillment = `We have multiple types of virtual private linux server as follows :`;
+      let idx = 0;
 
       res.data.map((item) => {
-        cnt = cnt + 1;
-        output = output + `\n\n${cnt}. ${item.Name}:\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
+        idx = idx + 1;
+        fulfillment = fulfillment + `\n\n${idx}. *${item.Name}* :\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
       });
 
-      output = output + `\n\nPlease provide your contact details to serve your requirement.`;
-      agent.add(output);
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
-
-        // agent.add(`We have following kind of virtual private linux server :\n\n1. VPS-Lux-Light:\n1 Core CPU, 256 MB Memory, 50 GB SSD Storage with pre-loaded latest version of linux server.\nRs. 150/- pre month.\n\n2. VPS-Lux-Professional:\n2 Core CPU, 4 GB Memory, 2 TB SSD Storage with pre-loaded latest version of linux server.\nRs. 500/- per month.\n\n3. VPS-Lux-Custom:\nAny other custom configuration of linux OS and any hardware configuration can be done as your requirement.\n\nPlease provide your contact details to serve your requirement.`);
-
-        // agent.add(new Suggestion("VPS-Lux-Light"));
-        // agent.add(new Suggestion("VPS-Lux-Professional"));
-        // agent.add(new Suggestion("VPS-Lux-Custom"));
   } catch (e) {
     console.log(e);
   };
@@ -313,28 +389,24 @@ const handelVPSLinux = async (agent) => {
 // Shared Server
 const handelSharedServer = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Server&SubCategory=Shared");
 
     if (res.data) {
-      let output = `We have various kind of shared servers as follows :`;
-      let cnt = 0;
+      let fulfillment = `We have various kind of shared servers as follows :`;
+      let idx = 0;
 
       res.data.map((item) => {
-        cnt = cnt + 1;
-        output = output + `\n\n${cnt}. ${item.Name}:\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
+        idx = idx + 1;
+        fulfillment = fulfillment + `\n\n${idx}. *${item.Name}* :\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
       });
 
-      output = output + `\n\nPlease provide your contact details to serve your requirement.`;
-      agent.add(output);
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
-        // agent.add(`We have following kind of virtual private linux server :\n\n1. Shared-Windows:\n50 GB SSD Storage with pre-loaded Windows OS\nRs. 1200/- pre year.\n\n2. Shared-Linux:\n50 GB SSD Storage with pre-loaded Windows OS\nRs. 1000/- pre year.\n\nPlease provide your contact details to serve your requirement.`);
-
-        // agent.add(new Suggestion("Shared Windows"));
-        // agent.add(new Suggestion("Shared Linux"));
   } catch (e) {
     console.log(e);
   };
@@ -351,29 +423,24 @@ const handelSharedServer = async (agent) => {
 // Email
 const handelEmail = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=Email");
 
     if (res.data) {
-      let output = `We have various kind of email as follows :`;
-      let cnt = 0;
+      let fulfillment = `We have wide range of email servers as follows :`;
+      let idx = 0;
 
       res.data.map((item) => {
-        cnt = cnt + 1;
-        output = output + `\n\n${cnt}. ${item.Name}:\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
+        idx = idx + 1;
+        fulfillment = fulfillment + `\n\n${idx}. *${item.Name}* :\n${item.Description}\nRs. ${item.Price}/- ${item.Unit}`
       });
 
-      output = output + `\n\nPlease provide your contact details to serve your requirement.`;
-      agent.add(output);
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
-        // agent.add(`We have following email :\n\n1. Corporate Email:\nThis is 99.99% uptime & 99.99% delivery within minute, it also has 5 GB storage\nRs. 275/- per email per month\n\n2. MSME Email:\nThis server is capable to send email for any corporate but it is less uptime and 1GB storage per account.\nRs. 70/- per email per month\n\n3. Bulk Email:\nThis server us capable of sending 10000 email at a time. Basically all marketing & campaign email can be send by this.\nRs. 0.20/- per email.\n\nPlease provide your contact details to serve your requirement.`);
-
-        // agent.add(new Suggestion("Corporate Email"));
-        // agent.add(new Suggestion("MSME Email"));
-        // agent.add(new Suggestion("Bulk Email"));
   } catch (e) {
     console.log(e);
   };
@@ -386,28 +453,24 @@ const handelEmail = async (agent) => {
 // ChatBot
 const handelChatBot = async (agent) => {
   try {
+    const sessionId = agent.session.split("/").pop();
     const res = await axios.get(PRODUCT_SHEETDB_API_URL + "/search?Category=ChatBot");
 
     if (res.data) {
-      let output = `We have various kind of chatbot as follows :`;
-      let cnt = 0;
+      let fulfillment = `We have  chatbots as follows :`;
+      let idx = 0;
 
       res.data.map((item) => {
-        cnt = cnt + 1;
-        output = output + `\n\n${cnt}. ${item.Name}:\n${item.Description}`
+        idx = idx + 1;
+        fulfillment = fulfillment + `\n\n${idx}. *${item.Name}* :\n${item.Description}`
       });
 
-      output = output + `\n\nPlease provide your contact details to serve your requirement.`;
-      agent.add(output);
+      agent.add(fulfillment);
       
       res.data.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
-
-        // agent.add(`ChatBot is a WhatsApp based customized product chat, price will be dependent of complicity of activity it will generally cost 500 to 2500 per month. WhatsApp message cost will extra (i.e., Rs. 0.90/- per message)`);
-
-        // agent.add(new Suggestion("Custom ChatBot"));
   } catch (e) {
     console.log(e);
   };
@@ -419,36 +482,61 @@ const handelChatBot = async (agent) => {
 // Start
 // Enquiry
 const handelEnquiry = async (agent) => {
-  const product = agent.context.get("enquiry").parameters["product"];
+  const CONTEXT_NAME = "enquiry";
+  //const sessionId = agent.session.split("/").pop();
+
+  let product = "";
 
   try {
-        agent.add(`Thank you!👌\nFor your interest on our product ${product}.\nPlease provide your contact details.\n\nPlease enter your name:`);
+    agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
+    if (!context) return;
+
+    product = context.parameters["product"] ? context.parameters["product"].toUpperCase() : ""; 
+    if (product === "") return;      
+
+    const fulfillment = `Thank you!👌\nFor your interest on our product (*${product}*).\n\nPlease provide your details for further communication.`;
+    agent.add(fulfillment);
   } catch (e) {
     console.log(e);
   };
 };
 
 const handelEnquiryDetails = async (agent) => {
-  const company = agent.context.get("enquiry").parameters["company-name"];
-  const person = agent.context.get("enquiry").parameters["person-name"];
-  const phone = agent.context.get("enquiry").parameters["phone-number"];
-  const product = agent.context.get("enquiry").parameters["product"];
+  const CONTEXT_NAME = "enquiry";
+
+  // const sessionId = agent.session.split("/").pop();
+  let context = null;
+  let company = "";
+  let person = "";
+  let phone = "";
+  let product = "";
+
+  //find the session id, if not add this, else ignore
+  //find contact details within the session id, if not add this, else ignore
 
   try {
-    if ((company !== "") && (person !== "") && (phone !== "") && (product !== "")) {
-      // const currentDate = new Date();
+    agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
 
-      // insert to sheet
-      const res = await axios.post(ENQUIRY_SHEETDB_API_URL, 
-                                {Company: company.toUpperCase(),
-                                 Person: person.toUpperCase(),
-                                 Phone: phone,
-                                 Note: product});
+    if (!context) return;
+
+    company = context.parameters["company-name"] ? context.parameters["company-name"].toUpperCase() : ""; 
+    person = context.parameters["person-name"].name ? context.parameters["person-name"].name.toUpperCase() : "";
+    phone = context.parameters["phone-number"] ? context.parameters["phone-number"] : "";
+    product = context.parameters["product"] ? context.parameters["product"] : "";
+
+    if ((company === "") && (person === "") && (phone === "") && (product === "")) return;      
+
+    // insert to sheet
+    const res = await axios.post(ENQUIRY_SHEETDB_API_URL, 
+                              {Company: company.toUpperCase(),
+                                Person: person.toUpperCase(),
+                                Phone: phone,
+                                Note: product});
       
-      if (res.data.created > 0) {
-        agent.add(`Thank you ${person.toUpperCase()} for your interest on our product ${product}! 👍\nOur sales team will contact (${phone}) you soon.`);
-      }
-    }
+    if (res.data.created <= 0) return;
+    
+    const fulfillment = `Thank you *${person.toUpperCase()}* for your interest on our product (*${product}*)! 👍\nOur team will contact (phone. *${phone}*) you soon.\n\nAny thing else?`;
+    agent.add(fulfillment);
   } catch (e) {
     console.log(e);
   };
@@ -459,35 +547,55 @@ const handelEnquiryDetails = async (agent) => {
 
 // Start
 // Customer Support
-const handelCustomerSupport = async (agent) => {
+const handelSupport = async (agent) => {
   try {
-        agent.add(`Sorry, for your inconvenient!🙏\nPlease provide your contact details.\n\nPlease enter your company name:`);
+    // const sessionId = agent.session.split("/").pop();
+    // console.log(agent.context);
+    //find the session id, if not add this
+    //find note within the session id, if not add this, else ignote
+
+    const fulfillment = `Sorry,🙏for your inconvenient!\n\nPlease enter your details including issues.`;
+    agent.add(fulfillment);
   } catch (e) {
     console.log(e);
   };
 };
 
 const handelSupportDetails = async (agent) => {
-  const company = agent.context.get("customersupport").parameters["company-name"];
-  const person = agent.context.get("customersupport").parameters["person-name"];
-  const phone = agent.context.get("customersupport").parameters["phone-number"];
-  const note = agent.context.get("customersupport").parameters["issue-note"];
+  const CONTEXT_NAME = "support";
+  // const sessionId = agent.session.split("/").pop();
+
+  let context = null;
+  let company = "";
+  let person = "";
+  let phone = "";
+  let note = "";
+  
+  //find the session id, if not add this, else ignore
+  //find contact details within the session id, if not add this, else ignore
 
   try {
-    if ((company !== "") && (person !== "") && (phone !== "") && (note !== "")) {
-      // const currentDate = new Date();
+    agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
+    if (!context) return;
 
-      // insert to sheet
-      const res = await axios.post(ENQUIRY_SHEETDB_API_URL, 
-                                {Company: company.toUpperCase(),
-                                 Person: person.toUpperCase(),
-                                 Phone: phone,
-                                 Note: note});
+    company = context.parameters["company-name"] ? context.parameters["company-name"].toUpperCase() : ""; 
+    person = context.parameters["person-name"].name ? context.parameters["person-name"].name.toUpperCase() : "";
+    phone = context.parameters["phone-number"] ? context.parameters["phone-number"] : "";
+    note = context.parameters["issue-note"] ? context.parameters["issue-note"] : "";
+
+    if ((company === "") && (person === "") && (phone === "") && (note === "")) return;      
+
+    // insert to sheet
+    const res = await axios.post(ENQUIRY_SHEETDB_API_URL, 
+                              {Company: company,
+                                Person: person,
+                                Phone: phone,
+                                Note: note});
       
-      if (res.data.created > 0) {
-        agent.add(`Thank you ${person.toUpperCase()}! 👍\nOur support team will contact (${phone}) you soon.`);
-      }
-    }
+    if (res.data.created <= 0) return;
+
+    const fulfillment = `Thank you *${person}*! 👍\nOur support team will contact (Phone. ${phone}) you soon.\n\nAny thing else?`;
+    agent.add(fulfillment);
   } catch (e) {
     console.log(e);
   };
@@ -495,9 +603,20 @@ const handelSupportDetails = async (agent) => {
 // Customer Support
 // End
 
+
+const handelQuit = async (agent) => {
+  const sessionId = agent.session.split("/").pop();
+
+
+  //put all the details to db
+  //find the session id, if found remove this, else ignore
+
+  agent.end("Ok, Buy for now!");
+}
+
 module.exports = {
   handelTest,
-  handelMenu,
+  handelWelcome,
   handelProductMenu,
   handelServerCategoryMenu,
   handelDedicatedServerOSMenu,
@@ -511,6 +630,7 @@ module.exports = {
   handelChatBot,
   handelEnquiry,
   handelEnquiryDetails,
-  handelCustomerSupport,
-  handelSupportDetails
+  handelSupport,
+  handelSupportDetails,
+  handelQuit
 };

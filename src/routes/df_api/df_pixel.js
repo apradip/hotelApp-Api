@@ -1,26 +1,28 @@
 const express = require('express');
 const router = express.Router();
 const { handelTest,
-        handelMenu,
-        handelProductMenu,
-        handelServerCategoryMenu,
-        handelDedicatedServerOSMenu,
-        handelDedicatedWindows,
-        handelDedicatedLinux,
-        handelVPSOSMenu,
-        handelVPSWindows,
-        handelVPSLinux,
-        handelSharedServer,
-        handelEmail,
-        handelChatBot,
-        handelEnquiry,
-        handelEnquiryDetails,
-        handelCustomerSupport,
-        handelSupportDetails } = require("../../controllers/dialogFlow/df_pixel")
+    handelWelcome,
+    handelProductMenu,
+    handelServerCategoryMenu,
+    handelDedicatedServerOSMenu,
+    handelDedicatedWindows,
+    handelDedicatedLinux,
+    handelVPSOSMenu,
+    handelVPSWindows,
+    handelVPSLinux,
+    handelSharedServer,
+    handelEmail,
+    handelChatBot,
+    handelEnquiry,
+    handelEnquiryDetails,
+    handelSupport,
+    handelSupportDetails,
+    handelQuit } = require("../../controllers/dialogFlow/df_pixel")
 
 router.route('/')
     .post(handelTest)
-    .post(handelMenu)
+    
+    .post(handelWelcome)
     .post(handelProductMenu)
     .post(handelServerCategoryMenu)
     .post(handelDedicatedServerOSMenu)
@@ -34,6 +36,7 @@ router.route('/')
     .post(handelChatBot)
     .post(handelEnquiry)
     .post(handelEnquiryDetails)
-    .post(handelCustomerSupport)
+    .post(handelSupport)
     .post(handelSupportDetails)
+    .post(handelQuit)
 module.exports = router;

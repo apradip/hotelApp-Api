@@ -32,7 +32,7 @@ const { handelDemo,
 
     const { 
         handelTest,
-        handelMenu,
+        handelWelcome,
         handelProductMenu,
         handelServerCategoryMenu,
         handelDedicatedServerOSMenu,
@@ -46,8 +46,9 @@ const { handelDemo,
         handelChatBot,
         handelEnquiry,
         handelEnquiryDetails,
-        handelCustomerSupport,
+        handelSupport,
         handelSupportDetails,
+        handelQuit
     } = require('./controllers/dialogFlow/df_pixel');
 
 // const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
@@ -190,10 +191,13 @@ app.post("/wh/api/pixel", express.json(), (req, res) => {
     });
 
     const intentMap = new Map();
-    intentMap.set("TestIntent", handelTest);
     
-    intentMap.set("welcome", handelMenu);
+    intentMap.set("test", handelTest);
+
     
+    intentMap.set("welcome", handelWelcome);
+
+
     intentMap.set("get.product.menu", handelProductMenu);
     
     intentMap.set("get.product.server.menu", handelServerCategoryMenu);
@@ -215,9 +219,12 @@ app.post("/wh/api/pixel", express.json(), (req, res) => {
     intentMap.set("get.enquiry.enquiry", handelEnquiry);
     intentMap.set("post.enquerydetails.enquiry", handelEnquiryDetails);
     
-    intentMap.set("get.customersupport.customersupport", handelCustomerSupport);
-    intentMap.set("post.customerdetails.customersupport", handelSupportDetails);
 
+    intentMap.set("get.customersupport.support", handelSupport);
+    intentMap.set("post.customerdetails.support", handelSupportDetails);
+
+    intentMap.set("quit.event", handelQuit);
+    intentMap.set("quit", handelQuit);
     agent.handleRequest(intentMap);
 });
 
