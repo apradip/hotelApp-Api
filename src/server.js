@@ -229,6 +229,11 @@ app.post("/wh/api/pixel", express.json(), (req, res) => {
 });
 
 
+//send invoice through whatsApp
+app.use("/api/sendinvoice", require("./routes/df_api/send_invoice"));
+
+
+
 //start apis for front end
 //login
 app.use("/api/login", require("./routes/auth"));

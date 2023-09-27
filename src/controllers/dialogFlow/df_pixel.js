@@ -494,7 +494,7 @@ const handelEnquiry = async (agent) => {
     product = context.parameters["product"] ? context.parameters["product"].toUpperCase() : ""; 
     if (product === "") return;      
 
-    const fulfillment = `Thank you!👌\nFor your interest on our product (*${product}*).\n\nPlease provide your details for further communication.`;
+    const fulfillment = `Thank you!👌\nFor your interest on our product (*${product}*).\n\nPlease provide your details for further communication starts with your comany.`;
     agent.add(fulfillment);
   } catch (e) {
     console.log(e);
