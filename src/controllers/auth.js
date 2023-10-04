@@ -2,7 +2,6 @@ const Employee = require("../models/employees");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-
 //handel login with password
 //query string : hotelId
 //body : {"userName" : "", "password" : ""}

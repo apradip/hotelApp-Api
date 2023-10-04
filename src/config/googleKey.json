@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "pixellive-jjf9",
+  "private_key_id": "5c498603cfd546da8514c78cdb41e276d6726db6",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDuJDqOC61ebCpB\ngmfsRztFpkT4VKEItvhDHOmNvfmgkFOL/qBdhjx9CXg146m68hlN/dAKbwH6Ltni\nBd7kjwsR3TD3lVQpcPtsL2/kWrgRTUKOn1eUCj4ovvAb0rpCVfIhhELUuTQ0dm4G\nquewqmToVXLJuyEa1Urf4cs3fQMeX7qp+LDBgc8/0LADsogLswalG/Z5SJ3tnFui\ndLWRI+k6jdHrdTu/hQaTYai3fXIhIo4JZaaLrGCMHZ0BQ734L4VEcJcQNWsb8Zyd\nDrzAOpTuaThzPa/3sHioFs3z0xLMZUfJy5BTYz8qhNIT0Wiq0gtXGEe4NC5Efz5f\n2z99SkJzAgMBAAECggEADyYc13Zks/H7iilKhRxO5/JYxtdTWyOQjWxkaxDftVgZ\nCHnNJ8XnSSj2Da+K14qZE34G4vMG1CxwzdEDydRTpvJEMCu+q9g1Fj+6RXOD7A3X\nIw1927v/EkZ7LbntAVVITtuECNYzPPcfrqrmjDV6r9DnuW9+/p784VsSu1fnf+IF\nqt3bGBDBzVFFRKY95E0j+ceiLROYkH47ZECBIR6cpNEvHS5bTs8RORATLEzUFeDl\n5NnDjIdMrc0yPvCAWXneKFlsoG8Yf7kIz3FrIss1w2pr/0V9SDQQME+JXAVfF/gz\ne34KR+YvFg0aIaqpAxORuVGgzGmjXZPddKltH1LbGQKBgQD3w60XgvAqMEY2ufBo\n96UBi9HH/zNCwUVqiJhvEfCMiuBOk6MmKIQ4EL8AcQSHyxwv6Dgcs1kYoc+OXhGQ\n+1/sW2DhEfWgwS1NiHKs/Ebu0hvFDcULYAiJO3QMr5/gEHoIps+vIRtUHaKz9Hhn\nDGhkYEKxY0MKLYtseKQAzjjxBQKBgQD2DqsGfWVhJDrq5Lb5R9FVi4c4sCJlbCcN\ncNEy7nvGF+TIR3U1grddFg1N7LJ9e1xJwiScL/XeyFrzDtsF/xHQp0KeHXXU3bZW\nTAt6KxeJdQW0IwAhklqZ/HbufPSOst/MJIxhibGo1zQFg1QszZkR0RwS3CFbpgNq\nN9k/AZkfFwKBgQCDFgJUeDB9AcGEXug1gSDKKqG5QOpsHTmO3epYiZNNqIR4zl/5\nZmJeD24e26zb87hcGG7nsHQpNiNMXbTJklX0BXzCV/AvN0WyychygZ895+hNX7Wr\nCQo7ITuLIrhhohYO0cL8E3YUEQHuWCAD1Wq+ALgIhk4H6oTjxQhwbKtvyQKBgQCB\nUMYre/2q5wqb5qYPLuJijhj7/v2kxglkM/WOSe389xPC+mMsQ02w+2T0nkBUWF/x\nV7o756zVcAD0mssbRKmNOkp1pNAHlpo8kmy5wSn2kOz1diuceTlqklfDESLKWFHs\nDQ1GOcKIFMn/V70GautWhMq3Ur+pVf+XdFCVn3Zk8wKBgQCtDRMk2RWAWKP1Fscj\nBy1UWtlhAvSV/DbzQkx2SheSvOe8a+ASnJJJ32luQr6H3C4uYKXWVtZyN2STsUj5\n47E7yS8bxPY3If/Zw7lPDvtiAhjLVoGw1KaNyvrXvFkLYJWuH4Q5aYsemtlcInjg\nNz4EdtvFqhvd1dfa8pcakTTeaA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "pixellive@pixellive-jjf9.iam.gserviceaccount.com",
+  "client_id": "110274659514598045129",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/pixellive%40pixellive-jjf9.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
