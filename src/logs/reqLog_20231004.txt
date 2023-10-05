@@ -1,0 +1,12 @@
+20231004	14:18:48	10dce0a9-22ee-43bc-b8eb-f7c9afdc6156	POST	undefined	/wh/api/
+20231004	14:31:36	976b1cc9-5655-48c3-9f94-6e2f9f0cbae7	POST	undefined	/wh/api/
+20231004	14:56:08	427f5482-326f-442d-8b4e-30534dd1ea86	POST	undefined	/wh/api/
+20231004	15:10:26	45b7160a-9a97-4b19-aeba-d5b7b545881e	GET	undefined	/
+20231004	15:10:26	c3d46bc1-7386-46b2-a0fc-eca626687c17	GET	undefined	/favicon.ico
+20231004	15:20:02	6429617e-b4c2-4982-80ab-5e3746ac507d	POST	undefined	/wh/api/hotel
+20231004	15:20:51	ea316e05-f165-45dc-b7b5-27e1b424cdcf	POST	undefined	/wh/api/hotel
+20231004	15:21:01	b53fb42c-1d72-4de8-9c3d-00a96fdbafdd	POST	undefined	/wh/api/hotel
+20231004	15:24:17	013d1eb7-ceb7-4623-b735-6a11ebeab7b5	POST	undefined	/wh/api/hotel
+20231004	15:24:29	12dcc4c6-dd09-4bc3-ad13-a524fe547b17	POST	undefined	/wh/api/hotel
+20231004	21:31:15	53652039-9828-4bd5-838f-6bb671291d3f	POST	undefined	/wh/api/hotel
+20231004	21:31:27	0af1450a-4516-4a99-b308-6151c68d04ad	POST	undefined	/wh/api/hotel

@@ -256,68 +256,68 @@ const handelServerCategoryMenu = async (agent) => {
 };
 
 
-const handelSubCategoryServerMenu = async (agent) => {
-  const CONTEXT_NAME = "menu";
+// const handelSubCategoryServerMenu = async (agent) => {
+//   const CONTEXT_NAME = "menu";
   
-  let context = null;
-  let category = "";
-  let subCategory = "";
-  let os = "";
+//   let context = null;
+//   let category = "";
+//   let subCategory = "";
+//   let os = "";
 
-  try {
-    agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
-    category = context.parameters["category"] ? context.parameters["category"].toUpperCase() : ""; 
-    subCategory = context.parameters["subCategory"] ? context.parameters["subCategory"].toUpperCase() : ""; 
-    os = context.parameters["os"] ? context.parameters["os"].toUpperCase() : ""; 
+//   try {
+//     agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
+//     category = context.parameters["category"] ? context.parameters["category"].toUpperCase() : ""; 
+//     subCategory = context.parameters["subCategory"] ? context.parameters["subCategory"].toUpperCase() : ""; 
+//     os = context.parameters["os"] ? context.parameters["os"].toUpperCase() : ""; 
 
-    console.log("category : " + category);
-    console.log("subCategory : " + subCategory);
-    console.log("os : " + os);
+//     console.log("category : " + category);
+//     console.log("subCategory : " + subCategory);
+//     console.log("os : " + os);
 
-    // switch(subCategory) {
-    //   case "DEDICATED SERVER":
-    //     switch(os) {
-    //       case "WINDOWS":
+//     // switch(subCategory) {
+//     //   case "DEDICATED SERVER":
+//     //     switch(os) {
+//     //       case "WINDOWS":
               
-    //         break;
+//     //         break;
 
-    //       case "LINUX":
+//     //       case "LINUX":
           
-    //         break;
+//     //         break;
 
-    //       default:
-    //         break;            
-    //     }
+//     //       default:
+//     //         break;            
+//     //     }
       
-    //     break;
+//     //     break;
 
-    //   case "VPS SERVER":
-    //     switch(os) {
-    //       case "WINDOWS":
+//     //   case "VPS SERVER":
+//     //     switch(os) {
+//     //       case "WINDOWS":
               
-    //         break;
+//     //         break;
 
-    //       case "LINUX":
+//     //       case "LINUX":
           
-    //         break;
+//     //         break;
 
-    //       default:
-    //         break;            
-    //     }
+//     //       default:
+//     //         break;            
+//     //     }
 
-    //   break;
+//     //   break;
 
-    //   case "SHARED SERVER":
-    //     break;
+//     //   case "SHARED SERVER":
+//     //     break;
       
-    //   default:
-    //   //code block
-    //   }
+//     //   default:
+//     //   //code block
+//     //   }
 
-  } catch (e) {
-    console.log(e);
-  };
-};
+//   } catch (e) {
+//     console.log(e);
+//   };
+// };
 
 
 
@@ -652,7 +652,7 @@ const handelSupport = async (agent) => {
     //find the session id, if not add this
     //find note within the session id, if not add this, else ignote
 
-    const fulfillment = `Sorry,🙏for your inconvenient!\n\nPlease enter your details including issues.`;
+    const fulfillment = `Sorry,🙏for your inconvenient!\n\nPlease provide your details for further communication starts with your comany.`;
     agent.add(fulfillment);
   } catch (e) {
     console.log(e);

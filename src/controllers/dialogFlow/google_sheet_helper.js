@@ -13,7 +13,6 @@ const supportRange = "support";
 const enquirySheetId = "1Z37U3sG1iS7TWO_GLZplp6wwR8UzCd0BjL-pCcnxuJY";
 const enquiryRange = "enquiry";
 
-
 const formatDate = async (data) => {
   let formatedData = [];
 
@@ -36,7 +35,6 @@ const formatDate = async (data) => {
   return formatedData;
 }
 
-
 const authentication = async () => {
   try {
     const auth = new google.auth.GoogleAuth({
@@ -54,8 +52,6 @@ const authentication = async () => {
   return;
 }
 
-// {"Category": "Server", "SubCategory" : "Dedicated", "OS": "Windows"}
-
 async function getProduct(searchJson = {}) {
   let data = null;
   let condition = "";
@@ -69,34 +65,31 @@ async function getProduct(searchJson = {}) {
 
     data = await formatDate(readData.data.values);  
 
-    // if (searchJson) {
-      for(var key in searchJson) {
-        if (searchJson[key].length > 0) {
-          switch(key) {
-            case "Category":
-              condition = d => d.Category === searchJson[key];
-              data = data.filter(condition);
+    for(var key in searchJson) {
+      if (searchJson[key].length > 0) {
+        switch(key) {
+          case "Category":
+            condition = d => d.Category === searchJson[key];
+            data = data.filter(condition);
+  
+            break;
+          case "SubCategory":
+            condition = d => d.SubCategory === searchJson[key];
+            data = data.filter(condition);
+
+            break;
+          case "OS":
+            condition = d => d.OS === searchJson[key];
+            data = data.filter(condition);
     
-              break;
-            case "SubCategory":
-              condition = d => d.SubCategory === searchJson[key];
-              data = data.filter(condition);
-
-              break;
-            case "OS":
-              condition = d => d.OS === searchJson[key];
-              data = data.filter(condition);
-      
-              break;
-            default:
-              break;
-          }
+            break;
+          default:
+            break;
         }
-        // const search = d => d.Category === searchJson[key];
-        // data = data.filter(search);
       }
-    // }
-
+      // const search = d => d.Category === searchJson[key];
+      // data = data.filter(search);
+    }
   } catch (e) {
     console.error(e);
   }
@@ -139,63 +132,6 @@ async function addProduct(valueJson) {
   return false;
 };
 
-
-// async function delProduct(valueJson) {
-//   try {
-//     const sheets = await authentication();
-
-//     const status = await sheets.spreadsheets.batchUpdate({ 
-//       spreadsheetId : productSheetId, 
-//       range : productRange, 
-//       valueInputOption: valueInputOption, 
-//       resource: {
-//         "requests": 
-//         [
-//           {
-//             "deleteRange": 
-//             {
-//               "range": 
-//               {
-//                 "sheetId": sheetId, 
-//                 "startRowIndex": 0,
-//                 "endRowIndex": 1
-//               },
-//               "shiftDimension": "ROWS"
-//             }
-//           }
-//         ]
-//       }
-//     }).then(response => response.statusText);
-
-
-//     // sheets.spreadsheets.batchUpdate({
-//     //   auth: auth,
-//     //   spreadsheetId: spreadsheetId,
-//     //   resource: {
-//     //     "requests": 
-//     //     [
-//     //       {
-//     //         "deleteRange": 
-//     //         {
-//     //           "range": 
-//     //           {
-//     //             "sheetId": sheetId, // gid
-//     //             "startRowIndex": 0,
-//     //             "endRowIndex": 1
-//     //           },
-//     //           "shiftDimension": "ROWS"
-//     //         }
-//     //       }
-//     //     ]
-//     //   }
-//     // }, (err, response) => {
-//   } catch (e) {
-//     console.error(e);
-//   }
-
-// }
-
-
 async function addSupport(valueJson) {
   try {
     const values = [
@@ -227,7 +163,6 @@ async function addSupport(valueJson) {
 
   return false;
 };
-
 
 async function addEnquiry(valueJson) {
   try {
@@ -261,6 +196,4 @@ async function addEnquiry(valueJson) {
   return false;
 };
 
-
-module.exports = { getProduct, addProduct, addSupport, addEnquiry };
-  
+module.exports = { getProduct, addProduct, addSupport, addEnquiry };  

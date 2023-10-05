@@ -18,10 +18,11 @@ const connectDB = require("./config/dbConn");
 
 //dialog flow api code file
 const { handelDemo, 
-        handelPlaceList,
-        handelGetPlace,
-        handelGetStartDate,
-        handelGetNoOfDays,
+        handelHotelWelcome,
+        handelHotelPlaceList,
+        handelHotelSetPlace,
+        handelHotelGetStartDate,
+        handelHotelGetNoOfDays,
         handelGetNoOfBoders,
         handelRoomEnquiry, 
         handelRoomCategoryBrochier
@@ -162,7 +163,7 @@ app.get("/", (req, res) => {
 
 
 
-app.post("/wh/api/", express.json(), (req, res) => {
+app.post("/wh/api/hotel", express.json(), (req, res) => {
     const agent = new WebhookClient({ 
         request: req, 
         response: res 
@@ -171,10 +172,11 @@ app.post("/wh/api/", express.json(), (req, res) => {
     const intentMap = new Map();
     intentMap.set("DemoIntent", handelDemo);
     
-    intentMap.set("PlaceListIntent", handelPlaceList);
-    intentMap.set("GetPlaceIntent", handelGetPlace);
-    intentMap.set("GetStartDateIntent", handelGetStartDate);
-    intentMap.set("GetNoOfDayToStayIntent", handelGetNoOfDays);
+    intentMap.set("welcome", handelHotelWelcome);
+    intentMap.set("get.place.menu", handelHotelPlaceList);
+    intentMap.set("set.place", handelHotelSetPlace);
+    intentMap.set("GetStartDateIntent", handelHotelGetStartDate);
+    intentMap.set("GetNoOfDayToStayIntent", handelHotelGetNoOfDays);
     intentMap.set("GetBorderCountIntent", handelGetNoOfBoders);
     intentMap.set("GetBorderCountYesIntent", handelRoomEnquiry);
     intentMap.set("GetRoomCategoryBrochierIntent", handelRoomCategoryBrochier);
