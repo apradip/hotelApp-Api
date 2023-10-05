@@ -207,7 +207,7 @@ const handelProductMenu = async (agent) => {
     const res = await getProduct({ "Category": "", "SubCategory" : "", "OS": "" });
 
     if (res) {
-      const fulfillment = `We have quite a range of products (i.e., *Web Servers*, *Email Servers*, *ChatBot Utilities*).\n\nWhich product are you looking for?`;
+      const fulfillment = `We have quite a range of products (i.e., *Servers*, *Email*, *ChatBot*).\n\nWhich product are you looking for?`;
       agent.add(fulfillment);
       
       res.map((item) => {
@@ -254,71 +254,6 @@ const handelServerCategoryMenu = async (agent) => {
     console.log(e);
   };
 };
-
-
-// const handelSubCategoryServerMenu = async (agent) => {
-//   const CONTEXT_NAME = "menu";
-  
-//   let context = null;
-//   let category = "";
-//   let subCategory = "";
-//   let os = "";
-
-//   try {
-//     agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
-//     category = context.parameters["category"] ? context.parameters["category"].toUpperCase() : ""; 
-//     subCategory = context.parameters["subCategory"] ? context.parameters["subCategory"].toUpperCase() : ""; 
-//     os = context.parameters["os"] ? context.parameters["os"].toUpperCase() : ""; 
-
-//     console.log("category : " + category);
-//     console.log("subCategory : " + subCategory);
-//     console.log("os : " + os);
-
-//     // switch(subCategory) {
-//     //   case "DEDICATED SERVER":
-//     //     switch(os) {
-//     //       case "WINDOWS":
-              
-//     //         break;
-
-//     //       case "LINUX":
-          
-//     //         break;
-
-//     //       default:
-//     //         break;            
-//     //     }
-      
-//     //     break;
-
-//     //   case "VPS SERVER":
-//     //     switch(os) {
-//     //       case "WINDOWS":
-              
-//     //         break;
-
-//     //       case "LINUX":
-          
-//     //         break;
-
-//     //       default:
-//     //         break;            
-//     //     }
-
-//     //   break;
-
-//     //   case "SHARED SERVER":
-//     //     break;
-      
-//     //   default:
-//     //   //code block
-//     //   }
-
-//   } catch (e) {
-//     console.log(e);
-//   };
-// };
-
 
 
 // Start

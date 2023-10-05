@@ -202,28 +202,27 @@ app.post("/wh/api/pixel", express.json(), (req, res) => {
 
     intentMap.set("get.product.menu", handelProductMenu);
     
-    intentMap.set("get.product.server.menu", handelServerCategoryMenu);
+    intentMap.set("get.server.menu", handelServerCategoryMenu);
     
-    intentMap.set("get.product.server.dedicated.os.menu", handelDedicatedServerOSMenu);
-    intentMap.set("get.product.server.dedicated.windows.product", handelDedicatedWindows);
-    intentMap.set("get.product.server.dedicated.linux.product", handelDedicatedLinux);
+    intentMap.set("get.dedicated.os.menu", handelDedicatedServerOSMenu);
+    intentMap.set("get.dedicated.windows.product", handelDedicatedWindows);
+    intentMap.set("get.dedicated.linux.product", handelDedicatedLinux);
     
-    intentMap.set("get.product.server.vps.os.menu", handelVPSOSMenu);
-    intentMap.set("get.product.server.vps.windows.product", handelVPSWindows);
-    intentMap.set("get.product.server.vps.linux.product", handelVPSLinux);
+    intentMap.set("get.vps.os.menu", handelVPSOSMenu);
+    intentMap.set("get.vps.windows.product", handelVPSWindows);
+    intentMap.set("get.vps.linux.product", handelVPSLinux);
 
-    intentMap.set("get.product.server.share.product", handelSharedServer);
+    intentMap.set("get.server.share.product", handelSharedServer);
 
-    intentMap.set("get.product.email.product", handelEmail);
+    intentMap.set("get.email.product", handelEmail);
 
-    intentMap.set("get.product.chatbot.product", handelChatBot);
+    intentMap.set("get.chatbot.product", handelChatBot);
 
-    intentMap.set("get.enquiry.enquiry", handelEnquiry);
-    intentMap.set("post.enquerydetails.enquiry", handelEnquiryDetails);
-    
+    intentMap.set("get.enquiry", handelEnquiry);
+    intentMap.set("post.enquery.details", handelEnquiryDetails);
 
-    intentMap.set("get.customersupport.support", handelSupport);
-    intentMap.set("post.customerdetails.support", handelSupportDetails);
+    intentMap.set("get.customersupport", handelSupport);
+    intentMap.set("post.customersupport.details", handelSupportDetails);
 
     intentMap.set("quit.event", handelQuit);
     intentMap.set("quit", handelQuit);
