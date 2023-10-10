@@ -17,15 +17,17 @@ const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
 
 //dialog flow api code file
-const { handelDemo, 
+const { handelHotelDemo, 
         handelHotelWelcome,
         handelHotelPlaceList,
         handelHotelSetPlace,
-        handelHotelGetStartDate,
-        handelHotelGetNoOfDays,
-        handelGetNoOfBoders,
-        handelRoomEnquiry, 
-        handelRoomCategoryBrochier
+        handelHotelSetStartDate,
+        handelHotelSetDayCount,
+        handelHotelSetRoomCategory,
+        handelHotelSetRoomCategoryFollowupYes,
+        handelHotelSetRoomCategoryFollowupNo,
+        // handelRoomEnquiry, 
+        // handelHotelRoomCategoryBrochier
         // handelRoomBooking, 
         // handelPaymentRealising, 
         // handelCancellation 
@@ -170,16 +172,18 @@ app.post("/wh/api/hotel", express.json(), (req, res) => {
     });
 
     const intentMap = new Map();
-    intentMap.set("DemoIntent", handelDemo);
+    intentMap.set("demo", handelHotelDemo);
     
     intentMap.set("welcome", handelHotelWelcome);
     intentMap.set("get.place.menu", handelHotelPlaceList);
     intentMap.set("set.place", handelHotelSetPlace);
-    intentMap.set("GetStartDateIntent", handelHotelGetStartDate);
-    intentMap.set("GetNoOfDayToStayIntent", handelHotelGetNoOfDays);
-    intentMap.set("GetBorderCountIntent", handelGetNoOfBoders);
-    intentMap.set("GetBorderCountYesIntent", handelRoomEnquiry);
-    intentMap.set("GetRoomCategoryBrochierIntent", handelRoomCategoryBrochier);
+    intentMap.set("set.start.date", handelHotelSetStartDate);
+    intentMap.set("set.day.count", handelHotelSetDayCount);
+    intentMap.set("set.room.category", handelHotelSetRoomCategory);
+    intentMap.set("set.room.category - yes", handelHotelSetRoomCategoryFollowupYes);
+    intentMap.set("set.room.category - no", handelHotelSetRoomCategoryFollowupNo);
+    //intentMap.set("GetBorderCountYesIntent", handelRoomEnquiry);
+    // intentMap.set("get.room.category.brochier", handelHotelRoomCategoryBrochier);
     
     agent.handleRequest(intentMap);
 });
@@ -187,46 +191,49 @@ app.post("/wh/api/hotel", express.json(), (req, res) => {
 
 
 app.post("/wh/api/pixel", express.json(), (req, res) => {
-    const agent = new WebhookClient({ 
-        request: req, 
-        response: res 
-    });
+    try {
+        const agent = new WebhookClient({ 
+            request: req, 
+            response: res 
+        });
 
-    const intentMap = new Map();
+        const intentMap = new Map();
     
-    intentMap.set("test", handelTest);
+        intentMap.set("test", handelTest);
+        
+        intentMap.set("welcome", handelWelcome);
 
+        intentMap.set("get.product.menu", handelProductMenu);
+        
+        intentMap.set("get.server.menu", handelServerCategoryMenu);
+        
+        intentMap.set("get.dedicated.os.menu", handelDedicatedServerOSMenu);
+        intentMap.set("get.dedicated.windows.product", handelDedicatedWindows);
+        intentMap.set("get.dedicated.linux.product", handelDedicatedLinux);
     
-    intentMap.set("welcome", handelWelcome);
+        intentMap.set("get.vps.os.menu", handelVPSOSMenu);
+        intentMap.set("get.vps.windows.product", handelVPSWindows);
+        intentMap.set("get.vps.linux.product", handelVPSLinux);
 
+        intentMap.set("get.server.share.product", handelSharedServer);
 
-    intentMap.set("get.product.menu", handelProductMenu);
-    
-    intentMap.set("get.server.menu", handelServerCategoryMenu);
-    
-    intentMap.set("get.dedicated.os.menu", handelDedicatedServerOSMenu);
-    intentMap.set("get.dedicated.windows.product", handelDedicatedWindows);
-    intentMap.set("get.dedicated.linux.product", handelDedicatedLinux);
-    
-    intentMap.set("get.vps.os.menu", handelVPSOSMenu);
-    intentMap.set("get.vps.windows.product", handelVPSWindows);
-    intentMap.set("get.vps.linux.product", handelVPSLinux);
+        intentMap.set("get.email.product", handelEmail);
 
-    intentMap.set("get.server.share.product", handelSharedServer);
+        intentMap.set("get.chatbot.product", handelChatBot);
 
-    intentMap.set("get.email.product", handelEmail);
+        intentMap.set("get.enquiry", handelEnquiry);
+        intentMap.set("post.enquery.details", handelEnquiryDetails);
 
-    intentMap.set("get.chatbot.product", handelChatBot);
+        intentMap.set("get.customersupport", handelSupport);
+        intentMap.set("post.customersupport.details", handelSupportDetails);
 
-    intentMap.set("get.enquiry", handelEnquiry);
-    intentMap.set("post.enquery.details", handelEnquiryDetails);
-
-    intentMap.set("get.customersupport", handelSupport);
-    intentMap.set("post.customersupport.details", handelSupportDetails);
-
-    intentMap.set("quit.event", handelQuit);
-    intentMap.set("quit", handelQuit);
-    agent.handleRequest(intentMap);
+        intentMap.set("quit.event", handelQuit);
+        intentMap.set("quit", handelQuit);
+        
+        agent.handleRequest(intentMap);
+    } catch (e) {
+        console.log(e);
+    }
 });
 
 

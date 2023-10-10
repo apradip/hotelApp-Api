@@ -1,8 +1,7 @@
-const { Card, Suggestion, Image } = require("dialogflow-fulfillment");
-const { getProduct, addProduct, addSupport, addEnquiry } = require("./google_sheet_helper");
+const { Suggestion, Image, Card } = require("dialogflow-fulfillment");
+const { getProduct, addSupport, addEnquiry } = require("./google_sheet_helper");
 
-
-class chat {
+class chatType {
   constructor(company = "", person = "", phone = "", note = "", products = []) {
     this.company = company,  
     this.person = person,
@@ -17,174 +16,58 @@ let chatDictionary = {};
 
 const handelTest = async (agent) => {
   console.log("handelTest");
-  const CONTEXT_NAME = "test";
-  let person = "";
-
-  const productAddValue = {
-    "Category": "Server1",	
-    "SubCategory": "Dedicated1",	
-    "OS": "Windows",
-    "Name":	"Win Light (D) 1",	
-    "Description": "1 Core CPU, 256 MB Memory, 50 GB SSD Storage with pre-loaded latest version of windows OS.",	
-    "Price": "1500",	
-    "Unit": "per month", 
-    "Keyword": ""};
-
-  const a = await addProduct(productAddValue);
-  console.log(a);
-
-  // const productDelValue = {
-  //   "Category": "Server1",	
-  //   "SubCategory": "Dedicated1",	
-  //   "OS": "Windows",
-  //   "Name":	"Win Light (D) 1"};
-
-  // const b = await delProduct(productDelValue);
-  // console.log(b);
-  // const allProducts = await getProduct();
-  // console.log(allProducts);
-
-
-  agent.end("ok bye");
-
+  // const CONTEXT_NAME = "test";
   // const sessionId = agent.session.split("/").pop();
-  
   //agent.context.get(CONTEXT_NAME) ? person = agent.context.get(CONTEXT_NAME).parameters["person"].name : person = "";
-  //person !== "" ? agent.add(`Thank's ${person}! Do you want any thing else?`) : null;
 
-  // const paraCpmpany = "Pixel";
-  // const paraPerson = "Pradip";
-  // const paraPhone = "9830152752";
-  // const paraNote = "Server error";
-  // const paraProduct = "Win Light (D)";
-  
-  // try {
-    // let currentChat = chatDictionary[sessionId];
-
-    // if (!currentChat) {
-    //   let productArr = [];
-      
-    //   if (paraProduct !== "") {
-    //     productArr.splice(0, 0, paraProduct);
-    //   }
-
-    //   chatDictionary[sessionId] = new chat( 
-    //                                         paraCpmpany !== "" ? paraCpmpany : "", 
-    //                                         paraPerson !== "" ? paraPerson : "", 
-    //                                         paraPhone !== "" ? paraPhone : "", 
-    //                                         paraNote !== "" ? paraNote : "", 
-    //                                         productArr);
-    // } else {
-    //   chatDictionary[sessionId].chat.company = "Coral";
-    // }
-
-    // console.log(chatDictionary);
-    // console.log(chatDictionary[sessionId].products);
-
-    // chatDictionary[sessionId].products.forEach((product) => {
-    //   console.log(product);
-    // })
-
-    // chatList.map((item) => {
-    //   if (item.sessionId === sessionId) {
-    //     if (((item.company === "") || (item.person === "") || (item.phone === "")) && ((paraCpmpany !== "") || (paraPerson !== "") || (paraPhone !== ""))) {
-    //       item.company = paraCpmpany;
-    //       item.person = paraPerson;
-    //       item.phone = paraPhone;
-
-    //       chatList[idx].company = item.company;
-    //       chatList[idx].person = item.person ;
-    //       chatList[idx].phone = item.phone;
-    //     }
-
-    //     if ((item.note === "") && (paraNote !== "")) {
-    //       item.note = paraNote;
-          
-    //       chatList[idx].note = item.note;
-    //     }
-
-    //     if (item.products.length === 0) {
-    //       if (paraProduct !== "") {
-    //         item.products.push(paraProduct);
-
-    //         chatList[idx].products = item.products;
-    //       }
-    //     } else {
-    //       if (paraProduct !== "") {
-    //         let isProductFound = false;
-
-    //         item.products.map((product) => {
-    //           if (product === paraProduct) {
-    //             isProductFound = true;
-    //           }
-    //         });
-
-    //         if (!isProductFound) {
-    //           item.products.push(paraProduct);
-
-    //           chatList[idx].products = item.products;
-    //         }
-    //       }
-    //     }
-
-    //     currentChat = item;
-    //     isSessionFound = true;
-    //   }
-
-    //   idx++;
-    // });
-
-    // if (!isSessionFound) {
-    //   let productArr = [];
-    //   currentChat = new chatType(sessionId, 
-    //                               paraCpmpany !== "" ? paraCpmpany : "", 
-    //                               paraPerson !== "" ? paraPerson : "", 
-    //                               paraPhone !== "" ? paraPhone : "", 
-    //                               paraNote !== "" ? paraNote : "", 
-    //                               paraProduct !== "" ? productArr.push(paraProduct) : productArr);
-
-    //   chatList.push(currentChat);
-    // }
-
-    // console.log(chatList);
-    // console.log(currentChat);
-    // console.log(currentChat.products[0]);
-
+  try {
     //add text
-    // agent.add("What is your name ?");
+    agent.add("This is text test.");
     
     //add suggestion clip
-    // agent.add(new Suggestion("Products"));
-    // agent.add(new Suggestion("Accounts"));
-    // agent.add(new Suggestion("Customer Service"));
+    agent.add(new Suggestion("1. Suggestion"));
+    agent.add(new Suggestion("2. Suggestion"));
+    agent.add(new Suggestion("3. Suggestion"));
 
-    // agent.add(new Suggestion({
-    //   title: 'Visit our website',
-    //   url: 'https://forms.gle/ubCWmJqwet29M5jS6',
-    // }));
+    // add image 
+    agent.add(new Image({
+      imageUrl: 'https://s3.ap-south-1.amazonaws.com/emaillive.in/images/pixel_logo.png',
+      accessibilityText: 'This is the description of the image',
+    }));
 
-    // agent.add(new Image({
-    //   imageUrl: 'https://s3.ap-south-1.amazonaws.com/emaillive.in/images/Ganeshchaturti.jpg',
-    //   accessibilityText: 'This is the description of the image',
-    // }));
+    // add media card
+    agent.add(new Card({
+      title: `Title: this is a card title`,
+      text: `This is the body text of a card. You can even use line breaks and emoji! \uD83D\uDC81`,
+      buttonText: 'Click me',
+      buttonUrl: 'https://hoteldolphin.in/digha.php'
+    }));
 
-    // agent.add(new Card({
-    //   title: `Title: this is a card title`,
-    //   text: `This is the body text of a card. You can even use line breaks and emoji! \uD83D\uDC81`,
-    //   buttonText: 'Click me',
-    //   buttonUrl: 'https://forms.gle/ubCWmJqwet29M5jS6'
-    // }));
-
-  // } catch (e) {
-  //   console.log(e)
-  // };
+    // end context
+    agent.end("ok bye");
+  } catch (e) {
+    console.log(e)
+  };
 };
 
 // Start
 // Initial menu
 const handelWelcome = async (agent) => {
+  let isOldSession = false;
+
   try {
-    // const sessionId = agent.session.split("/").pop();
+    const sessionId = agent.session.split("/").pop();
+    
+    for(var key in chatDictionary) {
+      if (key === sessionId) {
+        isOldSession = true;
+      }
+    }
+
+    if (!isOldSession) {
+      chatDictionary[sessionId] = new chatType();
+    }
+
     const fulfillment = `Welcome to Pixel Informatics! 👨‍💼\nI'm happy to help you with anything you need today. It's a pleasure to chat with you today. \n\nWhat do you like to know (Product or Support)?`;
 
     agent.add(fulfillment);
@@ -203,7 +86,6 @@ const handelProductMenu = async (agent) => {
   let category = [];
 
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "", "SubCategory" : "", "OS": "" });
 
     if (res) {
@@ -234,7 +116,6 @@ const handelServerCategoryMenu = async (agent) => {
   let subcategory = [];
 
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "", "OS": "" });
 
     if (res) {
@@ -262,7 +143,6 @@ const handelDedicatedServerOSMenu = async (agent) => {
   let osArr = [];
 
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "Dedicated", "OS": "" });
 
     if (res) {
@@ -285,7 +165,6 @@ const handelDedicatedServerOSMenu = async (agent) => {
 
 const handelDedicatedWindows = async (agent) => {
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "Dedicated", "OS": "Windows" });
 
     if (res) {
@@ -310,7 +189,6 @@ const handelDedicatedWindows = async (agent) => {
 
 const handelDedicatedLinux = async (agent) => {
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "Dedicated", "OS": "Linux" });
 
     if (res) {
@@ -324,7 +202,7 @@ const handelDedicatedLinux = async (agent) => {
 
       agent.add(fulfillment);
       
-      res.data.map((item) => {
+      res.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
@@ -342,7 +220,6 @@ const handelVPSOSMenu = async (agent) => {
   let osArr = [];
 
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "VPS", "OS": "" });
 
     if (res) {
@@ -367,7 +244,6 @@ const handelVPSWindows = async (agent) => {
   let idx = 0;
 
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "VPS", "OS": "Windows" });
 
     if (res) {
@@ -380,7 +256,7 @@ const handelVPSWindows = async (agent) => {
 
       agent.add(fulfillment);
       
-      res.data.map((item) => {
+      res.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
@@ -393,7 +269,6 @@ const handelVPSLinux = async (agent) => {
   let idx = 0;
 
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "VPS", "OS": "Linux" });
 
     if (res) {
@@ -406,7 +281,7 @@ const handelVPSLinux = async (agent) => {
 
       agent.add(fulfillment);
       
-      res.data.map((item) => {
+      res.map((item) => {
         agent.add(new Suggestion(`${item.Name}`));
       });
     }
@@ -424,7 +299,6 @@ const handelSharedServer = async (agent) => {
   let idx = 0;
 
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Server", "SubCategory" : "Shared", "OS": "" });
 
     if (res) {
@@ -457,7 +331,6 @@ const handelSharedServer = async (agent) => {
 // Email
 const handelEmail = async (agent) => {
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "Email", "SubCategory" : "", "OS": "" });
 
     if (res) {
@@ -487,7 +360,6 @@ const handelEmail = async (agent) => {
 // ChatBot
 const handelChatBot = async (agent) => {
   try {
-    // const sessionId = agent.session.split("/").pop();
     const res = await getProduct({ "Category": "ChatBot", "SubCategory" : "", "OS": "" });
 
     if (res) {
@@ -516,18 +388,12 @@ const handelChatBot = async (agent) => {
 // Start
 // Enquiry
 const handelEnquiry = async (agent) => {
-  const CONTEXT_NAME = "enquiry";
-  //const sessionId = agent.session.split("/").pop();
-
-  let product = "";
-
   try {
-    agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
-    if (!context) return;
-
-    product = context.parameters["product"] ? context.parameters["product"].toUpperCase() : ""; 
+    const sessionId = agent.session.split("/").pop();
+    const product = agent.parameters["product"];
     if (product === "") return;      
 
+    chatDictionary[sessionId].products.push(product); 
     const fulfillment = `Thank you!👌\nFor your interest on our product (*${product}*).\n\nPlease provide your details for further communication starts with your comany.`;
     agent.add(fulfillment);
   } catch (e) {
@@ -536,30 +402,19 @@ const handelEnquiry = async (agent) => {
 };
 
 const handelEnquiryDetails = async (agent) => {
-  const CONTEXT_NAME = "enquiry";
-
-  // const sessionId = agent.session.split("/").pop();
-  let context = null;
-  let company = "";
-  let person = "";
-  let phone = "";
-  let product = "";
-
-  //find the session id, if not add this, else ignore
-  //find contact details within the session id, if not add this, else ignore
-
   try {
-    agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
-
-    if (!context) return;
-
-    company = context.parameters["company-name"] ? context.parameters["company-name"].toUpperCase() : ""; 
-    person = context.parameters["person-name"].name ? context.parameters["person-name"].name.toUpperCase() : "";
-    phone = context.parameters["phone-number"] ? context.parameters["phone-number"] : "";
-    product = context.parameters["product"] ? context.parameters["product"] : "";
+    const sessionId = agent.session.split("/").pop();
+    const company = agent.parameters["company-name"];
+    const person = agent.parameters["person-name"].name;
+    const phone = agent.parameters["phone-number"];
+    const product = agent.parameters["product"];
 
     if ((company === "") && (person === "") && (phone === "") && (product === "")) return;      
 
+    chatDictionary[sessionId].company = company;
+    chatDictionary[sessionId].person = person;
+    chatDictionary[sessionId].phone = phone;
+    
     // insert to sheet
     const response = await addEnquiry({Company: company.toUpperCase(),
                                   Person: person.toUpperCase(),
@@ -582,11 +437,6 @@ const handelEnquiryDetails = async (agent) => {
 // Customer Support
 const handelSupport = async (agent) => {
   try {
-    // const sessionId = agent.session.split("/").pop();
-    // console.log(agent.context);
-    //find the session id, if not add this
-    //find note within the session id, if not add this, else ignote
-
     const fulfillment = `Sorry,🙏for your inconvenient!\n\nPlease provide your details for further communication starts with your comany.`;
     agent.add(fulfillment);
   } catch (e) {
@@ -595,29 +445,20 @@ const handelSupport = async (agent) => {
 };
 
 const handelSupportDetails = async (agent) => {
-  const CONTEXT_NAME = "support";
-  // const sessionId = agent.session.split("/").pop();
-
-  let context = null;
-  let company = "";
-  let person = "";
-  let phone = "";
-  let note = "";
-  
-  //find the session id, if not add this, else ignore
-  //find contact details within the session id, if not add this, else ignore
-
   try {
-    agent.context.get(CONTEXT_NAME) ? context = agent.context.get(CONTEXT_NAME) : context = null;
-    if (!context) return;
-
-    company = context.parameters["company-name"] ? context.parameters["company-name"].toUpperCase() : ""; 
-    person = context.parameters["person-name"].name ? context.parameters["person-name"].name.toUpperCase() : "";
-    phone = context.parameters["phone-number"] ? context.parameters["phone-number"] : "";
-    note = context.parameters["issue-note"] ? context.parameters["issue-note"] : "";
+    const sessionId = agent.session.split("/").pop();
+    const company = agent.parameters["company-name"];
+    const person = agent.parameters["person-name"].name;
+    const phone = agent.parameters["phone-number"];
+    const note = agent.parameters["issue-note"];
 
     if ((company === "") && (person === "") && (phone === "") && (note === "")) return;      
     
+    chatDictionary[sessionId].company = company;
+    chatDictionary[sessionId].person = person;
+    chatDictionary[sessionId].phone = phone;
+    chatDictionary[sessionId].note = note;
+
     // insert to sheet
     const response = await addSupport({Company: company,
                                         Person: person,
@@ -639,10 +480,7 @@ const handelSupportDetails = async (agent) => {
 const handelQuit = async (agent) => {
   const sessionId = agent.session.split("/").pop();
 
-
-  //put all the details to db
-  //find the session id, if found remove this, else ignore
-
+  delete chatDictionary[sessionId];
   agent.end("Ok, Buy for now!");
 }
 

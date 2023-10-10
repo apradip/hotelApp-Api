@@ -1,6 +1,5 @@
 version: '3.9'
 services:
-  # Node JS API https://www.youtube.com/watch?v=vm3YfOHf_Cc
   api:
     container_name: api_container
     build: .

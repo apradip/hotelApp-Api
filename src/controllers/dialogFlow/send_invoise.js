@@ -18,8 +18,6 @@ const handelSendInvoice = async (req, res) => {
                 media: {url: INVOICE_URL, filename: FILE_TYPE},
                 templateParams: [products, total]});
 
-        console.log(res.data);
-
         if (res.data !== "Success") {
             return false;
         } else {
