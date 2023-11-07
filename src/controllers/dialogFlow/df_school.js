@@ -201,7 +201,7 @@ const handelDistrictStatics = async (agent) => {
           }
         });
 
-        const fulfillment = `School statics for *${district}* as follows :\n\nTotal no of school(s) : ${total}\nUp to grade IV\nUp to grade IV : ${class_4}\nUp to grade V : ${class_5}\nUp to grade VIII : ${class_8}\nUp to grade X : ${class_10}\nUp to grade XII : ${class_12}\n\nNo. of School Type\nCo-ed : ${coed}, Girls : ${girl}, Boys : ${boy}\n\nNo. of School have Toilet\nGirls : ${toilet_g},  Boys : ${toilet_b}\n\nNo. of School have Water : ${water}\nNo. of School have Hand pump : ${hand_pump}\nNo. of School have Whell port : ${whell_port}\nNo. of School(s) have Tap water : ${tap}\nNo. of School(s) have Packet water : ${pack_water}\n\nNo. of School have Hand wash facility : ${hand_wash}\n\nNo. of School have Electricity : ${electricity}\n\nNo. of School have Play ground : ${play_ground}`;
+        const fulfillment = `School statics for *${district}* as follows :\n\nTotal no of school(s) : ${total}\nup to grade IV : ${class_4}\nup to grade V : ${class_5}\nup to grade VIII : ${class_8}\nup to grade X : ${class_10}\nup to grade XII : ${class_12}\nhave Water : ${water}\nhave Hand pump : ${hand_pump}\nhave Whell port : ${whell_port}\nhave Tap water : ${tap}\nhave Packet water : ${pack_water}\nhave Hand wash facility : ${hand_wash}\nhave Electricity : ${electricity}\nhave Play ground : ${play_ground}\n\nType\nCo-ed : ${coed}, Girls : ${girl}, Boys : ${boy}\n\nhave Toilet\nGirls : ${toilet_g},  Boys : ${toilet_b}`;
 
         agent.add(fulfillment);
         agent.add(new Suggestion('School Info.'));
