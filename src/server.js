@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const app = express();
+// const app = express();
 const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
 // const http = require("http");
@@ -8,7 +8,7 @@ const https = require("https");
 const fs = require("fs");
 const { Server } = require("socket.io");
 const { WebhookClient } = require('dialogflow-fulfillment');
-const socketOptions = require("./config/socketOptions");
+
 const { logger } = require("./middlewares/logEvents");
 const errorHandler = require("./middlewares/errorHandler");
 const verifyJWT = require("./middlewares/verifyJWT");
@@ -16,7 +16,23 @@ const cookieParser = require("cookie-parser");
 const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
 
+// const PORT_HTTP_EXPRESS = process.env.API_SERVER_HTTP_PORT || process.env.API_SERVER_HTTP_PORT_ALTERNATIVE;
+const PORT_HTTPS_EXPRESS = process.env.API_SERVER_HTTPS_PORT || process.env.API_SERVER_HTTPS_PORT_ALTERNATIVE;
+const PORT_SOCKET = process.env.SOCKET_PORT || process.env.SOCKET_PORT_ALTERNATIVE; 
+
 //dialog flow api code file
+const { 
+    // handelSchoolDemo, 
+    handelSchoolWelcome,
+    handelIndividualSchoolMenu,
+    handelIndividualSchool,
+    handelDistrictStaticsMenu,
+    handelDistrictStatics,
+    // handelSuggestionMenu,
+    // handelSuggestionDetails,
+    handelSchoolQuit
+} = require('./controllers/dialogFlow/df_school');
+
 const { handelHotelDemo, 
         handelHotelWelcome,
         handelHotelPlaceList,
@@ -31,9 +47,10 @@ const { handelHotelDemo,
         // handelRoomBooking, 
         // handelPaymentRealising, 
         // handelCancellation 
+        handelHotelQuit
     } = require('./controllers/dialogFlow/df_rooms');
 
-    const { 
+const { 
         handelTest,
         handelWelcome,
         handelProductMenu,
@@ -54,11 +71,7 @@ const { handelHotelDemo,
         handelQuit
     } = require('./controllers/dialogFlow/df_pixel');
 
-// const PORT_HTTP_EXPRESS = process.env.API_HTTP_SERVER_PORT || 3500;
-const PORT_HTTPS_EXPRESS = process.env.API_HTTPS_SERVER_PORT || 3511;
-const PORT_SOCKET = process.env.SOCKET_PORT || 3600; 
-
-const httpsOptions = {
+const httpsCredential = {
     key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
     cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
 };
@@ -70,6 +83,19 @@ const messageRoom = {
     Miscellaneous: "SOCKET_MISCELLANEOUS"
 };
  
+
+
+const app = express();
+const httpsServer = https.createServer(httpsCredential, app);
+const io = new Server(httpsServer, {
+    cors: {
+      origin: `${process.env.API_SERVER_DOMAIN}:${PORT_SOCKET}`,
+      methods: ["GET", "POST"]
+    }
+});
+
+
+
 // Connect to MongoDB
 connectDB();
 
@@ -91,9 +117,9 @@ app.use(express.json());
 
 // create and run node server
 // const httpServer = http.createServer(app);
-const httpsServer = https.createServer(httpsOptions, app);
+// const httpsServer = https.createServer(httpsCredential, app);
 
-// // create & run socket server for front end communication
+// create & run socket server for front end communication
 // const io = new Server(httpServer, {
 //     cors: {
 //       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
@@ -101,43 +127,19 @@ const httpsServer = https.createServer(httpsOptions, app);
 //     }
 // });
 
-const io = new Server(httpsServer, {
-    cors: {
-      origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
-      methods: ["GET", "POST"]
-    }
-});
-  
-io.on("connection", (socket) => {
-    // console.log(`User Connected: ${socket.id}`);
-  
-    // socket.on("join_room", (data) => {
-    //     // console.log("join_room" + data);
-    //     socket.join(data);
-    // });
-  
-    // socket.on("send_message", (data) => {
-    //     // console.log("send_message" + data);
-    //     socket.broadcast.emit("receive_message", data);
-    //     // socket.to(data.room).emit("receive_message", data);
-    // });
+// const io = socketIO(httpsServer);
 
-    socket.on(messageRoom.Miscellaneous, (message) => {
-        socket.broadcast.emit(messageRoom.Miscellaneous, message);
-    });
+// const io = new Server(httpsServer, {
+//     cors: {
+//       origin: `${process.env.API_SERVER_DOMAIN}:${PORT_SOCKET}`,
+//       methods: ["GET", "POST"]
+//     }
+// });
 
-    socket.on(messageRoom.Service, (message) => {
-        socket.broadcast.emit(messageRoom.Service, message);
-    });
+// io.listen(PORT_SOCKET, () => {
+//     console.log(`Socket server is running on ${PORT_SOCKET}...`);
+// });
 
-    socket.on(messageRoom.Table, (message) => {
-        socket.broadcast.emit(messageRoom.Table, message);
-    });
-
-    socket.on(messageRoom.Room, (message) => {
-        socket.broadcast.emit(messageRoom.Room, message);
-    });
-});
   
 //middleware for cookies
 app.use(cookieParser());
@@ -164,6 +166,32 @@ app.get("/", (req, res) => {
 // });
 
 
+app.post("/wh/api/school", express.json(), (req, res) => {
+    const agent = new WebhookClient({ 
+        request: req, 
+        response: res 
+    });
+
+    const intentMap = new Map();
+    
+    // intentMap.set("demo", handelSchoolDemo);
+    
+    intentMap.set("welcome", handelSchoolWelcome);
+
+    intentMap.set("get.individual.school.menu", handelIndividualSchoolMenu);
+    intentMap.set("get.individual.school.details", handelIndividualSchool);
+
+    intentMap.set("get.statics.district.menu", handelDistrictStaticsMenu);
+    intentMap.set("get.statics.district.details", handelDistrictStatics);
+
+    // intentMap.set("get.suggestion.menu", handelSuggestionMenu);
+    // intentMap.set("post.suggestion.details", handelSuggestionDetails);
+
+    intentMap.set("quit.event", handelSchoolQuit);
+    intentMap.set("quit", handelSchoolQuit);
+
+    agent.handleRequest(intentMap);
+});
 
 app.post("/wh/api/hotel", express.json(), (req, res) => {
     const agent = new WebhookClient({ 
@@ -185,10 +213,11 @@ app.post("/wh/api/hotel", express.json(), (req, res) => {
     //intentMap.set("GetBorderCountYesIntent", handelRoomEnquiry);
     // intentMap.set("get.room.category.brochier", handelHotelRoomCategoryBrochier);
     
+    intentMap.set("quit.event", handelHotelQuit);
+    intentMap.set("quit", handelHotelQuit);
+
     agent.handleRequest(intentMap);
 });
-
-
 
 app.post("/wh/api/pixel", express.json(), (req, res) => {
     try {
@@ -326,6 +355,33 @@ app.use("/api/guestPayments", require("./routes/api/guestPayments"));
 app.use("/api/guestExpensesPayments", require("./routes/api/guestExpensesPayments"));
 
 app.use(errorHandler);
+
+
+io.on("connection", (socket) => {
+    console.log(`Socket connected: ${socket.id}`);
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    });
+
+    socket.on(messageRoom.Miscellaneous, (data) => {
+        socket.broadcast.emit(messageRoom.Miscellaneous, data);
+    });
+
+    socket.on(messageRoom.Service, (data) => {
+        socket.broadcast.emit(messageRoom.Service, data);
+    });
+
+    socket.on(messageRoom.Table, (data) => {
+        console.log("messageRoom.Table : " + data);
+
+        socket.broadcast.emit(messageRoom.Table, data);
+    });
+
+    socket.on(messageRoom.Room, (data) => {
+        socket.broadcast.emit(messageRoom.Room, data);
+    });
+});
 
 app.listen(PORT_SOCKET, () => {
     console.log(`Socket server is running on ${PORT_SOCKET}...`);

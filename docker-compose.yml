@@ -7,27 +7,32 @@ services:
       - 3001:3001
       - 443:443
     environment:
-      - API_DOMAIN=https://hotelapi.wikitoria.in
-      - FRONTEND_DOMAIN=https://hotel.wikitoria.in:80
-      - GOOGLE_DOMAIN=https://google.com
-      - GOOGLE_CLOUD_DOMAIN=https://cloud.google.com
-      - GOOGLE_DIALOGFLOW_DOMAIN=https://dialogflow.cloud.google.com
+      - API_SERVER_DOMAIN=https://hotelapi.wikitoria.in
+      - API_SERVER_IP=43.239.110.22
+      - API_SERVER_HTTPS_PORT=443
+      - API_SERVER_HTTPS_PORT_ALTERNATIVE=3511
       - API_SERVER_SSL_KEY_FILE=.//sslcert//private.key
       - API_SERVER_SSL_CERT_FILE=.//sslcert//certificate.crt
-      - API_SERVER_IP=43.239.110.22
-      - API_HTTPS_SERVER_PORT=443
-      - SOCKET_PORT=3001
-      - SOCKET_PRIVATE_KEY=abcd
-      - SOCKET_PUBLIC_KEY=efgh
-      - FRONTEND_SERVER_IP=43.239.110.22
-      - FRONTEND_SERVER_PORT=3000
+
+      - DATABASE_URI=mongodb+srv://apiUser:P9i8X3e0l0@hotelapp.nei0nms.mongodb.net/hotelApp
+
       - ACCESS_TOKEN_SECRET=79929dab59c07b6b8a82b4d2805f725b65eb5cf5d7a55733d6fb4cf46bd589585ee120568a6d972019ac303e1e19268a4b5b8c9679da3ced537f64f764185406
       - REFRESH_TOKEN_SECRET=dded652ea31c8a34d294a24d715e79a9d44e74cb9c17fba822766c3408db046faa89ab8c94bbd67c1929f332c391eeba29016ea85355367e6860abaaed26d637
-      - DATABASE_URI=mongodb+srv://apiUser:P9i8X3e0l0@hotelapp.nei0nms.mongodb.net/hotelApp
+
+      - SOCKET_PORT=3001
+      - SOCKET_PORT_ALTERNATIVE=3600
+      - SOCKET_PRIVATE_KEY=B8ADE1E5629BB6831F53B81563D65
+      - SOCKET_PUBLIC_KEY=4178F9E811F8B456955EE574FEE8F
+
+      - FRONTEND_SERVER_DOMAIN=https://hotel.wikitoria.in:80
+      - FRONTEND_SERVER_IP=43.239.110.22
+      - FRONTEND_SERVER_PORT=3000
+      
       - EMAIL_HOST=smtp.gmail.com
       - EMAIL_PORT=587
       - EMAIL_ADDRESS=pradip.adhikary@gmail.com
       - EMAIL_PASSWORD=qukattfakrxfiicl
+
       - SMS_HOST=2factor.in
       - SMS_PORT=443
       - SMS_PATH=/API/R1/
@@ -35,3 +40,7 @@ services:
       - SMS_MODULE=TRANS_SMS
       - SMS_TEMPLATEID=WBPNRD
       - SMS_APIKEY=7724f759-3a60-11ed-9c12-0200cd936042
+
+      - GOOGLE_DOMAIN=https://google.com
+      - GOOGLE_CLOUD_DOMAIN=https://cloud.google.com
+      - GOOGLE_DIALOGFLOW_DOMAIN=https://dialogflow.cloud.google.com

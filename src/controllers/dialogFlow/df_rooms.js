@@ -533,6 +533,14 @@ const handelHotelSetRoomCategoryFollowupNo = async (agent) => {
 //   agent.add(`We have received your cancellation request. Your booking will be cancelled and payment will be realised to you within 3 working days.`);    
 // };
 
+const handelHotelQuit = async (agent) => {
+  const sessionId = agent.session.split("/").pop();
+
+  delete chatDictionary[sessionId];
+  agent.end("Ok, Buy for now!");
+}
+
+
 
 async function getRoomCategoryFromName(hotelId, name) {
   try {
@@ -615,4 +623,5 @@ module.exports = {
   // handelRoomBooking,
   // handelPaymentRealising,
   // handelCancellation
+  handelHotelQuit
 };

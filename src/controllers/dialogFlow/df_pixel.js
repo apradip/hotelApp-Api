@@ -1,4 +1,4 @@
-const { Suggestion, Image, Card } = require("dialogflow-fulfillment");
+const { Suggestion, Card, Payload } = require("dialogflow-fulfillment");
 const { getProduct, addSupport, addEnquiry } = require("./google_sheet_helper");
 
 class chatType {
@@ -16,35 +16,113 @@ let chatDictionary = {};
 
 const handelTest = async (agent) => {
   console.log("handelTest");
-  // const CONTEXT_NAME = "test";
-  // const sessionId = agent.session.split("/").pop();
-  //agent.context.get(CONTEXT_NAME) ? person = agent.context.get(CONTEXT_NAME).parameters["person"].name : person = "";
 
   try {
     //add text
-    agent.add("This is text test.");
+    // agent.add("This is text test.");
     
-    //add suggestion clip
-    agent.add(new Suggestion("1. Suggestion"));
-    agent.add(new Suggestion("2. Suggestion"));
-    agent.add(new Suggestion("3. Suggestion"));
+    // //add suggestion clip
+    // agent.add(new Suggestion("1. Suggestion"));
+    // agent.add(new Suggestion("2. Suggestion"));
+    // agent.add(new Suggestion("3. Suggestion"));
 
-    // add image 
-    agent.add(new Image({
-      imageUrl: 'https://s3.ap-south-1.amazonaws.com/emaillive.in/images/pixel_logo.png',
-      accessibilityText: 'This is the description of the image',
-    }));
+    // // add image 
+    // agent.add(new Image({
+    //   imageUrl: 'https://s3.ap-south-1.amazonaws.com/emaillive.in/images/pixel_logo.png',
+    //   accessibilityText: 'This is the description of the image',
+    // }));
 
-    // add media card
-    agent.add(new Card({
-      title: `Title: this is a card title`,
-      text: `This is the body text of a card. You can even use line breaks and emoji! \uD83D\uDC81`,
-      buttonText: 'Click me',
-      buttonUrl: 'https://hoteldolphin.in/digha.php'
-    }));
+
+    // // add media card
+    // agent.add(new Card({
+    //   title: "Our rooms", 
+    //   imageUrl: "IMAGE;;" + "https://s3.ap-south-1.amazonaws.com/emaillive.in/images/pixel_logo.png", 
+    //   text: "Our all hotels are well maintained with proper maintenance & up keeping systems operated by our skilled hotel staff.\n https://hoteldolphin.in/digha.php", 
+    //   buttonText: "", 
+    //   buttonUrl: ""
+    // }));
+
+    // // add carousel
+    // const payload1 = { 
+    //   type: "carousel", 
+    //   items: [ 
+    //    { 
+    //      title: "Google Workspace", 
+    //      body: "Google Workspace is a combination of Email & Cloud-based tools for communication and collaboration. Google Workspace is a service where the Gmail server can be used for business/ corporate mail Ids. Any business organization that needs to use business mail ID, store mail data or office documents, folders on the cloud server, work together with their teams collectively on the cloud; communicate in modern mail or use video calling facilities, can prefer using Google Workspace and take advantage of the features to achieve more productivity in their business.\nhttps://pixel.co/google-workspace", 
+    //      mediaType: "IMAGE", 
+    //      mediaUri: "https://s3.ap-south-1.amazonaws.com/emaillive.in/images/pixel_logo.png" 
+    //    },
+    //    { 
+    //     title: "Business Email", 
+    //     body: "Don't settle for free email IDs for your business. Go pro, create a unique internet identity and gain credibility by opting for personalized business email using your domain name. Help your customers gain recognition for their brand name and leave a long-lasting impression on their clients.\nhttps://pixel.co/business-email", 
+    //     mediaType: "IMAGE", 
+    //     mediaUri: "https://s3.ap-south-1.amazonaws.com/emaillive.in/images/pixel_logo.png" 
+    //   } 
+    //  ] 
+    // }; 
+
+    // agent.add(new 
+    //   Payload(agent.UNSPECIFIED, payload1, 
+    //   {rawPayload: true, sendAsMessage: true})); 
+
+
+
+    const payload = {
+      title : "Title text", 
+      subtitle : "Body text", 
+      buttonTitle : "List Button Name", 
+      rows: [ 
+        { 
+          cells: [ 
+               { 
+                   "text": "Section 1"  
+               }, 
+               { 
+                   "text": "Option 1" 
+               }, { "text": "Description 1" 
+               },
+               { "text": "" 
+               } 
+             ] 
+           },  
+           { 
+             cells: [ 
+                 { 
+                    "text": "Section 1" 
+                 }, 
+                 { "text": "Option 2" 
+                 }, 
+                 { 
+                    "text": "Description 2"
+                 },
+                 { 
+                    "text": ""
+                 } 
+               ] 
+             }, 
+             { 
+               cells: [ 
+                    { 
+                       "text": "Section 2" 
+                    }, 
+                    { 
+                       "text": "Option 1" 
+                    }, 
+                    { 
+                       "text": "Description 1" 
+                    }, 
+                    { 
+                       "text": "" 
+                    } 
+                 ] 
+               } 
+             ], 
+           } 
+
+    agent.add(new Payload(agent.UNSPECIFIED, payload, {rawPayload: true, sendAsMessage: true})); 
 
     // end context
-    agent.end("ok bye");
+    // agent.end("ok bye");
   } catch (e) {
     console.log(e)
   };
