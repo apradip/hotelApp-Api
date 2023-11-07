@@ -68,10 +68,10 @@ const handelIndividualSchool = async (agent) => {
 
       } else {
         let fulfillment = `*Great !* 👍 
-        \nYour enquired school detail as follows :`;
+        \nSchool detail as follows :`;
 
         res.map((item) => {
-          fulfillment = fulfillment + `\n\n*${item.SCHOOL_NAME}*\n${item.DISTRICT_NAME}\n${item.BLOCK_NAME}\n${item.VILLAGE_WARD_NAME}\n\nNo. of toilet(s)\nBoys : ${item.TOILETB}, Girls : ${item.TOILETG}\n\nWater : ${item.WATER}\nHand pump : ${item.HAND_PUMP}\nWell : ${item.WELL_PROT}\nTap : ${item.TAP}\nPacket Water : ${item.PACK_WATER_FUN}\nHand wash : ${item.HANDWASH}\n\nElectricity : ${item.ELECT}\n\nPlayground : ${item.PGROUND}`
+          fulfillment = fulfillment + `\n\n*${item.SCHOOL_NAME}*\n${item.DISTRICT_NAME}\n${item.BLOCK_NAME}\n${item.VILLAGE_WARD_NAME}\n\nNo. of toilet(s) :\nBoys : ${item.TOILETB}, Girls : ${item.TOILETG}\n\nWater : ${item.WATER}\nHand pump : ${item.HAND_PUMP}\nWell port : ${item.WELL_PROT}\nTap water : ${item.TAP}\nPacket Water : ${item.PACK_WATER_FUN}\nHand wash : ${item.HANDWASH}\nElectricity : ${item.ELECT}\n\nPlayground : ${item.PGROUND}`
         });
 
         agent.add(fulfillment);
@@ -201,7 +201,7 @@ const handelDistrictStatics = async (agent) => {
           }
         });
 
-        const fulfillment = `School statics for *${district}* as follows :\n\nTotal no of school(s) : ${total}\nup to grade IV : ${class_4}\nup to grade V : ${class_5}\nup to grade VIII : ${class_8}\nup to grade X : ${class_10}\nup to grade XII : ${class_12}\nhave Water : ${water}\nhave Hand pump : ${hand_pump}\nhave Whell port : ${whell_port}\nhave Tap water : ${tap}\nhave Packet water : ${pack_water}\nhave Hand wash facility : ${hand_wash}\nhave Electricity : ${electricity}\nhave Play ground : ${play_ground}\n\nNo. of school(s) Type\nCo-ed : ${coed}, Girls : ${girl}, Boys : ${boy}\n\nNo. of school(s) have Toilet\nGirls : ${toilet_g},  Boys : ${toilet_b}`;
+        const fulfillment = `*${district}* school statics as follows :\n\nTotal no of school(s) : ${total}\nup to grade IV : ${class_4}\nup to grade V : ${class_5}\nup to grade VIII : ${class_8}\nup to grade X : ${class_10}\nup to grade XII : ${class_12}\n\nNo. of school Type\nCo-ed : ${coed}, Girls : ${girl}, Boys : ${boy}\n\nNo. of school have Toilet\nGirls : ${toilet_g},  Boys : ${toilet_b}\n\nNo. of school(s) have\nWater : ${water}\nHand pump : ${hand_pump}\nWhell port : ${whell_port}\nTap water : ${tap}\nPacket water : ${pack_water}\nHand wash : ${hand_wash}\nElectricity : ${electricity}\nPlay ground : ${play_ground}`;
 
         agent.add(fulfillment);
         agent.add(new Suggestion('School Info.'));

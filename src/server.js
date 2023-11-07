@@ -6,7 +6,7 @@ const corsOptions = require("./config/corsOptions");
 // const http = require("http");
 const https = require("https");
 const fs = require("fs");
-const { Server } = require("socket.io");
+// const { Server } = require("socket.io");
 const { WebhookClient } = require('dialogflow-fulfillment');
 
 const { logger } = require("./middlewares/logEvents");
@@ -87,12 +87,13 @@ const messageRoom = {
 
 const app = express();
 const httpsServer = https.createServer(httpsCredential, app);
-const io = new Server(httpsServer, {
-    cors: {
-      origin: `${process.env.API_SERVER_DOMAIN}:${PORT_SOCKET}`,
-      methods: ["GET", "POST"]
-    }
-});
+var io = require('socket.io')(httpsServer);
+// const io = new Server(httpsServer, {
+//     cors: {
+//       origin: `${process.env.API_SERVER_DOMAIN}:${PORT_SOCKET}`,
+//       methods: ["GET", "POST"]
+//     }
+// });
 
 
 
@@ -148,24 +149,6 @@ app.get("/", (req, res) => {
     res.send("HotelApp Restfull API server is live...");
 });
 
-// app.get('*', function (req, res) {
-//     var file = path.join(dir, req.path.replace(/\/$/, '/th_0.jpeg'));
-//     // if (file.indexOf(dir + path.sep) !== 0) {
-//     //     return res.status(403).end('Forbidden');
-//     // }
-//     // var type = mime[path.extname(file).slice(1)] || 'text/plain';
-//     var s = fs.createReadStream(file);
-//     s.on('open', function () {
-//         res.set('Content-Type', 'image-jpeg');
-//         s.pipe(res);
-//     });
-//     // s.on('error', function () {
-//     //     res.set('Content-Type', 'text/plain');
-//     //     res.status(404).end('Not found');
-//     // });
-// });
-
-
 app.post("/wh/api/school", express.json(), (req, res) => {
     const agent = new WebhookClient({ 
         request: req, 
@@ -173,8 +156,6 @@ app.post("/wh/api/school", express.json(), (req, res) => {
     });
 
     const intentMap = new Map();
-    
-    // intentMap.set("demo", handelSchoolDemo);
     
     intentMap.set("welcome", handelSchoolWelcome);
 
@@ -383,9 +364,9 @@ io.on("connection", (socket) => {
     });
 });
 
-app.listen(PORT_SOCKET, () => {
-    console.log(`Socket server is running on ${PORT_SOCKET}...`);
-});
+// app.listen(PORT_SOCKET, () => {
+    // console.log(`Socket server is running on ${PORT_SOCKET}...`);
+// });
 
 // //listen http server
 // httpServer.listen(PORT_HTTP_EXPRESS, () => {
