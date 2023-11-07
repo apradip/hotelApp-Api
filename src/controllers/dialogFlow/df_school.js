@@ -71,7 +71,7 @@ const handelIndividualSchool = async (agent) => {
         \nSchool detail as follows :`;
 
         res.map((item) => {
-          fulfillment = fulfillment + `\n\n*${item.SCHOOL_NAME}*\n${item.DISTRICT_NAME}\n${item.BLOCK_NAME}\n${item.VILLAGE_WARD_NAME}\n\nNo. of toilet(s) :\nBoys : ${item.TOILETB}, Girls : ${item.TOILETG}\n\nWater : ${item.WATER}\nHand pump : ${item.HAND_PUMP}\nWell port : ${item.WELL_PROT}\nTap water : ${item.TAP}\nPacket Water : ${item.PACK_WATER_FUN}\nHand wash : ${item.HANDWASH}\nElectricity : ${item.ELECT}\nPlayground : ${item.PGROUND}`
+          fulfillment = fulfillment + `\n\n*${item.SCHOOL_NAME}*\n${item.DISTRICT_NAME}\n${item.BLOCK_NAME}\n${item.VILLAGE_WARD_NAME}\n\nType : ${item.SCHTYPE}\n\nNo. of toilet(s) :\nBoys : ${item.TOILETB}, Girls : ${item.TOILETG}\n\nStatus of following facility :\nWater : ${item.WATER}\nHand pump : ${item.HAND_PUMP}\nWell port : ${item.WELL_PROT}\nTap water : ${item.TAP}\nPacket Water : ${item.PACK_WATER_FUN}\nHand wash : ${item.HANDWASH}\nElectricity : ${item.ELECT}\nPlayground : ${item.PGROUND}`
         });
 
         agent.add(fulfillment);
