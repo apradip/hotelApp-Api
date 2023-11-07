@@ -48,7 +48,7 @@ const handelSchoolWelcome = async (agent) => {
 // Individual School
 const handelIndividualSchoolMenu = async (agent) => {
   try {
-      const fulfillment = `Please enter the school's UDISE Code :`;
+      const fulfillment = `Please enter the UDISE Code :`;
       agent.add(fulfillment);
   } catch (e) {
     console.log(e);
