@@ -317,13 +317,9 @@ const handelBooking = async (req, res) => {
         // get hotel tax details    
         const hotel = await Hotel.detail(hotelId);
 
-        if (transactionId === "NAN") {
-            activeTransactionId = await getActiveId(hotelId, guestId);
-        } else {
+        if (transactionId !== "undefined") {
             activeTransactionId = transactionId;
-        }
 
-        if (transactionId) {
             const filter1 = {
                 $match: {
                     _id: mongoose.Types.ObjectId(guestId),         
@@ -440,7 +436,10 @@ const handelBooking = async (req, res) => {
         
                 await data.save();
             }));   
+
         } else {
+
+            activeTransactionId = await getActiveId(hotelId, guestId);
             dbBooking = await newRoomValues(hotel, guestId, bookings);
 
             await Guest.updateOne(
@@ -479,6 +478,7 @@ const handelBooking = async (req, res) => {
     
                 await data.save();
             }));   
+
         }
     } catch(e) {
         return res.status(500).send(e);
@@ -863,7 +863,7 @@ const handelPayment = async (req, res) => {
 const handelCheckout = async (req, res) => {
     const {hotelId, guestId} = req.params;
 
-    // try {
+    try {
         const filter1 = {
             $match: {
                 _id: mongoose.Types.ObjectId(guestId),         
@@ -908,9 +908,9 @@ const handelCheckout = async (req, res) => {
                 }
             }
         );
-    // } catch(e) {
-    //     return res.status(500).send(e);
-    // }
+    } catch(e) {
+        return res.status(500).send(e);
+    }
 
     return res.status(200).send();    
 };

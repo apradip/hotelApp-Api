@@ -1,37 +1,45 @@
 require("dotenv").config();
 const express = require("express");
-// const app = express();
 const cors = require("cors");
-const corsOptions = require("./config/corsOptions");
-// const http = require("http");
 const https = require("https");
 const fs = require("fs");
-// const { Server } = require("socket.io");
-const { WebhookClient } = require('dialogflow-fulfillment');
+const {Server} = require("socket.io");
+const jwt = require("jsonwebtoken");
 
-const { logger } = require("./middlewares/logEvents");
+const corsOptions = require("./config/corsOptions");
+
+const {logger} = require("./middlewares/logEvents");
 const errorHandler = require("./middlewares/errorHandler");
 const verifyJWT = require("./middlewares/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middlewares/credentials");
 const connectDB = require("./config/dbConn");
 
-// const PORT_HTTP_EXPRESS = process.env.API_SERVER_HTTP_PORT || process.env.API_SERVER_HTTP_PORT_ALTERNATIVE;
+//for google dialog flow client
+const {WebhookClient} = require("dialogflow-fulfillment");
+
 const PORT_HTTPS_EXPRESS = process.env.API_SERVER_HTTPS_PORT || process.env.API_SERVER_HTTPS_PORT_ALTERNATIVE;
-const PORT_SOCKET = process.env.SOCKET_PORT || process.env.SOCKET_PORT_ALTERNATIVE; 
+
+const sslCredential = {
+    key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
+    cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
+};
+
+const messageRoom = {
+    Room: "SOCKET_ROOM",
+    Table: "SOCKET_TABLE",
+    Service: "SOCKET_SERVICE",
+    Miscellaneous: "SOCKET_MISCELLANEOUS"
+};
 
 //dialog flow api code file
-const { 
-    // handelSchoolDemo, 
-    handelSchoolWelcome,
-    handelIndividualSchoolMenu,
-    handelIndividualSchool,
-    handelDistrictStaticsMenu,
-    handelDistrictStatics,
-    // handelSuggestionMenu,
-    // handelSuggestionDetails,
-    handelSchoolQuit
-} = require('./controllers/dialogFlow/df_school');
+const { SchoolWelcomeHandler,
+        SchoolIndividualMenuHandler,
+        SchoolIndividualDataHandler,
+        SchoolDistrictStaticsMenuHandler,
+        SchoolDistrictStaticsHandler,
+        SchoolQuitHandler
+} = require("./controllers/dialogFlow/df_school");
 
 const { handelHotelDemo, 
         handelHotelWelcome,
@@ -48,7 +56,7 @@ const { handelHotelDemo,
         // handelPaymentRealising, 
         // handelCancellation 
         handelHotelQuit
-    } = require('./controllers/dialogFlow/df_rooms');
+} = require("./controllers/dialogFlow/df_rooms");
 
 const { 
         handelTest,
@@ -69,32 +77,11 @@ const {
         handelSupport,
         handelSupportDetails,
         handelQuit
-    } = require('./controllers/dialogFlow/df_pixel');
-
-const httpsCredential = {
-    key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
-    cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
-};
-
-const messageRoom = {
-    Room: "SOCKET_ROOM",
-    Table: "SOCKET_TABLE",
-    Service: "SOCKET_SERVICE",
-    Miscellaneous: "SOCKET_MISCELLANEOUS"
-};
- 
+} = require("./controllers/dialogFlow/df_pixel");
 
 
 const app = express();
-const httpsServer = https.createServer(httpsCredential, app);
-var io = require('socket.io')(httpsServer);
-// const io = new Server(httpsServer, {
-//     cors: {
-//       origin: `${process.env.API_SERVER_DOMAIN}:${PORT_SOCKET}`,
-//       methods: ["GET", "POST"]
-//     }
-// });
-
+const httpsServer = https.createServer(sslCredential, app);
 
 
 // Connect to MongoDB
@@ -115,37 +102,11 @@ app.use(express.urlencoded({ extended: false }));
 
 // built-in middleware for json 
 app.use(express.json());
-
-// create and run node server
-// const httpServer = http.createServer(app);
-// const httpsServer = https.createServer(httpsCredential, app);
-
-// create & run socket server for front end communication
-// const io = new Server(httpServer, {
-//     cors: {
-//       origin: `${socketOptions.SOCKET_SETTINGS.host}:${socketOptions.SOCKET_SETTINGS.port}`,
-//       methods: ["GET", "POST"]
-//     }
-// });
-
-// const io = socketIO(httpsServer);
-
-// const io = new Server(httpsServer, {
-//     cors: {
-//       origin: `${process.env.API_SERVER_DOMAIN}:${PORT_SOCKET}`,
-//       methods: ["GET", "POST"]
-//     }
-// });
-
-// io.listen(PORT_SOCKET, () => {
-//     console.log(`Socket server is running on ${PORT_SOCKET}...`);
-// });
-
   
 //middleware for cookies
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
     res.send("HotelApp Restfull API server is live...");
 });
 
@@ -157,19 +118,18 @@ app.post("/wh/api/school", express.json(), (req, res) => {
 
     const intentMap = new Map();
     
-    intentMap.set("welcome", handelSchoolWelcome);
+    intentMap.set("welcome", SchoolWelcomeHandler);
 
-    intentMap.set("get.individual.school.menu", handelIndividualSchoolMenu);
-    intentMap.set("get.individual.school.details", handelIndividualSchool);
+    
+    intentMap.set("quit.event", SchoolQuitHandler);
+    intentMap.set("quit", SchoolQuitHandler);
 
-    intentMap.set("get.statics.district.menu", handelDistrictStaticsMenu);
-    intentMap.set("get.statics.district.details", handelDistrictStatics);
+    intentMap.set("get.individual.school.menu", SchoolIndividualMenuHandler);
+    intentMap.set("get.individual.school.details", SchoolIndividualDataHandler);
 
-    // intentMap.set("get.suggestion.menu", handelSuggestionMenu);
-    // intentMap.set("post.suggestion.details", handelSuggestionDetails);
+    intentMap.set("get.statics.district.menu", SchoolDistrictStaticsMenuHandler);
+    intentMap.set("get.statics.district.details", SchoolDistrictStaticsHandler);
 
-    intentMap.set("quit.event", handelSchoolQuit);
-    intentMap.set("quit", handelSchoolQuit);
 
     agent.handleRequest(intentMap);
 });
@@ -246,11 +206,8 @@ app.post("/wh/api/pixel", express.json(), (req, res) => {
     }
 });
 
-
 //send invoice through whatsApp
 app.use("/api/sendinvoice", require("./routes/df_api/send_invoice"));
-
-
 
 //start apis for front end
 //login
@@ -337,12 +294,41 @@ app.use("/api/guestExpensesPayments", require("./routes/api/guestExpensesPayment
 
 app.use(errorHandler);
 
+//listen https server
+httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
+    console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
+});
 
-io.on("connection", (socket) => {
-    console.log(`Socket connected: ${socket.id}`);
+const socketIo = new Server(httpsServer, {
+    cors: {
+        origin: `${process.env.FRONTEND_SERVER_DOMAIN}`,
+        methods: ["GET"]
+    }
+});
 
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
+
+socketIo.on("connection", (socket) => {
+    try {
+        // Verify the token here and get user info from JWT token.
+        const token = socket.handshake.auth.token;
+    
+        jwt.verify(
+            token,
+            process.env.ACCESS_TOKEN_SECRET,
+            (err, decoded) => {
+                if (err) { 
+                    socket.disconnect(true);
+                } else {
+                    console.log(`Socket connected id : ${socket.id} with user ${decoded.UserInfo.userid}`);
+                }
+            }
+        );
+    } catch (error) {
+        socket.disconnect(true);
+    }
+
+    socket.on("disconnect", (socket) => {
+        console.log(`Socket disconnected: ${socket.id}`);
     });
 
     socket.on(messageRoom.Miscellaneous, (data) => {
@@ -354,26 +340,10 @@ io.on("connection", (socket) => {
     });
 
     socket.on(messageRoom.Table, (data) => {
-        console.log("messageRoom.Table : " + data);
-
         socket.broadcast.emit(messageRoom.Table, data);
     });
 
     socket.on(messageRoom.Room, (data) => {
         socket.broadcast.emit(messageRoom.Room, data);
     });
-});
-
-// app.listen(PORT_SOCKET, () => {
-    // console.log(`Socket server is running on ${PORT_SOCKET}...`);
-// });
-
-// //listen http server
-// httpServer.listen(PORT_HTTP_EXPRESS, () => {
-//     console.log(`Node http server is running on ${PORT_HTTP_EXPRESS}...`);
-// });
-
-//listen https server
-httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
-    console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
 });

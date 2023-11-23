@@ -213,7 +213,7 @@ const handelCreate = async (req, res) => {
 //query string : hotel Id / guest Id
 //body detail: {option [D = detail / S = small],
 //        "idDocumentId" : "", "idNo" : "", "name" : "", "age" : 0, "fatherName" : "", "address" : "", "city" : "", "policeStation" : "", "state" : "",
-//        "pin" : "", "phone" : "", "mobile" : "", "email" : "", "guestCount" : 0, "guestMaleCount" : 0, "guestMaleCount" : 0, "guestFemaleCount" : 0,
+//        "pin" : "", "mobile" : "", "email" : "", "guestCount" : 0, "guestMaleCount" : 0, "guestMaleCount" : 0, "guestFemaleCount" : 0,
 //        "dayCount" : 0, "bookingAgentId" : "", "planId" : "", "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 //body detail: {"name" : "", "mobile" : "", "guestCount" : 0, "corporateName" : "", "corporateAddress" : "", "gstNo" : ""}
 const handelUpdate = async (req, res) => {
@@ -226,7 +226,7 @@ const handelUpdate = async (req, res) => {
             (option.trim().toUpperCase() === "T") ||
             (option.trim().toUpperCase() === "A")) {
             const {name, mobile, guestCount, corporateName, corporateAddress, gstNo} =  req.body;
-            const data = await Guest.findOne({hotelId, isEnable: true, guestId});
+            const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true});
             if (!data) return res.status(404).send();
 
             const resUpdate = await Guest.findByIdAndUpdate(guestId, 
@@ -244,27 +244,26 @@ const handelUpdate = async (req, res) => {
 
         } else if (option.trim().toUpperCase() === "R") {
             const {idDocumentId, idNo, name, age, fatherName, address, city, policeStation, state, 
-                pin, phone, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
+                pin, mobile, email, guestCount, guestMaleCount, guestFemaleCount, 
                 dayCount, bookingAgentId, planId, corporateName, corporateAddress, gstNo} =  req.body;
             
-            const data = await Guest.findOne({hotelId, isEnable: true, guestId});
+            const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true});
             if (!data) return res.status(404).send();
 
             const resUpdate = await Guest.findByIdAndUpdate(guestId, 
                 {
                     idDocumentId,
-                    idNo: idNo.trim().toUpperCase(), 
-                    name: name.trim().toUpperCase(), 
+                    idNo: idNo ? idNo.trim().toUpperCase() : "", 
+                    name: name ? name.trim().toUpperCase() : "", 
                     age,
-                    fatherName: fatherName.trim().toUpperCase(),
-                    address: address.trim().toUpperCase(),
-                    city: city.trim().toUpperCase(),
-                    policeStation: policeStation.trim().toUpperCase(),
-                    state: state.trim().toUpperCase(),
-                    pin: pin.trim(),
-                    phone,
+                    fatherName: fatherName ? fatherName.trim().toUpperCase() : "",
+                    address: address ? address.trim().toUpperCase() : "",
+                    city: city ? city.trim().toUpperCase() : "",
+                    policeStation: policeStation ? policeStation.trim().toUpperCase() : "",
+                    state: state ? state.trim().toUpperCase() : "",
+                    pin: pin ? pin.trim() : "",
                     mobile,
-                    email,
+                    email: email ? email.trim().toLowerCase() : "",
                     guestCount,
                     guestMaleCount,
                     guestFemaleCount,
@@ -284,80 +283,104 @@ const handelUpdate = async (req, res) => {
     }
 };
 
-//handel checkout guest
-//query string : hotel Id / guest Id 
-const handelCheckout = async (req, res) => {
-    const {hotelId, guestId} = req.params;
+// //handel checkout guest
+// //query string : hotel Id / guest Id / flag
+// const handelCheckout = async (req, res) => {
+//     const {hotelId, guestId, flag} = req.params;
 
-    try {
-        // check if total expense & total payment is same
-        const data = await Guest.findOne({hotelId, isEnable: true, isActive: true, guestId});
-        if (!data) return res.status(404).send();
+//     try {
+//         // check if total expense & total payment is same
+//         const data = await Guest.findOne({hotelId, isEnable: true, isActive: true, guestId});
+//         if (!data) return res.status(404).send();
 
-        const resUpdate = await Guest.findByIdAndUpdate(guestId, 
-            {isActive: false, 
-                updatedDate: Date.now});
-        if (!resUpdate) return res.status(400).send(resUpdate);
+//         const resUpdate = await Guest.findByIdAndUpdate(guestId, 
+//             {isActive: false, 
+//                 updatedDate: Date.now});
+//         if (!resUpdate) return res.status(400).send(resUpdate);
 
-        return res.status(200).send();
-    } catch(e) {
-        return res.status(500).send(e);
-    }
-};
+//         return res.status(200).send();
+//     } catch(e) {
+//         return res.status(500).send(e);
+//     }
+// };
 
-//handel delete guest
-//query string : hotel Id / guestId
+//handel checkout & delete guest
+//query string : hotel Id / guestId / flag
 const handelRemove = async (req, res) => {
-    const {hotelId, guestId} = req.params;
-    
-    try {
-        const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true});
-        if (!data) return res.status(404).send();
+    const {hotelId, guestId, flag} = req.params;
 
-        if (data.option == "T") {
-            //get last transaction id
-            //get all tables id of that transaction
-            const filter1 = {
-                $match: {
-                    _id: mongoose.Types.ObjectId(guestId),         
-                    hotelId,
-                    isEnable: true
-                }
-            };
-            const filter2 = {
-                $project: {
-                    _id: 0,
-                    tablesDetail: {
-                        $slice: ["$tablesDetail", -1] 
-                    }
-                }
-            };
+    // for checkout
+    if (flag == "C") {
+        try {
+            // check if total expense & total payment is same
+            const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true, isActive: true});
+            if (!data) return res.status(404).send();
 
-            const pipeline = [filter1, filter2];
-            const foundTableDetails = await Guest.aggregate(pipeline);  
+            const resUpdate = await Guest.findByIdAndUpdate(guestId, 
+                {isActive: false, updatedDate: Date.now});
+            if (!resUpdate) return res.status(400).send(resUpdate);
 
-            //update all tables guestid it null & occupied status is false
-            foundTableDetails.forEach(async (item) => {
-                item.tablesDetail.forEach(async (tableDetail) => {
-                    tableDetail.tables.forEach(async (table) => {
-                        const tableId = table.id;
-                        const resRelese = await Table.findByIdAndUpdate(
-                                                mongoose.Types.ObjectId(tableId), 
-                                                {$set: {isOccupied: false,
-                                                        guestId: ""}}                                        
-                                                );  
-                        if (!resRelese) return res.status(404).send();                                            
-                    });
-                });
-            });
+            return res.status(200).send();
+        } catch(e) {
+            return res.status(500).send(e);
         }
 
-        const resDelete = await Guest.findByIdAndUpdate(guestId, {isEnable: false});
-        if (!resDelete) return res.status(400).send(resDelete);
+        return;
+    }
 
-        return res.status(200).send(resDelete);
-    } catch(e) {
-        return res.status(500).send(e);
+    // for delete
+    if (flag == "D") {
+        try {
+            const data = await Guest.findOne({hotelId, _id: guestId, isEnable: true});
+            if (!data) return res.status(404).send();
+
+            if (data.option == "T") {
+                //get last transaction id
+                //get all tables id of that transaction
+                const filter1 = {
+                    $match: {
+                        _id: mongoose.Types.ObjectId(guestId),         
+                        hotelId,
+                        isEnable: true
+                    }
+                };
+                const filter2 = {
+                    $project: {
+                        _id: 0,
+                        tablesDetail: {
+                            $slice: ["$tablesDetail", -1] 
+                        }
+                    }
+                };
+
+                const pipeline = [filter1, filter2];
+                const foundTableDetails = await Guest.aggregate(pipeline);  
+
+                //update all tables guestid it null & occupied status is false
+                foundTableDetails.forEach(async (item) => {
+                    item.tablesDetail.forEach(async (tableDetail) => {
+                        tableDetail.tables.forEach(async (table) => {
+                            const tableId = table.id;
+                            const resRelese = await Table.findByIdAndUpdate(
+                                                    mongoose.Types.ObjectId(tableId), 
+                                                    {$set: {isOccupied: false,
+                                                            guestId: ""}}                                        
+                                                    );  
+                            if (!resRelese) return res.status(404).send();                                            
+                        });
+                    });
+                });
+            }
+
+            const resDelete = await Guest.findByIdAndUpdate(guestId, {isEnable: false});
+            if (!resDelete) return res.status(400).send(resDelete);
+
+            return res.status(200).send(resDelete);
+        } catch(e) {
+            return res.status(500).send(e);
+        }
+
+        return;
     }
 };
 
@@ -366,6 +389,5 @@ module.exports = {
     handelDetail,
     handelCreate,
     handelUpdate,
-    handelRemove,
-    handelCheckout
+    handelRemove
 };

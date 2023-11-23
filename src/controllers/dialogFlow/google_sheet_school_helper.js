@@ -1,8 +1,14 @@
-const { google } = require("googleapis");
+// const { google } = require("googleapis");
+
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { JWT } = require('google-auth-library');
 
 const keyFile = "./src/config/googleKey.json";
 const scopes = "https://www.googleapis.com/auth/spreadsheets";
 const valueInputOption = "RAW";
+
+const email = 'schoollive-dort@appspot.gserviceaccount.com';
+const key = '4bc36a21b18e960ad0ad411a854a04abe57bdfcf';
 
 const schoolSheetId = "17zwgI20nvqkwCV1-kTrVcCdJ9trFodwbgrA8iH64v9E";
 const schoolRange = "school";
@@ -13,14 +19,30 @@ const suggestionRange = "suggestion";
 
 const authentication = async () => {
   try {
-    const auth = new google.auth.GoogleAuth({
-      keyFile: keyFile,
-      scopes: scopes 
-    });
-    const client = await auth.getClient();
-    const sheets = google.sheets({ version: "v4", auth: client });
+    // const auth = new google.auth.GoogleAuth({
+    //   keyFile: keyFile,
+    //   scopes: scopes 
+    // });
+    // const client = await auth.getClient();
+    // const sheets = google.sheets({ version: "v4", auth: client });
 
-    return sheets;
+    // return sheets;
+
+
+    const serviceAccountAuth = new JWT({
+      email: email,
+      key: key,
+      scopes: [
+        'https://www.googleapis.com/auth/spreadsheets',
+      ],
+    });
+    
+    const doc = new GoogleSpreadsheet(schoolSheetId, serviceAccountAuth);
+    await doc.loadInfo();
+    const sheet = doc.sheetsByIndex[0]; 
+    const rows = await sheet.getRows();
+
+    return rows;
   } catch (e) {
     console.error(e);
   }
@@ -51,40 +73,49 @@ const formatData = async (data) => {
 }
 
 
-async function getSchoolDetail(searchJson = {}) {
+async function getSchoolDetail(udise) {
   let data = null;
   let condition = "";
 
   try {
-    const sheets = await authentication();
-    const readData = await sheets.spreadsheets.values.get({
-      spreadsheetId: schoolSheetId,
-      range: schoolRange
-    });
+    // const sheet = await authentication();
+    // const rows = await sheet.getRows();
+    const rows = await authentication();
 
-    data = await formatData(readData.data.values);  
+    console.log(rows);
+  //   const sheets = await authentication();
+  //   const readData = await sheets.spreadsheets.values.get({
+  //     spreadsheetId: schoolSheetId,
+  //     range: schoolRange
+  //   });
 
-    for(var key in searchJson) {
-      searchJson[key] = searchJson[key] + "";
+  //   data = await formatData(readData.data.values);  
 
-      if (searchJson[key].length > 0) {
-        switch(key) {
-          case "SCHCD":
-            condition = d => d.SCHCD === searchJson[key];
-            data = data.filter(condition);
+  //   for(var key in searchJson) {
+  //     searchJson[key] = searchJson[key] + "";
+
+  //     if (searchJson[key].length > 0) {
+  //       switch(key) {
+  //         case "SCHCD":
+  //           condition = d => d.SCHCD === searchJson[key];
+  //           data = data.filter(condition);
   
-            break;
+  //           break;
 
-          default:
-            break;
-        }
-      }
-    }
+  //         default:
+  //           break;
+  //       }
+  //     }
+  //   }
+
+    // const rows = await sheet.getRows();
+    // console.log(rows);
   } catch (e) {
     console.error(e);
   }
 
-  return data;
+  // return data;
+  return null;
 };
 
 async function getStaticsDetail(searchJson = {}) {

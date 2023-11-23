@@ -1,35 +1,11 @@
-const { Suggestion, Card, Payload } = require("dialogflow-fulfillment");
-const { getSchoolDetail, getStaticsDetail, addSuggestion } = require("./google_sheet_school_helper");
-
-// class chatType {
-//   constructor(person = "", phone = "", suggestion = "") {
-//     this.person = person,
-//     this.phone = phone,
-//     this.suggestion = suggestion
-//   };
-// };
-
-// let chatDictionary = {};
+const { Suggestion } = require('dialogflow-fulfillment');
+const { getSchoolDetail, getStaticsDetail } = require('./google_sheet_school_helper');
 
 
 // Start
 // Initial menu
-const handelSchoolWelcome = async (agent) => {
-  // let isOldSession = false;
-
+const SchoolWelcomeHandler = async (agent) => {
   try {
-    // const sessionId = agent.session.split("/").pop();
-    
-    // for(var key in chatDictionary) {
-    //   if (key === sessionId) {
-    //     isOldSession = true;
-    //   }
-    // }
-
-    // if (!isOldSession) {
-    //   chatDictionary[sessionId] = new chatType();
-    // }
-
     const fulfillment = `Welcome to SchoolLive! 🙏\n\nI'm happy to help you with all our West Bengal Govermnet school information.\n\nWhat do you like to know (Individual School info. / District Statics info. / Suggedtion)`;
 
     agent.add(fulfillment);
@@ -46,45 +22,47 @@ const handelSchoolWelcome = async (agent) => {
 
 // Start
 // Individual School
-const handelIndividualSchoolMenu = async (agent) => {
+const SchoolIndividualMenuHandler = async (agent) => {
   try {
       const fulfillment = `Please enter the UDISE Code :`;
+
       agent.add(fulfillment);
   } catch (e) {
     console.log(e);
   };
 };
 
-const handelIndividualSchool = async (agent) => {
+const SchoolIndividualDataHandler = async (agent) => {
   try {
-    // const sessionId = agent.session.split("/").pop();
     const udise = agent.parameters["udiseCode"];
-    const res = await getSchoolDetail({ "SCHCD" : udise });
+    const res = await getSchoolDetail(udise);
 
-    if (res) {
-      if (res.length === 0) {
-        const fulfillment = `Invalid UDISE Code!😭\nPlease enter a correct UDISE Code :`;
-        agent.add(fulfillment);
+    console.log(res);
+    // const res = await getSchoolDetail({ "SCHCD" : udise });
 
-      } else {
-        let fulfillment = `*Great !* 👍 
-        \nSchool detail as follows :`;
+    // if (res) {
+    //   if (res.length === 0) {
+    //     const fulfillment = `Invalid UDISE Code!😭\nPlease enter a correct UDISE Code :`;
+    //     agent.add(fulfillment);
 
-        res.map((item) => {
-          fulfillment = fulfillment + `\n\n*${item.SCHOOL_NAME}*\n${item.DISTRICT_NAME}\n${item.BLOCK_NAME}\n${item.VILLAGE_WARD_NAME}\n\nType : ${item.SCHTYPE}\n\nNo. of toilet(s) :\nBoys : ${item.TOILETB}, Girls : ${item.TOILETG}\n\nStatus of following facility :\nWater : ${item.WATER}\nHand pump : ${item.HAND_PUMP}\nWell port : ${item.WELL_PROT}\nTap water : ${item.TAP}\nPacket Water : ${item.PACK_WATER_FUN}\nHand wash : ${item.HANDWASH}\nElectricity : ${item.ELECT}\nPlayground : ${item.PGROUND}`
-        });
+    //   } else {
+    //     let fulfillment = `*Great !* 👍\n\nSchool detail as follows :`;
 
-        agent.add(fulfillment);
-        agent.add(new Suggestion('School Info.'));
-        agent.add(new Suggestion('District Statics'));
-        agent.add(new Suggestion('Quit'));
+    //     res.map((item) => {
+    //       fulfillment = fulfillment + `\n\n*${item.SCHOOL_NAME}*\n${item.DISTRICT_NAME}\n${item.BLOCK_NAME}\n${item.VILLAGE_WARD_NAME}\n\nType : ${item.SCHTYPE}\n\nNo. of toilet(s) :\nBoys : ${item.TOILETB}, Girls : ${item.TOILETG}\n\nStatus of following facility :\nWater : ${item.WATER}\nHand pump : ${item.HAND_PUMP}\nWell port : ${item.WELL_PROT}\nTap water : ${item.TAP}\nPacket Water : ${item.PACK_WATER_FUN}\nHand wash : ${item.HANDWASH}\nElectricity : ${item.ELECT}\nPlayground : ${item.PGROUND}`
+    //     });
 
-      }
-     } else {
-      const fulfillment = `Invalid UDISE Code!😭\nPlease enter a correct UDISE Code :`;
-      agent.add(fulfillment);
+    //     agent.add(fulfillment);
+    //     agent.add(new Suggestion('School Info.'));
+    //     agent.add(new Suggestion('District Statics'));
+    //     agent.add(new Suggestion('Quit'));
 
-    }
+    //   }
+    //  } else {
+    //   const fulfillment = `Invalid UDISE Code!😭\nPlease enter a correct UDISE Code :`;
+
+    //   agent.add(fulfillment);
+    // }
   } catch (e) {
     console.log(e);
   };
@@ -95,7 +73,7 @@ const handelIndividualSchool = async (agent) => {
 
 // Start
 // Statical data
-const handelDistrictStaticsMenu = async (agent) => {
+const SchoolDistrictStaticsMenuHandler = async (agent) => {
   try {
       const fulfillment = `Please enter District name :`;
       agent.add(fulfillment);
@@ -104,8 +82,7 @@ const handelDistrictStaticsMenu = async (agent) => {
   };
 };
 
-const handelDistrictStatics = async (agent) => {
-  // const sessionId = agent.session.split("/").pop();
+const SchoolDistrictStaticsHandler = async (agent) => {
   const district = agent.parameters["district"];
   const res = await getStaticsDetail({ "DISTRICT_NAME" : district });
 
@@ -113,6 +90,7 @@ const handelDistrictStatics = async (agent) => {
     if (res) {
       if (res.length === 0) {
         const fulfillment = `Invalid District!😭\nPlease enter correct District name :`;
+
         agent.add(fulfillment);
 
       } else {
@@ -139,64 +117,64 @@ const handelDistrictStatics = async (agent) => {
         res.map((item) => {
           total = total + 1;
 
-          if (item.CLASS_TO == "4") {
+          if (item.CLASS_TO === '4') {
             class_4 = class_4 + 1;
           }
-          else if (item.CLASS_TO == "5") {
+          else if (item.CLASS_TO === '5') {
             class_5 = class_5 + 1;          
           }
-          else if (item.CLASS_TO == "8") {
+          else if (item.CLASS_TO === '8') {
             class_8 = class_8 + 1;          
           }
-          else if (item.CLASS_TO == "10") {
+          else if (item.CLASS_TO === '10') {
             class_10 = class_10 + 1;          
           }
-          else if (item.CLASS_TO == "12") {
+          else if (item.CLASS_TO === '12') {
             class_12 = class_12 + 1;          
           }
 
-          if (item.SCHTYPE == "CO-ED") {
+          if (item.SCHTYPE === 'CO-ED') {
             coed = coed + 1;
           }
-          else if (item.SCHTYPE == "GIRLS") {
+          else if (item.SCHTYPE === 'GIRLS') {
             girl = girl + 1;          
           }
-          else if (item.SCHTYPE == "BOYS") {
+          else if (item.SCHTYPE === 'BOYS') {
             boy = boy + 1;          
           }
 
           toilet_g = toilet_g + Number(item.TOILETG);          
           toilet_b = toilet_b + Number(item.TOILETB);
 
-          if (item.WATER == "YES") {
+          if (item.WATER === 'YES') {
             water = water + 1
           }
 
-          if (item.HAND_PUMP == "YES") {
+          if (item.HAND_PUMP === 'YES') {
             hand_pump = hand_pump + 1
           }
 
-          if (item.WELL_PROT == "YES") {
+          if (item.WELL_PROT === 'YES') {
             whell_port = whell_port + 1
           }
 
-          if (item.TAP == "YES") {
+          if (item.TAP === 'YES') {
             tap = tap + 1
           }
 
-          if (item.PACK_WATER == "YES") {
+          if (item.PACK_WATER === 'YES') {
             pack_water = pack_water + 1
           }
 
-          if (item.HANDWASH == "YES") {
+          if (item.HANDWASH === 'YES') {
             hand_wash = hand_wash + 1
           }
 
-          if (item.ELECT == "YES") {
+          if (item.ELECT === 'YES') {
             electricity = electricity + 1
           }
 
-          if (item.PGROUND == "YES") {
+          if (item.PGROUND === 'YES') {
             play_ground = play_ground + 1
           }
         });
@@ -204,15 +182,15 @@ const handelDistrictStatics = async (agent) => {
         const fulfillment = `School statics for *${district}* as follows :\n\nTotal no of school(s) : ${total}\n\nNo. of school(s) :\nGrade up to IV : ${class_4}\nGrade up to V : ${class_5}\nGrade up to VIII : ${class_8}\nGrade up to X : ${class_10}\nGrade up to XII : ${class_12}\n\nNo. of school Type :\nCo-ed : ${coed}, Girls : ${girl}, Boys : ${boy}\n\nNo. of school have Toilet :\nGirls : ${toilet_g}, Boys : ${toilet_b}\n\nNo. of school(s) have following facility :\nWater : ${water}\nHand pump : ${hand_pump}\nWhell port : ${whell_port}\nTap water : ${tap}\nPacket water : ${pack_water}\nHand wash : ${hand_wash}\nElectricity : ${electricity}\nPlay ground : ${play_ground}`;
 
         agent.add(fulfillment);
-        agent.add(new Suggestion('School Info.'));
-        agent.add(new Suggestion('District Statics'));
-        agent.add(new Suggestion('Quit'));
+        agent.add(new Suggestion(`School Info.`));
+        agent.add(new Suggestion(`District Statics`));
+        agent.add(new Suggestion(`Quit`));
 
       }
     } else {
       const fulfillment = `Invalid District!😭\nPlease enter correct District name :`;
+      
       agent.add(fulfillment);
-
     }
   } catch (e) {
     console.log(e);
@@ -222,70 +200,22 @@ const handelDistrictStatics = async (agent) => {
 // End
 
 
-// // Start
-// // Suggesition
-// const handelSuggestionMenu = async (agent) => {
-//   try {
-//     const fulfillment = `Thank you for your interest!🙏\n\nPlease provide your personal details with suggestion, starts with your name.`;
-//     agent.add(fulfillment);
-//   } catch (e) {
-//     console.log(e);
-//   };
-// };
-
-// const handelSuggestionDetails = async (agent) => {
-//   try {
-//     // const sessionId = agent.session.split("/").pop();
-//     const person = agent.parameters["person-name"].name;
-//     const phone = agent.parameters["phone-number"];
-//     const suggestion = agent.parameters["suggestion"];
-    
-//     if ((person === "") && (phone === "") && (suggestion === "")) return;      
-    
-//     // chatDictionary[sessionId].person = person;
-//     // chatDictionary[sessionId].phone = phone;
-//     // chatDictionary[sessionId].suggestion = suggestion;
-
-//     // insert to sheet
-//     const response = await addSuggestion({Person: person,
-//                                         Phone: phone,
-//                                         Suggestion: suggestion});
-    
-//     if (!response) return;             
-
-//     const fulfillment = `Thank you *${person}*! 👍
-//     \nOur team will contact (Phone. ${phone}) you soon.
-//     \n\nAny thing else?`;
-
-//     agent.add(fulfillment);
-//   } catch (e) {
-//     console.log(e);
-//   };
-// };
-// // Suggesition
-// // End
-
-
 // Start
 // Quit
-const handelSchoolQuit = async (agent) => {
-  // const sessionId = agent.session.split("/").pop();
+const SchoolQuitHandler = async (agent) => {
+  const fulfillment = `Ok, Bye for now! 👋👋👋`;
 
-  // delete chatDictionary[sessionId];
-  agent.end("Ok, Bye for now! 👋👋👋");
+  agent.end(fulfillment);
 }
 // Quit
 // End
 
 
 module.exports = {
-  // handelSchoolDemo,
-  handelSchoolWelcome,
-  handelIndividualSchoolMenu,
-  handelIndividualSchool,
-  handelDistrictStaticsMenu,
-  handelDistrictStatics,
-  // handelSuggestionMenu,
-  // handelSuggestionDetails,
-  handelSchoolQuit
+  SchoolWelcomeHandler,
+  SchoolIndividualMenuHandler,
+  SchoolIndividualDataHandler,
+  SchoolDistrictStaticsMenuHandler,
+  SchoolDistrictStaticsHandler,
+  SchoolQuitHandler
 };

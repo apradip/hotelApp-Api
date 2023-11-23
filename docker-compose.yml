@@ -4,11 +4,10 @@ services:
     container_name: api_container
     build: .
     ports:
-      - 3001:3001
+      # - 3000:3000
       - 443:443
     environment:
       - API_SERVER_DOMAIN=https://hotelapi.wikitoria.in
-      # - API_SERVER_IP=43.239.110.22
       - API_SERVER_HTTPS_PORT=443
       - API_SERVER_HTTPS_PORT_ALTERNATIVE=3511
       - API_SERVER_SSL_KEY_FILE=.//sslcert//private.key
@@ -19,15 +18,9 @@ services:
       - ACCESS_TOKEN_SECRET=79929dab59c07b6b8a82b4d2805f725b65eb5cf5d7a55733d6fb4cf46bd589585ee120568a6d972019ac303e1e19268a4b5b8c9679da3ced537f64f764185406
       - REFRESH_TOKEN_SECRET=dded652ea31c8a34d294a24d715e79a9d44e74cb9c17fba822766c3408db046faa89ab8c94bbd67c1929f332c391eeba29016ea85355367e6860abaaed26d637
 
-      - SOCKET_PORT=3001
-      - SOCKET_PORT_ALTERNATIVE=3600
-      - SOCKET_PRIVATE_KEY=B8ADE1E5629BB6831F53B81563D65
-      - SOCKET_PUBLIC_KEY=4178F9E811F8B456955EE574FEE8F
-
       - FRONTEND_SERVER_DOMAIN=http://hotel.wikitoria.in:80
-      # - FRONTEND_SERVER_IP=43.239.110.22
-      # - FRONTEND_SERVER_PORT=3000
       - FRONTEND_SERVER_URI=http://hotel.wikitoria.in
+      - FRONTEND_SERVER_PORT=3000
       
       - EMAIL_HOST=smtp.gmail.com
       - EMAIL_PORT=587
