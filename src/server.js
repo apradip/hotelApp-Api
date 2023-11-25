@@ -347,9 +347,7 @@ socketIo.on("connection", (socket) => {
     socket.on(socketRoom.TABLE, (data) => {
         try {
             socket.broadcast.emit(socketRoom.TABLE, data);
-            console.log("socketRoom.TABLE : " + socketRoom.TABLE);
-            console.log("data : " + data);
-        } catch (error) {
+       } catch (error) {
             console.log(error);
         }
     });
