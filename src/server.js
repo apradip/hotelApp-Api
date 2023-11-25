@@ -7,6 +7,7 @@ const {Server} = require("socket.io");
 const jwt = require("jsonwebtoken");
 
 const corsOptions = require("./config/corsOptions");
+const socketRoom = require("./config/socketList");
 
 const {logger} = require("./middlewares/logEvents");
 const errorHandler = require("./middlewares/errorHandler");
@@ -23,13 +24,6 @@ const PORT_HTTPS_EXPRESS = process.env.API_SERVER_HTTPS_PORT || process.env.API_
 const sslCredential = {
     key: fs.readFileSync(process.env.API_SERVER_SSL_KEY_FILE, "utf8"),
     cert: fs.readFileSync(process.env.API_SERVER_SSL_CERT_FILE, "utf8")
-};
-
-const messageRoom = {
-    Room: "SOCKET_ROOM",
-    Table: "SOCKET_TABLE",
-    Service: "SOCKET_SERVICE",
-    Miscellaneous: "SOCKET_MISCELLANEOUS"
 };
 
 //dialog flow api code file
@@ -306,7 +300,6 @@ const socketIo = new Server(httpsServer, {
     }
 });
 
-
 socketIo.on("connection", (socket) => {
     try {
         // Verify the token here and get user info from JWT token.
@@ -328,22 +321,44 @@ socketIo.on("connection", (socket) => {
     }
 
     socket.on("disconnect", (socket) => {
-        console.log(`Socket disconnected: ${socket.id}`);
+        try {
+            console.log(`Socket disconnected: ${socket.id}`);
+        } catch (error) {
+            console.log(error);
+        }
     });
 
-    socket.on(messageRoom.Miscellaneous, (data) => {
-        socket.broadcast.emit(messageRoom.Miscellaneous, data);
+    socket.on(socketRoom.MISCELLANEOUS, (data) => {
+        try {
+            socket.broadcast.emit(socketRoom.MISCELLANEOUS, data);
+        } catch (error) {
+            console.log(error);
+        }
     });
 
-    socket.on(messageRoom.Service, (data) => {
-        socket.broadcast.emit(messageRoom.Service, data);
+    socket.on(socketRoom.SERVICE, (data) => {
+        try {
+            socket.broadcast.emit(socketRoom.SERVICE, data);
+        } catch (error) {
+            console.log(error);
+        }
     });
 
-    socket.on(messageRoom.Table, (data) => {
-        socket.broadcast.emit(messageRoom.Table, data);
+    socket.on(socketRoom.TABLE, (data) => {
+        try {
+            socket.broadcast.emit(socketRoom.TABLE, data);
+            console.log("socketRoom.TABLE : " + socketRoom.TABLE);
+            console.log("data : " + data);
+        } catch (error) {
+            console.log(error);
+        }
     });
 
-    socket.on(messageRoom.Room, (data) => {
-        socket.broadcast.emit(messageRoom.Room, data);
+    socket.on(socketRoom.ROOM, (data) => {
+        try {
+            socket.broadcast.emit(socketRoom.ROOM, data);
+        } catch (error) {
+            console.log(error);
+        }
     });
 });
