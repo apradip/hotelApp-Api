@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 //query string : hotelId
 //body : {"userName" : "", "password" : ""}
 const handleLogin = async (req, res) => {
+    console.log("handleLogin");
+
     const hotelId = req.params.hotelId;
     const {userName, password} = req.body;
     let foundEmployee;
