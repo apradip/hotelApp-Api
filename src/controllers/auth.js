@@ -10,6 +10,10 @@ const handleLogin = async (req, res) => {
     const {userName, password} = req.body;
     let foundEmployee;
 
+    console.log("userName : " + userName);
+    console.log("password : " + password);
+
+
     if (!userName || !password) return res.status(400).json({message: "Mobile no. and password are required."});
 
     if (parseInt(userName)) {
