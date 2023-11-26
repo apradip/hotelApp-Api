@@ -6,15 +6,9 @@ const jwt = require("jsonwebtoken");
 //query string : hotelId
 //body : {"userName" : "", "password" : ""}
 const handleLogin = async (req, res) => {
-    console.log("handleLogin");
-
     const hotelId = req.params.hotelId;
     const {userName, password} = req.body;
     let foundEmployee;
-
-    console.log("userName : " + userName);
-    console.log("password : " + password);
-
 
     if (!userName || !password) return res.status(400).json({message: "Mobile no. and password are required."});
 
