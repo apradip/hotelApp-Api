@@ -295,8 +295,9 @@ httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
 
 const socketIo = new Server(httpsServer, {
     cors: {
-        origin: `${process.env.FRONTEND_SERVER_URI}:${process.env.FRONTEND_SERVER_PORT}`,
-        methods: ["GET"]
+        // origin: `${process.env.FRONTEND_SERVER_URI}:${process.env.FRONTEND_SERVER_PORT}`,
+        origin: `*`,
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTION"]
     }
 });
 
