@@ -9,6 +9,7 @@ const verifyJWT = (req, res, next) => {
         process.env.ACCESS_TOKEN_SECRET,
         (err, decoded) => {
             if (err) return res.sendStatus(403);
+            req.userid = decoded.UserInfo.userid;
             req.user = decoded.UserInfo.username;
             req.roles = decoded.UserInfo.roles;
             next();

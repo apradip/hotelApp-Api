@@ -290,12 +290,12 @@ app.use(errorHandler);
 
 //listen https server
 httpsServer.listen(PORT_HTTPS_EXPRESS, () => {
-    console.log(`Node https server is running on ${PORT_HTTPS_EXPRESS}...`);
+    console.log(`node - https server is running on ${PORT_HTTPS_EXPRESS}...`);
 });
 
 const socketIo = new Server(httpsServer, {
     cors: {
-        origin: `${process.env.FRONTEND_SERVER_DOMAIN}`,
+        origin: `${process.env.FRONTEND_SERVER_URI}:${process.env.FRONTEND_SERVER_PORT}`,
         methods: ["GET"]
     }
 });

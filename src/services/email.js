@@ -3,6 +3,7 @@ const EMAIL_SETTINGS = require("../config/emailOptions");
 
 async function sendOtpEmail(to, otp) {
   try {
+    console.log(otp);
     let transporter = createTransport(EMAIL_SETTINGS.EMAIL_SETTINGS);
 
     // send mail with defined transport object
@@ -20,7 +21,7 @@ async function sendOtpEmail(to, otp) {
               </div>`
     });
     
-    console.log("Message sent: %s", info.messageId);
+    // console.log("Message sent: %s", info.messageId);
     return true;
   } catch (e) {
     console.error(e);

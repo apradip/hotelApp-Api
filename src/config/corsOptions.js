@@ -5,7 +5,12 @@ const corsOptions = {
         if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
             callback(null, true);
         } else {
-            callback(new Error("Not allowed by CORS"));
+            if (allowedOrigins.indexOf("*") !== -1) {
+                callback(null, true);
+            } else {
+                console.log("false");
+                callback(new Error("Not allowed by CORS..."));
+            }
         }
     },
     optionsSuccessStatus: 200
